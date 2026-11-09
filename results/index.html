@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Race Results | Internet Motor Speedway</title>
+<meta name="description" content="Find your car. Every follower races every day.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;600;700&display=swap">
+<style>
+:root {
+  --bg: #111318; --card: #1c2028; --line: #2d323d; --fg: #f3f4f6; --muted: #9aa1ad;
+  --yel: #ffcc18; --gold: #f5c542; --silver: #c9ced6; --bronze: #d08a4c; --red: #ff5a4f;
+  --display: "Anton", Impact, "Arial Narrow", sans-serif;
+  --body: "Archivo", -apple-system, "Helvetica Neue", Arial, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--body); }
+.wrap { max-width: 560px; margin: 0 auto; padding: 22px max(16px, env(safe-area-inset-left)) 48px; }
+.flag { height: 10px; border-radius: 3px; margin-bottom: 18px;
+  background: repeating-conic-gradient(#fff 0 25%, #111 0 50%) 0 0 / 10px 10px; opacity: .9; }
+h1 { font-family: var(--display); font-weight: 400; text-transform: uppercase; font-size: 40px; line-height: 1; margin: 0; letter-spacing: .01em; }
+h1 span { color: var(--yel); }
+.meta { color: var(--muted); margin: 8px 0 18px; font-size: 14px; }
+.days { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.days button { font: 600 14px var(--body); background: var(--card); color: var(--fg); border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; cursor: pointer; }
+.days button[aria-pressed="true"] { background: var(--yel); color: #111; border-color: var(--yel); }
+label { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .06em; }
+.search { position: relative; }
+.search span { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); font-weight: 700; font-size: 18px; }
+input { width: 100%; font: 600 18px var(--body); color: var(--fg); background: var(--card); border: 2px solid var(--line); border-radius: 12px; padding: 14px 14px 14px 34px; outline: none; }
+input:focus { border-color: var(--yel); }
+.hit { margin-top: 14px; background: var(--card); border: 2px solid var(--yel); border-radius: 14px; padding: 18px; text-align: center; }
+.hit .pl { font-family: var(--display); font-size: 64px; line-height: 1; color: var(--yel); }
+.hit .nm { font-weight: 700; font-size: 18px; margin-top: 6px; overflow-wrap: anywhere; }
+.hit .of { color: var(--muted); font-size: 14px; margin-top: 4px; }
+.none { margin-top: 14px; color: var(--muted); font-size: 15px; line-height: 1.45; }
+h2 { font-family: var(--display); font-weight: 400; text-transform: uppercase; font-size: 22px; margin: 28px 0 10px; letter-spacing: .02em; }
+ol { list-style: none; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+li { display: grid; grid-template-columns: 64px 1fr auto; align-items: center; gap: 10px; padding: 11px 14px; border-top: 1px solid var(--line); background: var(--card); font-size: 15px; }
+li:first-child { border-top: 0; }
+li .p { font-family: var(--display); font-size: 20px; color: var(--muted); font-variant-numeric: tabular-nums; }
+li .n { overflow-wrap: anywhere; font-weight: 600; }
+li .t { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+li.p1 .p { color: var(--gold); } li.p2 .p { color: var(--silver); } li.p3 .p { color: var(--bronze); }
+li.p1 .t { color: var(--gold); }
+li.dnf .p, li.dnf .t { color: var(--red); }
+li.me { outline: 2px solid var(--yel); outline-offset: -2px; }
+.more { width: 100%; margin-top: 10px; font: 700 15px var(--body); background: transparent; color: var(--fg); border: 1px solid var(--line); border-radius: 10px; padding: 13px; cursor: pointer; }
+.foot { margin-top: 28px; color: var(--muted); font-size: 13px; line-height: 1.5; }
+.foot a { color: var(--yel); }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="flag" aria-hidden="true"></div>
+  <h1>Race <span>Results</span></h1>
+  <p class="meta" id="meta">Loading…</p>
+  <div class="days" id="days" role="group" aria-label="Race day"></div>
+  <label for="q">Find your car</label>
+  <div class="search"><span aria-hidden="true">@</span><input id="q" type="search" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="your instagram"></div>
+  <div id="out" aria-live="polite"></div>
+  <h2 id="lh">Full results</h2>
+  <ol id="list"></ol>
+  <button class="more" id="more" type="button">Show more</button>
+  <p class="foot">Every follower gets a car in every race. Not in the list? You followed after that day's cutoff, so you're in the next race.<br>Follow <a href="https://instagram.com/internetmotorspeedway">@internetmotorspeedway</a></p>
+</main>
+<script>
+const DAYS = [{ id: 3, file: "day3.json" }];   // newest first; add each new race here
+const STEP = 100;
+let data = null, shown = STEP, me = null;
+const $ = id => document.getElementById(id);
+const clean = s => s.toLowerCase().replace(/^@+/, "").trim();
+function row(r) {
+  const li = document.createElement("li");
+  const dnf = r.place === "DNF";
+  li.className = dnf ? "dnf" : (r.place <= 3 ? "p" + r.place : "");
+  if (me && r.name === me) li.classList.add("me");
+  const p = document.createElement("span"); p.className = "p"; p.textContent = dnf ? "DNF" : r.place;
+  const n = document.createElement("span"); n.className = "n"; n.textContent = "@" + r.name;
+  const t = document.createElement("span"); t.className = "t"; t.textContent = r.place === 1 ? "Winner" : dnf ? "Crashed" : "";
+  li.append(p, n, t); return li;
+}
+function drawList() {
+  const ol = $("list"); ol.textContent = "";
+  const f = document.createDocumentFragment();
+  data.results.slice(0, shown).forEach(r => f.appendChild(row(r)));
+  ol.appendChild(f);
+  $("more").hidden = shown >= data.results.length;
+}
+function find() {
+  const q = clean($("q").value), out = $("out"); out.textContent = ""; me = null;
+  if (!q || !data) { drawList(); return; }
+  const exact = data.results.find(r => r.name === q);
+  if (exact) {
+    me = exact.name;
+    const d = document.createElement("div"); d.className = "hit";
+    d.innerHTML = '<div class="pl"></div><div class="nm"></div><div class="of"></div>';
+    d.querySelector(".pl").textContent = exact.place === "DNF" ? "DNF" : ordinal(exact.place);
+    d.querySelector(".nm").textContent = "@" + exact.name;
+    d.querySelector(".of").textContent = exact.place === "DNF" ? "Caught in the crash. Better luck tomorrow." : "out of " + data.cars.toLocaleString() + " cars at " + data.track;
+    out.appendChild(d);
+  } else {
+    const near = data.results.filter(r => r.name.includes(q)).slice(0, 8);
+    if (near.length) {
+      const ol = document.createElement("ol"); ol.style.marginTop = "14px";
+      near.forEach(r => ol.appendChild(row(r))); out.appendChild(ol);
+    } else {
+      const p = document.createElement("p"); p.className = "none";
+      p.textContent = "No car under that name in this race. Check the spelling, or you may have followed after the cutoff.";
+      out.appendChild(p);
+    }
+  }
+  drawList();
+}
+function ordinal(n) { const s = ["th","st","nd","rd"], v = n % 100; return n.toLocaleString() + (s[(v - 20) % 10] || s[v] || s[0]); }
+async function load(day) {
+  $("meta").textContent = "Loading…";
+  try {
+    data = await (await fetch(day.file, { cache: "no-cache" })).json();
+  } catch (e) { $("meta").textContent = "Couldn't load results. Refresh to try again."; return; }
+  $("meta").textContent = "Day " + data.day + " · " + data.track + " · " + data.cars.toLocaleString() + " cars";
+  [...$("days").children].forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.id === day.id)));
+  shown = STEP; find();
+}
+DAYS.forEach(d => {
+  const b = document.createElement("button"); b.type = "button"; b.textContent = "Day " + d.id; b.dataset.id = d.id;
+  b.addEventListener("click", () => load(d)); $("days").appendChild(b);
+});
+$("q").addEventListener("input", find);
+$("more").addEventListener("click", () => { shown += STEP * 5; drawList(); });
+const pre = new URLSearchParams(location.search).get("u"); if (pre) $("q").value = pre;
+load(DAYS[0]);
+</script>
+</body>
+</html>
