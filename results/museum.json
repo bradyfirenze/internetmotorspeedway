@@ -1,0 +1,20 @@
+{
+ "winners": [
+  {
+   "day": 3,
+   "name": "alexisfine_18",
+   "track": "ThunderRing Motor Speedway",
+   "date": "Nov 8, 2026",
+   "cars": 2401,
+   "img": "museum/day3.jpg"
+  },
+  {
+   "day": 2,
+   "name": "lukacskeller",
+   "track": "Piston Cup Motor Speedway",
+   "date": "Nov 7, 2026",
+   "cars": 221,
+   "img": "museum/day2.jpg"
+  }
+ ]
+}

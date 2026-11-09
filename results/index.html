@@ -51,13 +51,42 @@ li.me { outline: 2px solid var(--yel); outline-offset: -2px; }
 .foot { margin-top: 28px; color: var(--muted); font-size: 13px; line-height: 1.5; }
 .foot a { color: var(--yel); }
 button:focus-visible, input:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
+.tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 4px; margin-bottom: 20px; }
+.tabs button { font: 700 15px var(--body); border: 0; border-radius: 9px; padding: 11px 8px; background: transparent; color: var(--muted); cursor: pointer; }
+.tabs button[aria-selected="true"] { background: var(--yel); color: #111; }
+.pres { margin: -6px 0 18px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); }
+.pres .k { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.pres .v { font-family: var(--display); font-size: 22px; text-transform: uppercase; margin-top: 2px; line-height: 1.15; }
+.pres .v a { color: var(--fg); text-decoration: none; border-bottom: 2px solid var(--yel); }
+.pres .v span { color: var(--muted); }
+.wins { display: flex; flex-direction: column; gap: 16px; }
+.win { background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.win img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; background: #222; }
+.win .b { padding: 14px 16px 16px; }
+.win .d { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); }
+.win .nm { font-family: var(--display); font-size: 30px; line-height: 1.05; margin-top: 4px; overflow-wrap: anywhere; }
+.win .tr { color: var(--muted); font-size: 15px; margin-top: 4px; }
+.win .beat { display: inline-block; margin-top: 10px; font-weight: 700; font-size: 14px; background: #2a2410; color: var(--gold); border-radius: 999px; padding: 6px 12px; }
+.mintro { color: var(--muted); margin: 0 0 18px; font-size: 15px; line-height: 1.45; }
+[hidden] { display: none !important; }
 </style>
 </head>
 <body>
 <main class="wrap">
   <div class="flag" aria-hidden="true"></div>
+  <div class="tabs" role="tablist">
+    <button type="button" role="tab" id="t-res" aria-selected="true" aria-controls="v-res">Race Results</button>
+    <button type="button" role="tab" id="t-mus" aria-selected="false" aria-controls="v-mus">Victory Museum</button>
+  </div>
+  <section id="v-mus" role="tabpanel" aria-labelledby="t-mus" hidden>
+    <h1>Victory <span>Museum</span></h1>
+    <p class="mintro">Every winner's car turns gold and goes in the museum forever.</p>
+    <div class="wins" id="wins"></div>
+  </section>
+  <section id="v-res" role="tabpanel" aria-labelledby="t-res">
   <h1>Race <span>Results</span></h1>
   <p class="meta" id="meta">Loading…</p>
+  <div class="pres" id="pres" hidden><div class="k">Presented by</div><div class="v" id="presv"></div></div>
   <div class="days" id="days" role="group" aria-label="Race day"></div>
   <label for="q">Find your car</label>
   <div class="search"><span aria-hidden="true">@</span><input id="q" type="search" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="your instagram"></div>
@@ -65,6 +94,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--fg); outlin
   <h2 id="lh">Full results</h2>
   <ol id="list"></ol>
   <button class="more" id="more" type="button">Show more</button>
+  </section>
   <p class="foot">Every follower gets a car in every race. Not in the list? You followed after that day's cutoff, so you're in the next race.<br>Follow <a href="https://instagram.com/internetmotorspeedway">@internetmotorspeedway</a></p>
 </main>
 <script>
@@ -122,6 +152,14 @@ async function load(day) {
     data = await (await fetch(day.file, { cache: "no-cache" })).json();
   } catch (e) { $("meta").textContent = "Couldn't load results. Refresh to try again."; return; }
   $("meta").textContent = "Day " + data.day + " · " + data.track + " · " + data.cars.toLocaleString() + " cars";
+  const sp = data.sponsors || [], pv = $("presv"); pv.textContent = "";
+  sp.forEach((s, i) => {
+    if (i) { const amp = document.createElement("span"); amp.textContent = " & "; pv.appendChild(amp); }
+    const a = document.createElement("a"); a.textContent = s.name;
+    a.href = s.ig ? "https://instagram.com/" + s.ig : s.url; a.target = "_blank"; a.rel = "noopener";
+    pv.appendChild(a);
+  });
+  $("pres").hidden = !sp.length;
   [...$("days").children].forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.id === day.id)));
   shown = STEP; find();
 }
@@ -133,6 +171,35 @@ $("q").addEventListener("input", find);
 $("more").addEventListener("click", () => { shown += STEP * 5; drawList(); });
 const pre = new URLSearchParams(location.search).get("u"); if (pre) $("q").value = pre;
 load(DAYS[0]);
+function tab(which) {
+  const mus = which === "museum";
+  $("t-res").setAttribute("aria-selected", String(!mus)); $("t-mus").setAttribute("aria-selected", String(mus));
+  $("v-res").hidden = mus; $("v-mus").hidden = !mus;
+  if (mus) loadMuseum();
+  try { history.replaceState(null, "", mus ? "#museum" : location.pathname + location.search); } catch (e) {}
+}
+let museumDone = false;
+async function loadMuseum() {
+  if (museumDone) return;
+  const box = $("wins");
+  try {
+    const m = await (await fetch("museum.json", { cache: "no-cache" })).json();
+    m.winners.forEach(w => {
+      const c = document.createElement("article"); c.className = "win";
+      c.innerHTML = '<img loading="lazy" width="720" height="900"><div class="b"><div class="d"></div><div class="nm"></div><div class="tr"></div><div class="beat"></div></div>';
+      const img = c.querySelector("img"); img.src = w.img; img.alt = "Gold car of @" + w.name + " with the trophy";
+      c.querySelector(".d").textContent = "Day " + w.day + " winner · " + w.date;
+      c.querySelector(".nm").textContent = "@" + w.name;
+      c.querySelector(".tr").textContent = "Won at the " + w.track;
+      c.querySelector(".beat").textContent = "Beat " + (w.cars - 1).toLocaleString() + " cars";
+      box.appendChild(c);
+    });
+    museumDone = true;
+  } catch (e) { box.textContent = "Couldn't load the museum. Refresh to try again."; }
+}
+$("t-res").addEventListener("click", () => tab("results"));
+$("t-mus").addEventListener("click", () => tab("museum"));
+if (location.hash === "#museum") tab("museum");
 </script>
 </body>
 </html>
