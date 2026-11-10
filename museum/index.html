@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Victory Museum | Internet Motor Speedway</title>
+<meta name="description" content="Every winner's gold car, in the Victory Museum forever.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;600;700&display=swap">
+<style>
+:root {
+  --bg: #0c1124; --card: #161c33; --line: #2a3352; --fg: #f3f4f6; --muted: #a3abc2; --yel: #ffcc18; --gold: #f5c542;
+  --display: "Anton", Impact, "Arial Narrow", sans-serif;
+  --body: "Archivo", -apple-system, "Helvetica Neue", Arial, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); font-family: var(--body); overflow: hidden; }
+.bar { position: fixed; z-index: 6; top: 0; left: 0; right: 0; padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; background: linear-gradient(var(--bg) 60%, rgba(12,17,36,0)); }
+.bar a, .bar button { color: var(--muted); text-decoration: none; font: 600 14px var(--body); white-space: nowrap; background: none; border: 0; padding: 0; cursor: pointer; }
+.bar h1 { font-family: var(--display); font-weight: 400; text-transform: uppercase; font-size: 24px; line-height: 1; margin: 0; letter-spacing: .01em; }
+.bar h1 span { color: var(--gold); }
+.count { color: var(--muted); font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; min-width: 40px; text-align: right; }
+
+/* ---- Outside: the museum front, tap a gold car */
+.out { position: fixed; inset: 0; overflow-y: auto; padding-top: calc(52px + env(safe-area-inset-top)); transition: opacity .35s; }
+.out.gone { opacity: 0; pointer-events: none; }
+.frame { position: relative; width: min(100%, 560px, calc(64dvh * .8)); margin: 0 auto; aspect-ratio: 1080 / 1350; overflow: hidden; border-radius: 0 0 16px 16px; }
+.front { position: absolute; inset: 0; transform-origin: 0 0; transition: transform .8s cubic-bezier(.5,0,.2,1); }
+.front img { display: block; width: 100%; height: 100%; user-select: none; -webkit-user-drag: none; }
+.spot { position: absolute; display: flex; align-items: flex-start; justify-content: center; background: none; border: 0; padding: 0; cursor: pointer; border-radius: 6px; }
+.spot:focus-visible { outline: 3px solid var(--gold); }
+.spot .tag { position: relative; margin-top: -30px; background: var(--gold); color: #111; font: 700 12px var(--body); padding: 5px 9px; border-radius: 999px; white-space: nowrap;
+  box-shadow: 0 2px 10px rgba(0,0,0,.45); animation: pulse 2.2s ease-in-out infinite; }
+.spot .tag::after { content: ""; position: absolute; left: 50%; top: 100%; margin-left: -5px; border: 5px solid transparent; border-top-color: var(--gold); }
+@keyframes pulse { 50% { transform: translateY(-3px); } }
+.info { padding: 14px 16px 28px; max-width: 560px; margin: 0 auto; }
+.info p { color: var(--muted); font-size: 15px; line-height: 1.45; margin: 0 0 12px; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chips button { font: 600 14px var(--body); background: var(--card); color: var(--fg); border: 1px solid var(--line); border-radius: 999px; padding: 8px 12px; cursor: pointer; }
+.chips button b { color: var(--gold); font-weight: 700; margin-right: 6px; }
+
+/* ---- Inside: one winner per screen, swipe up */
+.feed { position: fixed; inset: 0; height: 100dvh; overflow-y: auto; scroll-snap-type: y mandatory; overscroll-behavior: contain; background: var(--bg);
+  opacity: 0; pointer-events: none; transition: opacity .35s; }
+.feed.open { opacity: 1; pointer-events: auto; }
+.bay { height: 100dvh; scroll-snap-align: start; scroll-snap-stop: always; display: flex; flex-direction: column; justify-content: center;
+  padding: calc(58px + env(safe-area-inset-top)) 16px calc(22px + env(safe-area-inset-bottom)); max-width: 560px; margin: 0 auto; }
+.stage { position: relative; width: 100%; max-height: 58dvh; aspect-ratio: 1; margin: 0 auto; background: #070a16; border: 1px solid var(--line); border-radius: 16px;
+  overflow: hidden; touch-action: pan-y; user-select: none; -webkit-user-select: none; cursor: grab; }
+.stage img { display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none; transition: transform .7s cubic-bezier(.2,.8,.2,1), opacity .5s; }
+.bay:not(.in) .stage img { transform: translateX(38%) scale(.96); opacity: .25; }
+.hint { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); background: rgba(0,0,0,.62); color: #fff; font-size: 13px; font-weight: 600;
+  padding: 6px 12px; border-radius: 999px; white-space: nowrap; transition: opacity .4s; pointer-events: none; }
+.load { position: absolute; left: 0; bottom: 0; height: 3px; background: var(--gold); transition: width .2s, opacity .4s; }
+.day { margin-top: 14px; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); }
+.nm { font-family: var(--display); font-size: 34px; line-height: 1.05; margin-top: 4px; overflow-wrap: anywhere; }
+.nm a { color: var(--fg); text-decoration: none; }
+.tr { color: var(--muted); font-size: 15px; margin-top: 4px; }
+.beat { display: inline-block; margin-top: 10px; font-weight: 700; font-size: 15px; background: #2a2410; color: var(--gold); border-radius: 999px; padding: 7px 13px; }
+.next { margin-top: 16px; text-align: center; color: var(--muted); font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.next b { display: block; font-size: 20px; color: var(--gold); animation: bob 1.6s ease-in-out infinite; }
+@keyframes bob { 50% { transform: translateY(-5px); } }
+.empty { aspect-ratio: 1; max-height: 58dvh; width: 100%; margin: 0 auto; border: 2px dashed var(--line); border-radius: 16px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center; padding: 20px; background: var(--card); }
+.empty .q { font-family: var(--display); font-size: 96px; line-height: 1; color: var(--gold); }
+.empty .t { font-family: var(--display); font-size: 30px; text-transform: uppercase; margin-top: 6px; }
+.empty p { color: var(--muted); font-size: 14px; line-height: 1.5; margin: 10px 0 0; max-width: 300px; }
+.cta { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding: 14px 16px; border-radius: 12px; background: var(--gold); color: #111;
+  text-decoration: none; font: 400 20px var(--display); text-transform: uppercase; letter-spacing: .02em; }
+.dots { position: fixed; z-index: 6; right: 6px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 7px; transition: opacity .35s; }
+.dots.gone { opacity: 0; }
+.dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--line); transition: background .3s, transform .3s; }
+.dots i.on { background: var(--gold); transform: scale(1.4); }
+.front.zoom .spot { opacity: 0; transition: opacity .2s; }
+@media (prefers-reduced-motion: reduce) { .front, .stage img { transition: none; } .bay:not(.in) .stage img { transform: none; opacity: 1; } .next b, .spot .tag { animation: none; } }
+</style>
+</head>
+<body>
+<header class="bar">
+  <a href="../map/" id="backOut">← Track</a>
+  <button type="button" id="backIn" hidden>← Outside</button>
+  <h1>Victory <span>Museum</span></h1>
+  <div class="count" id="count"></div>
+</header>
+
+<section class="out" id="out" aria-label="Outside the Victory Museum">
+  <div class="frame"><div class="front" id="front"><img src="../results/museum3d/outside.jpg" alt="The Victory Museum, with every winner's gold car inside"></div></div>
+  <div class="info">
+    <p id="intro">Every winner's car turns gold and goes in the museum forever. Tap a gold car to go inside.</p>
+    <div class="chips" id="chips"></div>
+  </div>
+</section>
+
+<div class="dots gone" id="dots" aria-hidden="true"></div>
+<main class="feed" id="feed" aria-label="Winners, swipe up for the next one"></main>
+
+<script>
+const $ = id => document.getElementById(id);
+const FRAMES = 36, COVER = 0, IMG = "../results/museum3d/";
+let WIN, SP, bays = [], active = -1, last = 0, inside = false;
+const src = (nm, i) => IMG + nm + "/" + String(i).padStart(2, "0") + ".jpg";
+
+function makeBay(w, i, n) {
+  const b = document.createElement("section"); b.className = "bay"; b.dataset.i = i;
+  b.innerHTML = '<div class="stage" role="img"><img alt=""><div class="hint">← drag to spin →</div><div class="load" style="width:0"></div></div>' +
+    '<div class="day"></div><div class="nm"><a target="_blank" rel="noopener"></a></div><div class="tr"></div><div><span class="beat"></span></div>' +
+    '<div class="next">' + (i < n - 1 ? "Swipe up for the next winner<b>↑</b>" : "Swipe up<b>↑</b>") + '</div>';
+  const st = b.querySelector(".stage"), img = b.querySelector("img"), a = b.querySelector(".nm a");
+  st.setAttribute("aria-label", "@" + w.name + "'s gold car, drag to spin");
+  img.src = src(w.name, COVER); img.alt = "@" + w.name + "'s gold car";
+  a.href = "https://instagram.com/" + w.name; a.textContent = "@" + w.name;
+  b.querySelector(".day").textContent = "Day " + w.day + " winner · " + w.date;
+  b.querySelector(".tr").textContent = w.track;
+  b.querySelector(".beat").textContent = "Beat " + (w.cars - 1).toLocaleString() + " cars";
+  const bay = { w, el: b, img, frame: COVER, imgs: null, spinning: true, touched: false };
+  let dx = null, df = 0;
+  st.addEventListener("pointerdown", e => { dx = e.clientX; df = bay.frame; bay.spinning = false; bay.touched = true; b.querySelector(".hint").style.opacity = 0; });
+  st.addEventListener("pointermove", e => { if (dx === null) return; show(bay, df + Math.round((e.clientX - dx) / (st.clientWidth / FRAMES * 1.4))); });
+  for (const ev of ["pointerup", "pointercancel", "pointerleave"]) st.addEventListener(ev, () => { dx = null; });
+  return bay;
+}
+function preload(bay) {
+  if (bay.imgs) return; bay.imgs = []; let done = 0; const bar = bay.el.querySelector(".load");
+  for (let i = 0; i < FRAMES; i++) {
+    const im = new Image(); im.onload = im.onerror = () => { done++; bar.style.width = (100 * done / FRAMES) + "%"; if (done === FRAMES) bar.style.opacity = 0; };
+    im.src = src(bay.w.name, i); bay.imgs[i] = im;
+  }
+}
+function show(bay, i) { bay.frame = ((i % FRAMES) + FRAMES) % FRAMES; const im = bay.imgs && bay.imgs[bay.frame]; if (im && im.complete && im.naturalWidth) bay.img.src = im.src; }
+function setActive(i) {
+  if (!inside || i === active) return; active = i;
+  document.querySelectorAll(".dots i").forEach((d, k) => d.classList.toggle("on", k === i));
+  const n = WIN.length; $("count").textContent = i < n ? (i + 1) + " / " + n : "";
+  if (i < n) {
+    preload(bays[i]); if (bays[i + 1]) preload(bays[i + 1]);
+    if (!bays[i].touched) bays[i].spinning = true;
+    try { history.replaceState(null, "", "#" + bays[i].w.name); } catch (e) {}
+  }
+}
+function tick(t) { const b = inside && bays[active]; if (b && b.spinning && t - last > 120) { last = t; show(b, b.frame + 1); } requestAnimationFrame(tick); }
+
+function goInside(i, instant) {
+  const sp = SP.find(s => s.name === (WIN[i] || {}).name), front = $("front");
+  if (bays[i]) preload(bays[i]);
+  const enter = () => {
+    inside = true; active = -1;
+    const fd = $("feed"); fd.classList.add("open"); $("out").classList.add("gone"); $("dots").classList.remove("gone");
+    $("backIn").hidden = false; $("backOut").hidden = true;
+    fd.scrollTo({ top: i * fd.clientHeight, behavior: "instant" }); setActive(i);
+  };
+  if (!sp || instant || matchMedia("(prefers-reduced-motion: reduce)").matches) return enter();
+  const W = front.clientWidth, H = front.clientHeight, cx = (sp.x + sp.w / 2) * W, cy = (sp.y + sp.h / 2) * H;
+  const k = Math.min(9, Math.max(3, .7 / Math.max(sp.w, sp.h)));
+  front.classList.add("zoom"); front.style.transformOrigin = cx + "px " + cy + "px";
+  front.style.transform = "translate(" + (W / 2 - cx) + "px," + (H / 2 - cy) + "px) scale(" + k + ")";
+  setTimeout(enter, 700);
+}
+function goOutside() {
+  inside = false; $("feed").classList.remove("open"); $("out").classList.remove("gone"); $("dots").classList.add("gone");
+  $("backIn").hidden = true; $("backOut").hidden = false; $("count").textContent = "";
+  requestAnimationFrame(() => { $("front").style.transform = ""; $("front").classList.remove("zoom"); });
+  try { history.replaceState(null, "", location.pathname); } catch (e) {}
+}
+$("backIn").addEventListener("click", goOutside);
+
+async function load() {
+  try {
+    const [m, o] = await Promise.all([fetch("../results/museum.json", { cache: "no-cache" }).then(r => r.json()), fetch(IMG + "outside.json", { cache: "no-cache" }).then(r => r.json())]);
+    WIN = m.winners; SP = o.spots;
+  } catch (e) { $("intro").textContent = "Couldn't load the museum. Refresh to try again."; return; }
+  const n = WIN.length, feed = $("feed");
+  WIN.forEach((w, i) => { const bay = makeBay(w, i, n); bays.push(bay); feed.append(bay.el); });
+  const end = document.createElement("section"); end.className = "bay"; end.dataset.i = n;
+  end.innerHTML = '<div class="empty"><div class="q">?</div><div class="t">Next winner</div><p>A new winner is picked from the real follower list every race. Their car turns gold and goes in here forever.</p></div>' +
+    '<a class="cta" href="https://instagram.com/internetmotorspeedway" target="_blank" rel="noopener">Follow to get your car in <span aria-hidden="true">→</span></a>';
+  feed.append(end);
+  for (let k = 0; k <= n; k++) $("dots").append(document.createElement("i"));
+  const front = $("front");
+  WIN.forEach((w, i) => {
+    const sp = SP.find(s => s.name === w.name);
+    if (sp) {
+      const b = document.createElement("button"); b.type = "button"; b.className = "spot";
+      Object.assign(b.style, { left: sp.x * 100 + "%", top: sp.y * 100 + "%", width: sp.w * 100 + "%", height: sp.h * 100 + "%" });
+      b.innerHTML = '<span class="tag"></span>'; b.querySelector(".tag").textContent = "@" + w.name;
+      b.setAttribute("aria-label", "Go see @" + w.name + "'s gold car"); b.addEventListener("click", () => goInside(i)); front.append(b);
+    }
+    const c = document.createElement("button"); c.type = "button"; c.innerHTML = "<b></b><span></span>";
+    c.querySelector("b").textContent = "Day " + w.day; c.querySelector("span").textContent = "@" + w.name;
+    c.addEventListener("click", () => goInside(i)); $("chips").append(c);
+  });
+  $("intro").textContent = n + " winner" + (n === 1 ? "" : "s") + " so far. Every winner's car turns gold and goes in the museum forever. Tap a gold car to go inside.";
+  const io = new IntersectionObserver(es => es.forEach(e => { e.target.classList.toggle("in", e.isIntersecting); if (e.isIntersecting) setActive(+e.target.dataset.i); }), { root: feed, threshold: .6 });
+  feed.querySelectorAll(".bay").forEach(el => io.observe(el));
+  const want = decodeURIComponent(location.hash.slice(1)).toLowerCase().replace(/^@/, "");
+  const wi = WIN.findIndex(w => w.name === want); if (wi >= 0) goInside(wi, true);
+  requestAnimationFrame(tick);
+}
+load();
+</script>
+</body>
+</html>

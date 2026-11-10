@@ -45,6 +45,11 @@ input:focus { border-color: var(--yel); }
 #load .bar i { display: block; height: 100%; width: 0; background: var(--yel); transition: width .2s; }
 #load .p { color: var(--muted); font-size: 13px; }
 .hint { font-size: 11px; color: var(--muted); margin-top: 6px; }
+.nav { display: flex; gap: 6px; margin-bottom: 8px; }
+.nav a { flex: 1; text-align: center; font: 400 15px var(--display); letter-spacing: .03em; text-transform: uppercase; text-decoration: none; color: var(--ink); background: var(--yel); border-radius: 8px; padding: 9px 4px; }
+.nav a.alt { background: #0b0d11; color: var(--fg); border: 1px solid var(--line); }
+.ctag { position: fixed; left: 0; top: 0; transform: translate(-50%, -100%); background: var(--fg); color: var(--ink); font: 700 12px var(--body); padding: 4px 8px; border-radius: 999px; white-space: nowrap; text-decoration: none; box-shadow: 0 3px 10px rgba(0,0,0,.35); }
+.ctag.big { background: var(--yel); font: 400 16px var(--display); letter-spacing: .03em; padding: 5px 10px; border-radius: 8px; }
 [hidden] { display: none !important; }
 button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
 @media (min-width: 700px) { .panel { padding: 12px; } h1 { font-size: 24px; } }
@@ -58,6 +63,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 <div id="load"><div><div class="t">Loading the speedway</div><div class="bar"><i id="lbar"></i></div><div class="p" id="lp">0%</div></div></div>
 <div class="hud">
   <div class="panel">
+    <nav class="nav" aria-label="Pages"><a href="../results/">Results</a><a class="alt" href="../cars/">Custom cars</a><a class="alt" href="../museum/">Victory Museum</a></nav>
     <div class="top"><span class="badge">IMS</span><h1 id="title">ThunderRing Motor Speedway</h1></div>
     <div class="sub" id="sub">Every follower gets a car</div>
     <form id="f" autocomplete="off"><input id="q" type="search" placeholder="@YOUR NAME" autocapitalize="none" spellcheck="false" aria-label="Your Instagram name"><button class="go" type="submit">FIND MY CAR</button></form>
@@ -67,6 +73,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
       <button class="chip" data-v="grid" aria-pressed="false">Starting grid</button>
       <button class="chip" data-v="ads" aria-pressed="false">Infield ads</button>
       <button class="chip" data-v="boards" aria-pressed="false">Billboards</button>
+      <button class="chip" data-v="garages" aria-pressed="false">Custom car garages</button>
       <button class="chip" data-v="museum" aria-pressed="false">Victory Museum</button>
     </div>
     <div class="buy">
@@ -78,7 +85,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
   </div>
 </div>
 <div id="tag" hidden></div>
-<div class="foot"><div><b id="cnt">0</b> followers have a car</div><a href="../results/">Results &amp; Museum</a></div>
+<div class="foot"><div><b id="cnt">0</b> followers have a car</div><a href="../results/">Race results</a></div>
 <script type="module">
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
@@ -104,6 +111,9 @@ controls.zoomToCursor = true;
 
 // Blender (x, y, z) to three (x, z, -y)
 const V = (x, y, z) => new THREE.Vector3(x, z, -y);
+// Custom car garages: on the back (infield) side of the GARAGES building (world.py building(170, -245, 110, 26, 14)), wall at y = -232.
+// The front side faces the pit building on the straight, which hides it, so the bays open toward the infield.
+const GX = 170, GY = -232, CTAGS = [];
 let DATA = null, carsByName = new Map(), hl = null, tagAt = null;
 
 function resize() { const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
@@ -122,7 +132,8 @@ const VIEWS = {
   ads: (() => { let k = 0; return () => { const x = (k++ % 2 ? -1 : 1) * DATA.rect_x; flyTo(V(x * .86, -330, 520), V(x, -30, 0)); }; })(),
   boards: (() => { let k = 0; return () => { const b = DATA.boards[k++ % DATA.boards.length];
     flyTo(V(b.x + b.fx * 190, b.y + b.fy * 190, b.z + 6), V(b.x, b.y, b.z - 4)); }; })(),
-  museum: () => { const m = DATA.museum; flyTo(V(m.x, m.y - m.d / 2 - 42, 9), V(m.x, m.y - 6, 4)); }
+  museum: () => { const m = DATA.museum; flyTo(V(m.x, m.y - m.d / 2 - 42, 9), V(m.x, m.y - 6, 4)); },
+  garages: () => flyTo(V(GX, GY + 125, 58), V(GX, GY - 16, 0))
 };
 document.querySelectorAll(".chip").forEach(b => b.addEventListener("click", () => {
   document.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
@@ -131,7 +142,8 @@ document.querySelectorAll(".chip").forEach(b => b.addEventListener("click", () =
   const m = document.getElementById("msg");
   if (b.dataset.v === "ads") m.innerHTML = 'Today\'s infield: <b>Stardubs</b> and <b>Rust-eze</b>. Tap again for the other end. <a href="' + KOFI + '" target="_blank" rel="noopener">Get yours: $30</a>';
   else if (b.dataset.v === "boards") m.innerHTML = 'Tap again for the next billboard. 8 spots on the stands. <a href="' + KOFI + '" target="_blank" rel="noopener">Get one: $5</a>';
-  else if (b.dataset.v === "museum") m.innerHTML = 'Every winner\'s gold car lives here forever. <a href="../results/#museum">See all winners</a>';
+  else if (b.dataset.v === "museum") m.innerHTML = 'Every winner\'s gold car lives here forever. <a href="../museum/">Go inside the museum</a>';
+  else if (b.dataset.v === "garages") m.innerHTML = 'Every custom car gets its own garage. Tap a car to go inside. <a href="../cars/">See all custom cars</a>';
   else m.textContent = "";
 }));
 
@@ -194,12 +206,53 @@ Promise.all([carsP, glbP]).then(([d, gltf]) => {
   ring.rotation.x = -Math.PI / 2; ring.position.y = .3; hl.add(ring);
   const beam = new THREE.Mesh(new THREE.CylinderGeometry(.35, .35, 40, 12), new THREE.MeshBasicMaterial({ color: 0xffcc18, transparent: true, opacity: .55 }));
   beam.position.y = 22; hl.add(beam); hl.visible = false; scene.add(hl);
+  addGarages();
   camera.position.set(-150, 950, 1050); controls.target.set(0, 0, 60); controls.update();
   document.getElementById("load").hidden = true;
   const u = new URLSearchParams(location.search).get("u");
   if (u) { document.getElementById("q").value = u; document.getElementById("f").requestSubmit(); }
 }).catch(() => { lp.textContent = "Couldn't load the track. Refresh to try again."; });
 
+// Paid custom cars parked out front of the garages, each in front of an open bay, tap one to go inside
+const PICK = [];
+function addGarages() {
+  fetch("../cars/cars.json", { cache: "no-cache" }).then(r => r.json()).then(cj => {
+    const cars = cj.cars.slice().reverse(), n = cars.length + 1;         // oldest first, plus one empty bay
+    const bayM = new THREE.MeshLambertMaterial({ color: 0x15171c }), yel = new THREE.MeshBasicMaterial({ color: 0xffcc18 });
+    const body = new THREE.BoxGeometry(4.6, .7, 2.2); body.translate(0, .75, 0);
+    const cab = new THREE.BoxGeometry(2.2, .65, 1.9); cab.translate(-.3, 1.4, 0);
+    const wheel = new THREE.BoxGeometry(.9, .9, .4), blk = new THREE.MeshLambertMaterial({ color: 0x111111 });
+    const x0 = GX - (n - 1) * 5.5;
+    for (let k = 0; k < n; k++) {
+      const x = x0 + k * 11, c = cars[k];
+      const bay = new THREE.Mesh(new THREE.BoxGeometry(9, 7, .4), bayM); bay.position.copy(V(x, GY + .25, 3.5)); scene.add(bay);
+      const trim = new THREE.Mesh(new THREE.BoxGeometry(9.4, .35, .45), yel); trim.position.copy(V(x, GY + .3, 7.1)); scene.add(trim);
+      if (!c) { CTAGS.push({ el: mkTag("+ Your car here", "../cars/", true), at: V(x, GY + 2, 9) }); continue; }
+      const g = new THREE.Group();
+      g.add(new THREE.Mesh(body, new THREE.MeshLambertMaterial({ color: c.bodyHex })));
+      g.add(new THREE.Mesh(cab, new THREE.MeshLambertMaterial({ color: c.roofHex })));
+      for (const [wx, wz] of [[1.5, 1.1], [1.5, -1.1], [-1.5, 1.1], [-1.5, -1.1]]) { const w = new THREE.Mesh(wheel, blk); w.position.set(wx, .45, wz); g.add(w); }
+      g.position.copy(V(x, GY + 5.5, .1)); g.rotation.y = Math.PI / 2;      // nose out toward the infield
+      g.userData.href = "../cars/#" + encodeURIComponent(c.ig); scene.add(g); PICK.push(g);
+      CTAGS.push({ el: mkTag("@" + c.ig + (c.num ? " #" + c.num : ""), g.userData.href), at: V(x, GY + 5.5, 4.2) });
+    }
+    CTAGS.push({ el: mkTag("Custom car garages", "../cars/", true, true), at: V(GX, GY + 1, 12.5) });
+  }).catch(() => {});
+}
+function mkTag(text, href, empty, big) {
+  const a = document.createElement("a"); a.className = "ctag" + (big ? " big" : ""); a.href = href; a.textContent = text; a.hidden = true;
+  if (empty && !big) a.style.background = "var(--yel)";
+  document.body.append(a); return a;
+}
+// tap (not drag) on a custom car opens its garage
+const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(); let downAt = null;
+canvas.addEventListener("pointerdown", e => { downAt = [e.clientX, e.clientY]; });
+canvas.addEventListener("pointerup", e => {
+  if (!downAt || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 6 || !PICK.length) return;
+  ndc.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1); ray.setFromCamera(ndc, camera);
+  const hit = ray.intersectObjects(PICK, true)[0]; if (!hit) return;
+  let o = hit.object; while (o && !o.userData.href) o = o.parent; if (o) location.href = o.userData.href;
+});
 const tagEl = document.getElementById("tag"), tmp = new THREE.Vector3();
 renderer.setAnimationLoop(t => {
   if (fly) {
@@ -213,6 +266,12 @@ renderer.setAnimationLoop(t => {
     const vis = tmp.z < 1 && Math.abs(tmp.x) < 1.1 && Math.abs(tmp.y) < 1.1;
     tagEl.hidden = !vis;
     if (vis) { tagEl.style.left = (tmp.x * .5 + .5) * innerWidth + "px"; tagEl.style.top = (-tmp.y * .5 + .5) * innerHeight + "px"; }
+  }
+  for (const ct of CTAGS) {
+    tmp.copy(ct.at); const dist = tmp.distanceTo(camera.position); tmp.project(camera);
+    const vis = dist < 420 && tmp.z < 1 && Math.abs(tmp.x) < 1.05 && Math.abs(tmp.y) < 1.05;
+    ct.el.hidden = !vis;
+    if (vis) { ct.el.style.left = (tmp.x * .5 + .5) * innerWidth + "px"; ct.el.style.top = (-tmp.y * .5 + .5) * innerHeight + "px"; }
   }
   renderer.render(scene, camera);
 });

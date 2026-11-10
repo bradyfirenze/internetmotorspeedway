@@ -82,12 +82,13 @@ html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); f
 .dots.gone { opacity: 0; }
 .dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--line); transition: background .3s, transform .3s; }
 .dots i.on { background: var(--yel); transform: scale(1.4); }
+.lane.zoom .spot { opacity: 0; transition: opacity .2s; }
 @media (prefers-reduced-motion: reduce) { .lane, .stage img { transition: none; } .bay:not(.in) .stage img { transform: none; opacity: 1; } .next b, .spot .tag { animation: none; } }
 </style>
 </head>
 <body>
 <header class="bar">
-  <a href="../results/" id="backRes">← Results</a>
+  <a href="../map/" id="backRes">← Track</a>
   <button type="button" id="backPit" hidden>← Pit lane</button>
   <h1>Custom Car <span>Room</span></h1>
   <div class="count" id="count"></div>
@@ -175,7 +176,7 @@ function goInside(i, instant) {
   sc.scrollTo({ left: cx - sc.clientWidth / 2, behavior: "smooth" });
   setTimeout(() => {
     const vx = cx - sc.scrollLeft;                       // bay centre in the visible window
-    lane.style.transformOrigin = cx + "px " + cy + "px";
+    lane.classList.add("zoom"); lane.style.transformOrigin = cx + "px " + cy + "px";
     lane.style.transform = "translate(" + (sc.clientWidth / 2 - vx) + "px," + (H / 2 - cy) + "px) scale(" + k + ")";
     setTimeout(enter, 650);
   }, 320);
@@ -183,7 +184,7 @@ function goInside(i, instant) {
 function goOutside() {
   inside = false; $("feed").classList.remove("open"); $("pit").classList.remove("gone"); $("dots").classList.add("gone");
   $("backPit").hidden = true; $("backRes").hidden = false; $("count").textContent = "";
-  requestAnimationFrame(() => { $("lane").style.transform = ""; });
+  requestAnimationFrame(() => { $("lane").style.transform = ""; $("lane").classList.remove("zoom"); });
   try { history.replaceState(null, "", location.pathname); } catch (e) {}
 }
 $("backPit").addEventListener("click", goOutside);
