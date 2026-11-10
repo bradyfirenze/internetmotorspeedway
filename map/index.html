@@ -154,7 +154,7 @@ document.getElementById("f").addEventListener("submit", e => {
   setTag(car);
   const fw = new THREE.Vector3(Math.cos(car.h), 0, -Math.sin(car.h));
   const p = V(car.x, car.y, 0);
-  flyTo(p.clone().addScaledVector(fw, 22).add(new THREE.Vector3(0, 14, 0)), p.clone().add(new THREE.Vector3(0, 1, 0)), 1800);
+  flyTo(p.clone().addScaledVector(fw, 30).add(new THREE.Vector3(0, 30, 0)), p.clone().addScaledVector(fw, -6), 1800);
   m.innerHTML = "";
   const s = document.createElement("span"); s.innerHTML = "<b></b> starts <b></b> of " + DATA.count.toLocaleString() + ". ";
   s.querySelectorAll("b")[0].textContent = "@" + car.n; s.querySelectorAll("b")[1].textContent = "#" + (car.i + 1).toLocaleString();
