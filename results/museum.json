@@ -1,6 +1,14 @@
 {
  "winners": [
   {
+   "day": 4,
+   "name": "jhr.1_",
+   "track": "Sir Patrick Stewart Motor Speedway",
+   "date": "Nov 9, 2026",
+   "cars": 3244,
+   "img": "museum/day4.jpg"
+  },
+  {
    "day": 3,
    "name": "alexisfine_18",
    "track": "ThunderRing Motor Speedway",
