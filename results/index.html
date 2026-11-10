@@ -78,7 +78,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--fg); outlin
     <button type="button" role="tab" id="t-res" aria-selected="true" aria-controls="v-res">Race Results</button>
     <button type="button" role="tab" id="t-mus" aria-selected="false" aria-controls="v-mus">Victory Museum</button>
   </div>
-  <nav style="display:flex;gap:8px;margin:-8px 0 20px" aria-label="Pages"><a href="../map/" style="flex:1;text-align:center;padding:11px 6px;border-radius:12px;background:var(--yel);color:#111;text-decoration:none;font:400 16px var(--display);text-transform:uppercase;letter-spacing:.02em">3D track</a><a href="../cars/" style="flex:1;text-align:center;padding:11px 6px;border-radius:12px;background:var(--card);border:1px solid var(--line);color:var(--fg);text-decoration:none;font:400 16px var(--display);text-transform:uppercase;letter-spacing:.02em">Custom cars</a><a href="../museum/" style="flex:1;text-align:center;padding:11px 6px;border-radius:12px;background:var(--card);border:1px solid var(--line);color:var(--fg);text-decoration:none;font:400 16px var(--display);text-transform:uppercase;letter-spacing:.02em">Victory Museum</a></nav>
+  <nav style="display:flex;gap:8px;margin:-8px 0 20px" aria-label="Pages"><a href="../map/" style="flex:1;text-align:center;padding:11px 6px;border-radius:12px;background:var(--yel);color:#111;text-decoration:none;font:400 16px var(--display);text-transform:uppercase;letter-spacing:.02em">3D track</a><a href="../map/#cars" style="flex:1;text-align:center;padding:11px 6px;border-radius:12px;background:var(--card);border:1px solid var(--line);color:var(--fg);text-decoration:none;font:400 16px var(--display);text-transform:uppercase;letter-spacing:.02em">Custom cars</a><a href="../map/#museum" style="flex:1;text-align:center;padding:11px 6px;border-radius:12px;background:var(--card);border:1px solid var(--line);color:var(--fg);text-decoration:none;font:400 16px var(--display);text-transform:uppercase;letter-spacing:.02em">Victory Museum</a></nav>
   <section id="v-mus" role="tabpanel" aria-labelledby="t-mus" hidden>
     <h1>Victory <span>Museum</span></h1>
     <p class="mintro">Every winner's car turns gold and goes in the museum forever.</p>
@@ -199,8 +199,8 @@ async function loadMuseum() {
   } catch (e) { box.textContent = "Couldn't load the museum. Refresh to try again."; }
 }
 $("t-res").addEventListener("click", () => tab("results"));
-$("t-mus").addEventListener("click", () => { location.href = "../museum/"; });   // the museum has its own 3D page now
-if (location.hash === "#museum") location.replace("../museum/");
+$("t-mus").addEventListener("click", () => { location.href = "../map/#museum"; });   // the museum lives on the 3D track
+if (location.hash === "#museum") location.replace("../map/#museum");
 </script>
 </body>
 </html>

@@ -50,6 +50,26 @@ input:focus { border-color: var(--yel); }
 .nav a.alt { background: #0b0d11; color: var(--fg); border: 1px solid var(--line); }
 .ctag { position: fixed; left: 0; top: 0; transform: translate(-50%, -100%); background: var(--fg); color: var(--ink); font: 700 12px var(--body); padding: 4px 8px; border-radius: 999px; white-space: nowrap; text-decoration: none; box-shadow: 0 3px 10px rgba(0,0,0,.35); }
 .ctag.big { background: var(--yel); font: 400 16px var(--display); letter-spacing: .03em; padding: 5px 10px; border-radius: 8px; }
+.show .panel > :not(.nav) { display: none; }
+.show .foot { display: none; }
+.card { position: fixed; left: 50%; bottom: max(14px, env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(560px, calc(100% - 20px)); z-index: 3;
+  background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px 14px 12px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); touch-action: pan-y; }
+.card .row { display: flex; align-items: center; gap: 10px; }
+.card .txt { flex: 1; min-width: 0; transition: opacity .25s, transform .25s; }
+.card .txt.out { opacity: 0; transform: translateX(var(--dx, -24px)); }
+.card .k { font: 700 12px var(--body); letter-spacing: .08em; text-transform: uppercase; color: var(--yel); }
+.card .nm { font: 400 30px var(--display); line-height: 1.05; overflow-wrap: anywhere; color: var(--fg); text-decoration: none; display: block; margin: 2px 0; }
+.card .d { font-size: 14px; color: var(--muted); line-height: 1.4; }
+.card .d b { color: var(--fg); }
+.card .d i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin: 0 4px 0 0; border: 1px solid rgba(255,255,255,.3); }
+.card .arr { flex: none; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: #0b0d11; color: var(--fg); font: 700 20px var(--body); cursor: pointer; }
+.card .arr:disabled { opacity: .3; cursor: default; }
+.card .acts { display: flex; gap: 6px; margin-top: 10px; }
+.card .acts a, .card .acts button { flex: 1; text-align: center; font: 700 13px var(--body); text-decoration: none; border-radius: 8px; padding: 10px 8px; border: 1px solid var(--line); color: var(--fg); background: #0b0d11; cursor: pointer; }
+.card .acts .main { background: var(--yel); color: var(--ink); border-color: var(--yel); }
+.card .dots { display: flex; justify-content: center; gap: 5px; margin-top: 10px; }
+.card .dots i { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.25); }
+.card .dots i.on { background: var(--yel); width: 16px; border-radius: 3px; }
 [hidden] { display: none !important; }
 button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
 @media (min-width: 700px) { .panel { padding: 12px; } h1 { font-size: 24px; } }
@@ -63,7 +83,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 <div id="load"><div><div class="t">Loading the speedway</div><div class="bar"><i id="lbar"></i></div><div class="p" id="lp">0%</div></div></div>
 <div class="hud">
   <div class="panel">
-    <nav class="nav" aria-label="Pages"><a href="../results/">Results</a><a class="alt" href="../cars/">Custom cars</a><a class="alt" href="../museum/">Victory Museum</a></nav>
+    <nav class="nav" aria-label="Pages"><a href="../results/">Results</a><a class="alt" href="#cars" data-show="garages">Custom cars</a><a class="alt" href="#museum" data-show="museum">Victory Museum</a></nav>
     <div class="top"><span class="badge">IMS</span><h1 id="title">ThunderRing Motor Speedway</h1></div>
     <div class="sub" id="sub">Every follower gets a car</div>
     <form id="f" autocomplete="off"><input id="q" type="search" placeholder="@YOUR NAME" autocapitalize="none" spellcheck="false" aria-label="Your Instagram name"><button class="go" type="submit">FIND MY CAR</button></form>
@@ -85,6 +105,11 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
   </div>
 </div>
 <div id="tag" hidden></div>
+<div class="card" id="card" hidden aria-live="polite">
+  <div class="row"><button class="arr" id="prev" aria-label="Previous">&#8249;</button><div class="txt" id="ctxt"></div><button class="arr" id="next" aria-label="Next">&#8250;</button></div>
+  <div class="acts" id="cacts"></div>
+  <div class="dots" id="cdots"></div>
+</div>
 <div class="foot"><div><b id="cnt">0</b> followers have a car</div><a href="../results/">Race results</a></div>
 <script type="module">
 import * as THREE from "three";
@@ -113,7 +138,7 @@ controls.zoomToCursor = true;
 const V = (x, y, z) => new THREE.Vector3(x, z, -y);
 // Custom car garages: on the back (infield) side of the GARAGES building (world.py building(170, -245, 110, 26, 14)), wall at y = -232.
 // The front side faces the pit building on the straight, which hides it, so the bays open toward the infield.
-const GX = 170, GY = -232, CTAGS = [];
+const GX = 170, GY = -232, CTAGS = [], GCARS = [];
 let DATA = null, carsByName = new Map(), hl = null, tagAt = null;
 
 function resize() { const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
@@ -137,13 +162,13 @@ const VIEWS = {
 };
 document.querySelectorAll(".chip").forEach(b => b.addEventListener("click", () => {
   document.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  if (b.dataset.v === "garages" || b.dataset.v === "museum") { startShow(b.dataset.v); return; }
+  endShow(false);
   if (DATA) VIEWS[b.dataset.v]();
   setTag(null);
   const m = document.getElementById("msg");
   if (b.dataset.v === "ads") m.innerHTML = 'Today\'s infield: <b>Stardubs</b> and <b>Rust-eze</b>. Tap again for the other end. <a href="' + KOFI + '" target="_blank" rel="noopener">Get yours: $30</a>';
   else if (b.dataset.v === "boards") m.innerHTML = 'Tap again for the next billboard. 8 spots on the stands. <a href="' + KOFI + '" target="_blank" rel="noopener">Get one: $5</a>';
-  else if (b.dataset.v === "museum") m.innerHTML = 'Every winner\'s gold car lives here forever. <a href="../museum/">Go inside the museum</a>';
-  else if (b.dataset.v === "garages") m.innerHTML = 'Every custom car gets its own garage. Tap a car to go inside. <a href="../cars/">See all custom cars</a>';
   else m.textContent = "";
 }));
 
@@ -206,11 +231,13 @@ Promise.all([carsP, glbP]).then(([d, gltf]) => {
   ring.rotation.x = -Math.PI / 2; ring.position.y = .3; hl.add(ring);
   const beam = new THREE.Mesh(new THREE.CylinderGeometry(.35, .35, 40, 12), new THREE.MeshBasicMaterial({ color: 0xffcc18, transparent: true, opacity: .55 }));
   beam.position.y = 22; hl.add(beam); hl.visible = false; scene.add(hl);
-  addGarages();
+  addGarages(); addMuseum(gltf.scene);
   camera.position.set(-150, 950, 1050); controls.target.set(0, 0, 60); controls.update();
   document.getElementById("load").hidden = true;
   const u = new URLSearchParams(location.search).get("u");
   if (u) { document.getElementById("q").value = u; document.getElementById("f").requestSubmit(); }
+  else if (location.hash === "#museum") startShow("museum");
+  else if (location.hash.startsWith("#cars")) startShow("garages", decodeURIComponent(location.hash.slice(6)));
 }).catch(() => { lp.textContent = "Couldn't load the track. Refresh to try again."; });
 
 // Paid custom cars parked out front of the garages, each in front of an open bay, tap one to go inside
@@ -222,26 +249,30 @@ function addGarages() {
     const body = new THREE.BoxGeometry(4.6, .7, 2.2); body.translate(0, .75, 0);
     const cab = new THREE.BoxGeometry(2.2, .65, 1.9); cab.translate(-.3, 1.4, 0);
     const wheel = new THREE.BoxGeometry(.9, .9, .4), blk = new THREE.MeshLambertMaterial({ color: 0x111111 });
-    const x0 = GX - (n - 1) * 5.5;
+    const x0 = GX - (n - 1) * 5.5; GCARS.length = 0;
     for (let k = 0; k < n; k++) {
       const x = x0 + k * 11, c = cars[k];
       const bay = new THREE.Mesh(new THREE.BoxGeometry(9, 7, .4), bayM); bay.position.copy(V(x, GY + .25, 3.5)); scene.add(bay);
       const trim = new THREE.Mesh(new THREE.BoxGeometry(9.4, .35, .45), yel); trim.position.copy(V(x, GY + .3, 7.1)); scene.add(trim);
-      if (!c) { CTAGS.push({ el: mkTag("+ Your car here", "../cars/", true), at: V(x, GY + 2, 9) }); continue; }
+      if (!c) { CTAGS.push({ el: mkTag("+ Your car here", "#cars", true), at: V(x, GY + 2, 9) }); GCARS.push({ empty: true, x }); continue; }
+      GCARS.push(Object.assign({ x }, c));
       const g = new THREE.Group();
       g.add(new THREE.Mesh(body, new THREE.MeshLambertMaterial({ color: c.bodyHex })));
       g.add(new THREE.Mesh(cab, new THREE.MeshLambertMaterial({ color: c.roofHex })));
       for (const [wx, wz] of [[1.5, 1.1], [1.5, -1.1], [-1.5, 1.1], [-1.5, -1.1]]) { const w = new THREE.Mesh(wheel, blk); w.position.set(wx, .45, wz); g.add(w); }
       g.position.copy(V(x, GY + 5.5, .1)); g.rotation.y = Math.PI / 2;      // nose out toward the infield
-      g.userData.href = "../cars/#" + encodeURIComponent(c.ig); scene.add(g); PICK.push(g);
+      g.userData.href = "../cars/#" + encodeURIComponent(c.ig); g.userData.show = ["garages", c.ig]; scene.add(g); PICK.push(g);
       CTAGS.push({ el: mkTag("@" + c.ig + (c.num ? " #" + c.num : ""), g.userData.href), at: V(x, GY + 5.5, 4.2) });
     }
-    CTAGS.push({ el: mkTag("Custom car garages", "../cars/", true, true), at: V(GX, GY + 1, 12.5) });
+    CTAGS.push({ el: mkTag("Custom car garages", "#cars", true, true), at: V(GX, GY + 1, 12.5) });
+    if (pendingShow) { const p = pendingShow; pendingShow = null; startShow(...p); }
   }).catch(() => {});
 }
 function mkTag(text, href, empty, big) {
   const a = document.createElement("a"); a.className = "ctag" + (big ? " big" : ""); a.href = href; a.textContent = text; a.hidden = true;
   if (empty && !big) a.style.background = "var(--yel)";
+  if (href === "#cars") a.addEventListener("click", e => { e.preventDefault(); startShow("garages", "__empty"); });
+  else if (href.startsWith("../cars/#")) a.addEventListener("click", e => { e.preventDefault(); startShow("garages", decodeURIComponent(href.slice(9))); });
   document.body.append(a); return a;
 }
 // tap (not drag) on a custom car opens its garage
@@ -251,7 +282,8 @@ canvas.addEventListener("pointerup", e => {
   if (!downAt || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 6 || !PICK.length) return;
   ndc.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1); ray.setFromCamera(ndc, camera);
   const hit = ray.intersectObjects(PICK, true)[0]; if (!hit) return;
-  let o = hit.object; while (o && !o.userData.href) o = o.parent; if (o) location.href = o.userData.href;
+  let o = hit.object; while (o && !o.userData.href) o = o.parent; if (!o) return;
+  if (o.userData.show) startShow(...o.userData.show); else location.href = o.userData.href;
 });
 const tagEl = document.getElementById("tag"), tmp = new THREE.Vector3();
 renderer.setAnimationLoop(t => {
@@ -276,6 +308,116 @@ renderer.setAnimationLoop(t => {
   renderer.render(scene, camera);
 });
 controls.addEventListener("start", () => { fly = null; });
+
+// ---- Victory Museum: gold cars for every winner on the plinths (newest in the centre, past winners left, right, left, right)
+const MUS = { x: 5, y: -50, d: 62 }, WINS = [];
+const GLASS_M = new THREE.MeshLambertMaterial({ color: 0x6f8aa3 }), LIT_M = new THREE.MeshBasicMaterial({ color: 0xffffff });
+const SLOTS = [[MUS.x - 24, MUS.y - 4], [MUS.x + 24, MUS.y - 4], [MUS.x - 38, MUS.y - 4], [MUS.x + 38, MUS.y - 4]];
+function goldCar(x, y, k, mat, blk) {
+  const g = new THREE.Group();
+  const add = (geo, m, px, py, pz) => { const o = new THREE.Mesh(geo, m); o.position.copy(V(px, py, pz)); g.add(o); };
+  add(new THREE.BoxGeometry(2.2 * k, .7 * k, 4.6 * k), mat, 0, 0, .75 * k);
+  add(new THREE.BoxGeometry(1.9 * k, .65 * k, 2.2 * k), mat, 0, .3 * k, 1.4 * k);
+  add(new THREE.BoxGeometry(1.75 * k, .5 * k, .08 * k), GLASS_M, 0, -.82 * k, 1.4 * k);
+  for (const a of [.72, -.72]) add(new THREE.BoxGeometry(.5 * k, .25 * k, .04 * k), LIT_M, a * k, -2.31 * k, .85 * k);
+  for (const a of [1.1, -1.1]) for (const b of [1.5, -1.5]) add(new THREE.BoxGeometry(.4 * k, .9 * k, .9 * k), blk, a * k, b * k, .45 * k);
+  g.position.copy(V(x, y, 2.2)); scene.add(g); return g;
+}
+function addMuseum(root) {
+  fetch("../results/museum.json", { cache: "no-cache" }).then(r => r.json()).then(mj => {
+    const W = mj.winners; if (!W.length) return;
+    const gold = new THREE.MeshLambertMaterial({ color: 0xf0c02a, emissive: 0x4a3600 }), blk = new THREE.MeshLambertMaterial({ color: 0x111111 });
+    const plinth = new THREE.MeshLambertMaterial({ color: 0x15171c });
+    // hide the baked name plates ("@NAME", "NEXT WINNER") so the floating tags are the only names
+    const plates = [V(MUS.x, MUS.y - 14.2, 1.45), ...SLOTS.map(([x, y]) => V(x, y - 6.2, 1.0))], bb = new THREE.Box3(), c = new THREE.Vector3(), sz = new THREE.Vector3(), baked = [];
+    root.updateMatrixWorld(true);
+    root.traverse(o => { if (!o.isMesh) return; bb.setFromObject(o); bb.getCenter(c); bb.getSize(sz);
+      if (sz.x < 13 && sz.y < 3 && sz.z < 3 && plates.some(p => p.distanceTo(c) < 2)) o.visible = false;
+      else if (sz.y < 4 && c.y > 2.4 && c.y < 6) baked.push(c.clone()); });
+    const hasCar = (x, y) => { const p = V(x, y, 0); return baked.some(q => Math.hypot(q.x - p.x, q.z - p.z) < 3); };   // older exports already have some gold cars
+    const past = W.slice(1).reverse();
+    const place = [{ w: W[0], x: MUS.x, y: MUS.y - 5, k: 2.2 }].concat(past.slice(0, 4).map((w, i) => ({ w, x: SLOTS[i][0], y: SLOTS[i][1], k: 1.9 })));
+    for (const p of place) {
+      if (p.k < 2.2 && !hasCar(p.x, p.y)) { const b = new THREE.Mesh(new THREE.BoxGeometry(10, 2.2, 12), plinth); b.position.copy(V(p.x, p.y, 1.1)); scene.add(b); goldCar(p.x, p.y, p.k, gold, blk); }
+      CTAGS.push({ el: mkTag("@" + p.w.name, "#museum"), at: V(p.x, p.y, 2.2 + 3.4 * p.k), show: "museum" });
+      WINS.push(p);
+    }
+    WINS.sort((a, b) => b.w.day - a.w.day);
+    CTAGS.forEach(t => { if (t.show === "museum") t.el.addEventListener("click", e => { e.preventDefault(); const i = WINS.findIndex(p => "@" + p.w.name === t.el.textContent); startShow("museum", i); }); });
+    if (pendingShow) { const p = pendingShow; pendingShow = null; startShow(...p); }
+  }).catch(() => {});
+}
+
+// ---- Showcase: fly to the place, then the camera goes car to car. Swipe left / right anywhere (or the arrows).
+const card = document.getElementById("card"), ctxt = document.getElementById("ctxt"), cacts = document.getElementById("cacts"), cdots = document.getElementById("cdots");
+let SHOW = null, pendingShow = null, showT = 0;
+const esc = s => String(s).replace(/[&<>"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[ch]);
+function startShow(kind, pick) {
+  const list = kind === "museum" ? WINS : GCARS;
+  if (!DATA || !list.length) { pendingShow = [kind, pick]; return; }
+  document.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.v === kind)));
+  setTag(null); document.body.classList.add("show"); controls.enabled = false;
+  let i = 0;
+  if (typeof pick === "number" && pick >= 0) i = pick;
+  else if (pick === "__empty") i = list.length - 1;
+  else if (pick) i = Math.max(0, list.findIndex(c => c.ig === pick));
+  const fresh = !SHOW || SHOW.kind !== kind;
+  SHOW = { kind, list, i: -1 };
+  history.replaceState(null, "", kind === "museum" ? "#museum" : "#cars");
+  clearTimeout(showT);
+  if (fresh) {     // the wide shot first, then zoom in on the first car
+    if (kind === "museum") VIEWS.museum(); else VIEWS.garages();
+    card.hidden = true; showT = setTimeout(() => go(i, 0), 1500);
+  } else go(i, 0);
+}
+function endShow(fly) {
+  if (!SHOW) return; SHOW = null; clearTimeout(showT); card.hidden = true; document.body.classList.remove("show"); controls.enabled = true;
+  history.replaceState(null, "", location.pathname + location.search);
+  if (fly) { document.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.v === "track"))); VIEWS.track(); }
+}
+function go(i, dir) {
+  if (!SHOW) return; const L = SHOW.list; i = Math.max(0, Math.min(L.length - 1, i)); if (i === SHOW.i && !card.hidden) return;
+  SHOW.i = i; const c = L[i];
+  const f = Math.max(1, .95 / camera.aspect);      // tall phone screens: step back so the whole car fits
+  if (SHOW.kind === "museum" && c.k > 2) { const r = (9 + 4 * c.k) * f; flyTo(V(c.x + r * .3, c.y - r, 3 + 2.2 * c.k * f), V(c.x, c.y - 1.5 * f, 1.2 + c.k), 1300); }
+  else if (SHOW.kind === "museum") {   // side plinths: stay inside the hall (the front wall is in the way) and look across from the aisle
+    const sx = Math.sign(c.x - MUS.x), r = (8 + 4 * c.k) * f, cy = Math.max(MUS.y - MUS.d / 2 + 3, c.y - r * .75);
+    flyTo(V(c.x - sx * r * .6, cy, 3 + 1.8 * c.k * f), V(c.x, c.y - .5, 1.4 + c.k), 1300); }
+  else flyTo(V(c.x + 3 * f, GY + 5.5 + 8.5 * f, 2.2 + 1.8 * f), V(c.x, GY + 4.5, 1.1), 1300);
+  ctxt.style.setProperty("--dx", (dir >= 0 ? -24 : 24) + "px"); ctxt.classList.add("out");
+  setTimeout(() => { fill(c); ctxt.style.setProperty("--dx", (dir >= 0 ? 24 : -24) + "px"); requestAnimationFrame(() => ctxt.classList.remove("out")); }, card.hidden ? 0 : 180);
+  card.hidden = false;
+  document.getElementById("prev").disabled = i === 0; document.getElementById("next").disabled = i === L.length - 1;
+  cdots.innerHTML = L.map((_, k) => "<i" + (k === i ? ' class="on"' : "") + "></i>").join("");
+}
+function fill(c) {
+  const exit = '<button type="button" data-x="1">Back to track</button>';
+  if (SHOW.kind === "museum") {
+    const w = c.w;
+    ctxt.innerHTML = '<div class="k">Day ' + w.day + ' winner &middot; ' + esc(w.date) + '</div><a class="nm" target="_blank" rel="noopener" href="https://instagram.com/' + encodeURIComponent(w.name) + '">@' + esc(w.name) + '</a>' +
+      '<div class="d">' + esc(w.track) + ' &middot; Beat <b>' + (w.cars - 1).toLocaleString() + '</b> cars</div>';
+    cacts.innerHTML = '<a class="main" href="../results/">Race results</a>' + exit;
+  } else if (c.empty) {
+    ctxt.innerHTML = '<div class="k">Open garage</div><div class="nm">Your car here</div><div class="d">Pick your colors and number. It races in every video and gets its own garage.</div>';
+    cacts.innerHTML = '<a class="main" href="' + KOFI + '" target="_blank" rel="noopener">Custom car $1</a>' + exit;
+  } else {
+    ctxt.innerHTML = '<div class="k">Custom car' + (c.since ? ' &middot; since ' + esc(new Date(c.since + 'T12:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })) : '') + '</div><a class="nm" target="_blank" rel="noopener" href="https://instagram.com/' + encodeURIComponent(c.ig) + '">@' + esc(c.ig) + (c.num ? ' <span style="color:var(--yel)">#' + esc(c.num) + '</span>' : '') + '</a>' +
+      '<div class="d"><i style="background:' + esc(c.bodyHex) + '"></i>Body &nbsp; <i style="background:' + esc(c.roofHex) + '"></i>Roof</div>';
+    cacts.innerHTML = '<a class="main" href="../cars/#' + encodeURIComponent(c.ig) + '">Go inside, spin it 360</a>' + exit;
+  }
+}
+cacts.addEventListener("click", e => { if (e.target.dataset.x) endShow(true); });
+document.getElementById("prev").addEventListener("click", () => SHOW && go(SHOW.i - 1, -1));
+document.getElementById("next").addEventListener("click", () => SHOW && go(SHOW.i + 1, 1));
+document.querySelectorAll("[data-show]").forEach(a => a.addEventListener("click", e => { e.preventDefault(); startShow(a.dataset.show); }));
+addEventListener("keydown", e => { if (!SHOW || e.target.tagName === "INPUT") return;
+  if (e.key === "ArrowRight") go(SHOW.i + 1, 1); else if (e.key === "ArrowLeft") go(SHOW.i - 1, -1); else if (e.key === "Escape") endShow(true); });
+// swipe left / right anywhere on the 3D view while showing cars (the map stops dragging then)
+let sw = null;
+addEventListener("pointerdown", e => { if (SHOW && !e.target.closest("a,button,input")) sw = [e.clientX, e.clientY, performance.now()]; }, true);
+addEventListener("pointerup", e => { if (!SHOW || !sw) return; const dx = e.clientX - sw[0], dy = e.clientY - sw[1]; sw = null;
+  if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.2) go(SHOW.i + (dx < 0 ? 1 : -1), dx < 0 ? 1 : -1); }, true);
+
 </script>
 </body>
 </html>
