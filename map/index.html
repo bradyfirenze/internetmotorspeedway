@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>Track Map | Internet Motor Speedway</title>
+<meta name="description" content="Fly around the speedway, find your car, see the sponsors and the Victory Museum.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@500;700&display=swap">
+<style>
+:root { --yel: #ffcc18; --ink: #111318; --card: rgba(17,19,24,.88); --line: rgba(255,255,255,.14); --fg: #f3f4f6; --muted: #aab0bb;
+  --display: "Anton", Impact, "Arial Narrow", sans-serif; --body: "Archivo", -apple-system, "Helvetica Neue", Arial, sans-serif; color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: #7fb2e5; font-family: var(--body); color: var(--fg); touch-action: none; }
+#c { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+.hud { position: fixed; left: 0; right: 0; top: 0; padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) 0 max(10px, env(safe-area-inset-left)); pointer-events: none; }
+.panel { pointer-events: auto; max-width: 560px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.top { display: flex; align-items: center; gap: 8px; }
+.badge { font-family: var(--display); background: var(--yel); color: var(--ink); border-radius: 6px; padding: 3px 6px; font-size: 13px; }
+h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 20px; text-transform: uppercase; letter-spacing: .02em; line-height: 1.1; }
+.sub { font-size: 11px; font-weight: 700; color: var(--yel); letter-spacing: .08em; text-transform: uppercase; margin: 2px 0 8px; }
+form { display: flex; gap: 6px; }
+input { flex: 1; min-width: 0; font: 700 16px var(--body); color: var(--fg); background: #0b0d11; border: 2px solid var(--line); border-radius: 8px; padding: 10px; outline: none; }
+input:focus { border-color: var(--yel); }
+.go { font: 400 16px var(--display); letter-spacing: .04em; background: var(--yel); color: var(--ink); border: 0; border-radius: 8px; padding: 0 12px; cursor: pointer; white-space: nowrap; }
+.msg { font-size: 13px; color: var(--muted); margin-top: 6px; min-height: 0; }
+.msg b { color: var(--fg); }
+.msg a { color: var(--yel); }
+.chips { display: flex; gap: 6px; overflow-x: auto; margin-top: 8px; padding-bottom: 2px; scrollbar-width: none; }
+.chips::-webkit-scrollbar { display: none; }
+.chip { flex: none; font: 700 12px var(--body); text-transform: uppercase; letter-spacing: .06em; background: #0b0d11; color: var(--fg); border: 1px solid var(--line); border-radius: 7px; padding: 8px 10px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--fg); color: var(--ink); }
+.buy { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.buy a { flex: 1 1 auto; text-align: center; font: 700 13px var(--body); text-decoration: none; border-radius: 8px; padding: 9px 8px; border: 1px solid var(--yel); color: var(--yel); background: rgba(255,204,24,.08); }
+.buy a.main { background: var(--yel); color: var(--ink); }
+.foot { position: fixed; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-between; gap: 8px; padding: 0 max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left)); pointer-events: none; }
+.foot div, .foot a { pointer-events: auto; background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 7px 9px; font: 700 11px var(--body); letter-spacing: .06em; text-transform: uppercase; color: var(--fg); text-decoration: none; }
+.foot b { color: var(--yel); }
+#tag { position: fixed; left: 0; top: 0; transform: translate(-50%, -100%); pointer-events: none; background: var(--yel); color: var(--ink); font: 400 17px var(--display); padding: 5px 10px; border-radius: 8px; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,.35); }
+#tag::after { content: ""; position: absolute; left: 50%; bottom: -7px; margin-left: -7px; border: 7px solid transparent; border-bottom: 0; border-top-color: var(--yel); }
+#load { position: fixed; inset: 0; display: grid; place-items: center; background: #111318; z-index: 5; }
+#load div { text-align: center; }
+#load .t { font: 400 30px var(--display); text-transform: uppercase; }
+#load .bar { width: 220px; height: 8px; border-radius: 4px; background: #2a2e37; margin: 14px auto 8px; overflow: hidden; }
+#load .bar i { display: block; height: 100%; width: 0; background: var(--yel); transition: width .2s; }
+#load .p { color: var(--muted); font-size: 13px; }
+.hint { font-size: 11px; color: var(--muted); margin-top: 6px; }
+[hidden] { display: none !important; }
+button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
+@media (min-width: 700px) { .panel { padding: 12px; } h1 { font-size: 24px; } }
+</style>
+<script type="importmap">{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
+</head>
+<body>
+<canvas id="c" aria-label="3D map of the speedway. Drag to move, pinch or scroll to zoom."></canvas>
+<div id="load"><div><div class="t">Loading the speedway</div><div class="bar"><i id="lbar"></i></div><div class="p" id="lp">0%</div></div></div>
+<div class="hud">
+  <div class="panel">
+    <div class="top"><span class="badge">IMS</span><h1 id="title">ThunderRing Motor Speedway</h1></div>
+    <div class="sub" id="sub">Every follower gets a car</div>
+    <form id="f" autocomplete="off"><input id="q" type="search" placeholder="@YOUR NAME" autocapitalize="none" spellcheck="false" aria-label="Your Instagram name"><button class="go" type="submit">FIND MY CAR</button></form>
+    <div class="msg" id="msg" aria-live="polite"></div>
+    <div class="chips" role="group" aria-label="Views">
+      <button class="chip" data-v="track" aria-pressed="true">Whole track</button>
+      <button class="chip" data-v="grid" aria-pressed="false">Starting grid</button>
+      <button class="chip" data-v="ads" aria-pressed="false">Infield ads</button>
+      <button class="chip" data-v="boards" aria-pressed="false">Billboards</button>
+      <button class="chip" data-v="museum" aria-pressed="false">Victory Museum</button>
+    </div>
+    <div class="buy">
+      <a class="main" href="https://ko-fi.com/internetmotorspeedway" target="_blank" rel="noopener">Custom car $1</a>
+      <a href="https://ko-fi.com/internetmotorspeedway" target="_blank" rel="noopener">Billboard $5</a>
+      <a href="https://ko-fi.com/internetmotorspeedway" target="_blank" rel="noopener">Infield ad $30</a>
+    </div>
+    <div class="hint">Drag to move · pinch or scroll to zoom · two fingers to turn</div>
+  </div>
+</div>
+<div id="tag" hidden></div>
+<div class="foot"><div><b id="cnt">0</b> followers have a car</div><a href="../results/">Results &amp; Museum</a></div>
+<script type="module">
+import * as THREE from "three";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
+import { MapControls } from "three/addons/controls/MapControls.js";
+
+const KOFI = "https://ko-fi.com/internetmotorspeedway";
+const canvas = document.getElementById("c");
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x86b9ea);
+scene.fog = new THREE.Fog(0x86b9ea, 1800, 4200);
+const camera = new THREE.PerspectiveCamera(45, 1, 1, 8000);
+scene.add(new THREE.HemisphereLight(0xffffff, 0x5a7a4a, 1.6));
+const sun = new THREE.DirectionalLight(0xffffff, 1.9); sun.position.set(-600, 900, 400); scene.add(sun);
+
+const controls = new MapControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.dampingFactor = 0.08; controls.screenSpacePanning = false;
+controls.minDistance = 8; controls.maxDistance = 2600; controls.maxPolarAngle = Math.PI * 0.47;
+controls.zoomToCursor = true;
+
+// Blender (x, y, z) to three (x, z, -y)
+const V = (x, y, z) => new THREE.Vector3(x, z, -y);
+let DATA = null, carsByName = new Map(), hl = null, tagAt = null;
+
+function resize() { const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+addEventListener("resize", resize); resize();
+
+// smooth camera moves
+let fly = null;
+function flyTo(pos, target, ms = 1400) {
+  fly = { p0: camera.position.clone(), t0: controls.target.clone(), p1: pos, t1: target, s: performance.now(), ms };
+}
+function ease(u) { return u < .5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2; }
+
+const VIEWS = {
+  track: () => flyTo(new THREE.Vector3(-150, 950, 1050), new THREE.Vector3(0, 0, 60)),
+  grid: () => { const f = DATA.front; flyTo(V(f.x + 70, f.y - 120, 60), V(f.x - 150, f.y + 20, 0)); },
+  ads: (() => { let k = 0; return () => { const x = (k++ % 2 ? -1 : 1) * DATA.rect_x; flyTo(V(x * .86, -330, 520), V(x, -30, 0)); }; })(),
+  boards: (() => { let k = 0; return () => { const b = DATA.boards[k++ % DATA.boards.length];
+    flyTo(V(b.x + b.fx * 190, b.y + b.fy * 190, b.z + 6), V(b.x, b.y, b.z - 4)); }; })(),
+  museum: () => { const m = DATA.museum; flyTo(V(m.x, m.y - m.d / 2 - 42, 9), V(m.x, m.y - 6, 4)); }
+};
+document.querySelectorAll(".chip").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  if (DATA) VIEWS[b.dataset.v]();
+  setTag(null);
+  const m = document.getElementById("msg");
+  if (b.dataset.v === "ads") m.innerHTML = 'Today\'s infield: <b>Stardubs</b> and <b>Rust-eze</b>. Tap again for the other end. <a href="' + KOFI + '" target="_blank" rel="noopener">Get yours: $30</a>';
+  else if (b.dataset.v === "boards") m.innerHTML = 'Tap again for the next billboard. 8 spots on the stands. <a href="' + KOFI + '" target="_blank" rel="noopener">Get one: $5</a>';
+  else if (b.dataset.v === "museum") m.innerHTML = 'Every winner\'s gold car lives here forever. <a href="../results/#museum">See all winners</a>';
+  else m.textContent = "";
+}));
+
+function setTag(car) {
+  const t = document.getElementById("tag");
+  if (!car) { t.hidden = true; tagAt = null; if (hl) hl.visible = false; return; }
+  t.textContent = "@" + car.n.toUpperCase(); t.hidden = false;
+  tagAt = V(car.x, car.y, 6);
+  hl.position.copy(V(car.x, car.y, 0)); hl.visible = true;
+}
+
+document.getElementById("f").addEventListener("submit", e => {
+  e.preventDefault(); if (!DATA) return;
+  const q = document.getElementById("q").value.toLowerCase().replace(/^@+/, "").trim(), m = document.getElementById("msg");
+  if (!q) return;
+  let car = carsByName.get(q);
+  if (!car) { const hit = DATA.cars.find(c => c.n.includes(q)); if (hit) car = hit; }
+  if (!car) { m.textContent = "No car under that name yet. Follow before the cutoff and you're in the next race."; setTag(null); return; }
+  document.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", "false"));
+  setTag(car);
+  const fw = new THREE.Vector3(Math.cos(car.h), 0, -Math.sin(car.h));
+  const p = V(car.x, car.y, 0);
+  flyTo(p.clone().addScaledVector(fw, 22).add(new THREE.Vector3(0, 14, 0)), p.clone().add(new THREE.Vector3(0, 1, 0)), 1800);
+  m.innerHTML = "";
+  const s = document.createElement("span"); s.innerHTML = "<b></b> starts <b></b> of " + DATA.count.toLocaleString() + ". ";
+  s.querySelectorAll("b")[0].textContent = "@" + car.n; s.querySelectorAll("b")[1].textContent = "#" + (car.i + 1).toLocaleString();
+  const a = document.createElement("a"); a.href = "../results/?u=" + encodeURIComponent(car.n); a.textContent = "See your race results";
+  m.append(s, a);
+});
+
+// load cars + track
+const lbar = document.getElementById("lbar"), lp = document.getElementById("lp");
+const prog = { cars: 0, glb: 0 }; const showProg = () => { const v = Math.round(prog.cars * 5 + prog.glb * 95); lbar.style.width = v + "%"; lp.textContent = v + "%"; };
+const carsP = fetch("cars.json").then(r => r.json()).then(d => { prog.cars = 1; showProg(); return d; });
+const draco = new DRACOLoader(); draco.setDecoderPath("https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/libs/draco/gltf/");
+const loader = new GLTFLoader(); loader.setDRACOLoader(draco);
+const glbP = new Promise((res, rej) => loader.load("track.glb", res, x => { if (x.total) { prog.glb = x.loaded / x.total; showProg(); } }, rej));
+
+Promise.all([carsP, glbP]).then(([d, gltf]) => {
+  DATA = d;
+  d.cars.forEach((c, i) => { c.i = i; carsByName.set(c.n.toLowerCase(), c); });
+  document.getElementById("cnt").textContent = d.count.toLocaleString();
+  document.getElementById("title").textContent = d.track;
+  gltf.scene.traverse(o => { if (o.isMesh && o.material) { o.material.side = THREE.FrontSide; } });
+  scene.add(gltf.scene);
+  // the cars: body + cabin, one instanced mesh each, colored per follower
+  const body = new THREE.BoxGeometry(4.6, .7, 2.2); body.translate(0, .75, 0);
+  const cab = new THREE.BoxGeometry(2.2, .65, 1.9); cab.translate(-.3, 1.4, 0);
+  const mat = new THREE.MeshLambertMaterial();
+  const mb = new THREE.InstancedMesh(body, mat, d.cars.length), mc = new THREE.InstancedMesh(cab, mat, d.cars.length);
+  const M = new THREE.Matrix4(), Q = new THREE.Quaternion(), S = new THREE.Vector3(1, 1, 1), C = new THREE.Color(), up = new THREE.Vector3(0, 1, 0);
+  d.cars.forEach((c, i) => {
+    Q.setFromAxisAngle(up, c.h); M.compose(V(c.x, c.y, .1), Q, S);
+    mb.setMatrixAt(i, M); mc.setMatrixAt(i, M); C.set(c.c); mb.setColorAt(i, C); C.multiplyScalar(.82); mc.setColorAt(i, C);
+  });
+  scene.add(mb, mc);
+  // highlight ring + beam over a found car
+  hl = new THREE.Group();
+  const ring = new THREE.Mesh(new THREE.RingGeometry(3.4, 4.2, 40), new THREE.MeshBasicMaterial({ color: 0xffcc18, side: THREE.DoubleSide }));
+  ring.rotation.x = -Math.PI / 2; ring.position.y = .3; hl.add(ring);
+  const beam = new THREE.Mesh(new THREE.CylinderGeometry(.35, .35, 40, 12), new THREE.MeshBasicMaterial({ color: 0xffcc18, transparent: true, opacity: .55 }));
+  beam.position.y = 22; hl.add(beam); hl.visible = false; scene.add(hl);
+  camera.position.set(-150, 950, 1050); controls.target.set(0, 0, 60); controls.update();
+  document.getElementById("load").hidden = true;
+  const u = new URLSearchParams(location.search).get("u");
+  if (u) { document.getElementById("q").value = u; document.getElementById("f").requestSubmit(); }
+}).catch(() => { lp.textContent = "Couldn't load the track. Refresh to try again."; });
+
+const tagEl = document.getElementById("tag"), tmp = new THREE.Vector3();
+renderer.setAnimationLoop(t => {
+  if (fly) {
+    const u = Math.min(1, (t - fly.s) / fly.ms), k = ease(u);
+    camera.position.lerpVectors(fly.p0, fly.p1, k); controls.target.lerpVectors(fly.t0, fly.t1, k);
+    if (u >= 1) fly = null;
+  }
+  controls.update();
+  if (tagAt) {
+    tmp.copy(tagAt).project(camera);
+    const vis = tmp.z < 1 && Math.abs(tmp.x) < 1.1 && Math.abs(tmp.y) < 1.1;
+    tagEl.hidden = !vis;
+    if (vis) { tagEl.style.left = (tmp.x * .5 + .5) * innerWidth + "px"; tagEl.style.top = (-tmp.y * .5 + .5) * innerHeight + "px"; }
+  }
+  renderer.render(scene, camera);
+});
+controls.addEventListener("start", () => { fly = null; });
+</script>
+</body>
+</html>
