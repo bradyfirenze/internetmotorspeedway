@@ -1,0 +1,9 @@
+{
+  "frames": 36,
+  "cover": 4,
+  "cars": [
+    { "ig": "cadenmayle05", "num": "05", "body": "Dark blue", "roof": "Sky blue", "bodyHex": "#0b2f8a", "roofHex": "#5fb4f5", "since": "2026-11-09" },
+    { "ig": "uh.bokein", "num": "53", "body": "Yellow", "roof": "Black", "bodyHex": "#ffd000", "roofHex": "#111111", "since": "2026-11-09" },
+    { "ig": "m4rvin_s", "num": "26", "body": "Black", "roof": "Red", "bodyHex": "#141416", "roofHex": "#d9201c", "since": "2026-11-08" }
+  ]
+}

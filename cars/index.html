@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Custom Car Room | Internet Motor Speedway</title>
+<meta name="description" content="Every custom car ever made at the Internet Motor Speedway. Tap a garage on pit lane and spin the car 360.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;600;700&display=swap">
+<style>
+:root {
+  --bg: #111318; --card: #1c2028; --line: #2d323d; --fg: #f3f4f6; --muted: #9aa1ad; --yel: #ffcc18;
+  --display: "Anton", Impact, "Arial Narrow", sans-serif;
+  --body: "Archivo", -apple-system, "Helvetica Neue", Arial, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); font-family: var(--body); overflow: hidden; }
+.bar { position: fixed; z-index: 6; top: 0; left: 0; right: 0; padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; background: linear-gradient(var(--bg) 60%, rgba(17,19,24,0)); }
+.bar a, .bar button { color: var(--muted); text-decoration: none; font: 600 14px var(--body); white-space: nowrap; background: none; border: 0; padding: 0; cursor: pointer; }
+.bar h1 { font-family: var(--display); font-weight: 400; text-transform: uppercase; font-size: 24px; line-height: 1; margin: 0; letter-spacing: .01em; }
+.bar h1 span { color: var(--yel); }
+.count { color: var(--muted); font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; min-width: 40px; text-align: right; }
+
+/* ---- Pit lane: the whole building, slide sideways on a phone, tap a bay */
+.pit { position: fixed; inset: 0; display: flex; flex-direction: column; padding-top: calc(52px + env(safe-area-inset-top)); transition: opacity .35s; }
+.pit.gone { opacity: 0; pointer-events: none; }
+.pitscroll { flex: none; height: min(64dvh, calc(100vw / 1.6 * 2.2)); overflow-x: auto; overflow-y: hidden; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.pitscroll::-webkit-scrollbar { display: none; }
+.lane { position: relative; height: 100%; aspect-ratio: 1.6; margin: 0 auto; transform-origin: 0 0; transition: transform .8s cubic-bezier(.5,0,.2,1); }
+.lane img { display: block; width: 100%; height: 100%; object-fit: cover; user-select: none; -webkit-user-drag: none; }
+.spot { position: absolute; display: flex; align-items: flex-start; justify-content: center; background: none; border: 0; padding: 0; cursor: pointer; border-radius: 6px; }
+.spot:focus-visible { outline: 3px solid var(--yel); }
+.spot .tag { position: relative; margin-top: -30px; background: var(--yel); color: #111; font: 700 12px var(--body); padding: 5px 9px; border-radius: 999px; white-space: nowrap;
+  box-shadow: 0 2px 10px rgba(0,0,0,.4); animation: pulse 2.2s ease-in-out infinite; }
+.spot.empty .tag { background: #fff; }
+.spot .tag::after { content: ""; position: absolute; left: 50%; top: 100%; margin-left: -5px; border: 5px solid transparent; border-top-color: var(--yel); }
+.spot.empty .tag::after { border-top-color: #fff; }
+@keyframes pulse { 50% { transform: translateY(-3px); } }
+.pinfo { padding: 14px 16px 0; max-width: 560px; margin: 0 auto; width: 100%; }
+.pinfo p { color: var(--muted); font-size: 15px; line-height: 1.45; margin: 0 0 12px; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chips button { font: 600 14px var(--body); background: var(--card); color: var(--fg); border: 1px solid var(--line); border-radius: 999px; padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 7px; }
+.chips i { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(255,255,255,.25); }
+.chips .you { border-style: dashed; color: var(--yel); }
+.slide { color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; margin-top: 12px; }
+
+/* ---- Garages: one per screen, swipe up for the next */
+.feed { position: fixed; inset: 0; height: 100dvh; overflow-y: auto; scroll-snap-type: y mandatory; overscroll-behavior: contain; background: var(--bg);
+  opacity: 0; pointer-events: none; transition: opacity .35s; }
+.feed.open { opacity: 1; pointer-events: auto; }
+.bay { height: 100dvh; scroll-snap-align: start; scroll-snap-stop: always; display: flex; flex-direction: column; justify-content: center;
+  padding: calc(58px + env(safe-area-inset-top)) 16px calc(22px + env(safe-area-inset-bottom)); max-width: 560px; margin: 0 auto; }
+.stage { position: relative; width: 100%; max-height: 62dvh; aspect-ratio: 1; margin: 0 auto; background: #0b0c10; border: 1px solid var(--line); border-radius: 16px;
+  overflow: hidden; touch-action: pan-y; user-select: none; -webkit-user-select: none; cursor: grab; }
+.stage:active { cursor: grabbing; }
+.stage img { display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none; transition: transform .7s cubic-bezier(.2,.8,.2,1), opacity .5s; }
+.bay:not(.in) .stage img { transform: translateX(38%) scale(.96); opacity: .25; }
+.hint { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); background: rgba(0,0,0,.62); color: #fff; font-size: 13px; font-weight: 600;
+  padding: 6px 12px; border-radius: 999px; white-space: nowrap; transition: opacity .4s; pointer-events: none; }
+.load { position: absolute; left: 0; bottom: 0; height: 3px; background: var(--yel); transition: width .2s, opacity .4s; }
+.who { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; margin: 14px 0 4px; }
+.nm { font-family: var(--display); font-size: 30px; line-height: 1.05; overflow-wrap: anywhere; }
+.nm a { color: var(--fg); text-decoration: none; }
+.no { font-family: var(--display); font-size: 40px; line-height: 1; color: var(--yel); }
+.paint { display: flex; gap: 14px; color: var(--muted); font-size: 14px; flex-wrap: wrap; }
+.paint i { display: inline-block; width: 14px; height: 14px; border-radius: 4px; vertical-align: -2px; margin-right: 6px; border: 1px solid rgba(255,255,255,.25); }
+.next { margin-top: 18px; text-align: center; color: var(--muted); font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.next b { display: block; font-size: 20px; color: var(--yel); animation: bob 1.6s ease-in-out infinite; }
+@keyframes bob { 50% { transform: translateY(-5px); } }
+.empty { aspect-ratio: 1; max-height: 62dvh; width: 100%; margin: 0 auto; border: 2px dashed var(--line); border-radius: 16px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center; padding: 20px; background: var(--card); }
+.empty .q { font-family: var(--display); font-size: 96px; line-height: 1; color: var(--yel); }
+.empty .t { font-family: var(--display); font-size: 30px; text-transform: uppercase; margin-top: 6px; }
+.empty p { color: var(--muted); font-size: 14px; line-height: 1.5; margin: 10px 0 0; max-width: 300px; }
+.buy { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding: 14px 16px; border-radius: 12px; background: var(--yel); color: #111;
+  text-decoration: none; font: 400 20px var(--display); text-transform: uppercase; letter-spacing: .02em; }
+.foot { color: var(--muted); font-size: 13px; margin-top: 14px; line-height: 1.5; text-align: center; }
+.foot a { color: var(--fg); }
+.dots { position: fixed; z-index: 6; right: 6px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 7px; transition: opacity .35s; }
+.dots.gone { opacity: 0; }
+.dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--line); transition: background .3s, transform .3s; }
+.dots i.on { background: var(--yel); transform: scale(1.4); }
+@media (prefers-reduced-motion: reduce) { .lane, .stage img { transition: none; } .bay:not(.in) .stage img { transform: none; opacity: 1; } .next b, .spot .tag { animation: none; } }
+</style>
+</head>
+<body>
+<header class="bar">
+  <a href="../results/" id="backRes">← Results</a>
+  <button type="button" id="backPit" hidden>← Pit lane</button>
+  <h1>Custom Car <span>Room</span></h1>
+  <div class="count" id="count"></div>
+</header>
+
+<section class="pit" id="pit" aria-label="Pit lane">
+  <div class="pitscroll" id="pitscroll">
+    <div class="lane" id="lane"><img src="pitlane.jpg" alt="The pit lane garages at the Internet Motor Speedway" id="laneimg"></div>
+  </div>
+  <div class="pinfo">
+    <p id="pintro">Every custom car gets its own garage on pit lane. Tap a garage to go inside.</p>
+    <div class="chips" id="chips"></div>
+    <div class="slide" id="slide">← slide to see all of pit lane →</div>
+  </div>
+</section>
+
+<div class="dots gone" id="dots" aria-hidden="true"></div>
+<main class="feed" id="feed" aria-label="Custom car garages, swipe up for the next one"></main>
+
+<script>
+const $ = id => document.getElementById(id);
+let DATA, PIT, bays = [], active = -1, last = 0, inside = false;
+const src = (ig, i) => "img/" + ig + "/" + String(i).padStart(2, "0") + ".jpg";
+
+// ---------- Garages (inside view)
+function makeBay(car, i, n) {
+  const b = document.createElement("section"); b.className = "bay"; b.dataset.i = i;
+  b.innerHTML = '<div class="stage" role="img"><img alt=""><div class="hint">← drag to spin →</div><div class="load" style="width:0"></div></div>' +
+    '<div class="who"><div class="nm"><a target="_blank" rel="noopener"></a></div><div class="no"></div></div><div class="paint"></div>' +
+    '<div class="next">' + (i < n - 1 ? "Swipe up for the next car<b>↑</b>" : "Swipe up to get yours<b>↑</b>") + '</div>';
+  const st = b.querySelector(".stage"), img = b.querySelector("img"), a = b.querySelector(".nm a");
+  st.setAttribute("aria-label", "@" + car.ig + " custom car, drag to spin");
+  img.src = src(car.ig, DATA.cover); img.alt = "@" + car.ig + " custom car" + (car.num ? " #" + car.num : "");
+  a.href = "https://instagram.com/" + car.ig; a.textContent = "@" + car.ig;
+  b.querySelector(".no").textContent = car.num ? "#" + car.num : "";
+  for (const [k, hex, nm] of [["Body", car.bodyHex, car.body], ["Roof", car.roofHex, car.roof]]) {
+    const s = document.createElement("span"), d = document.createElement("i"); d.style.background = hex; s.append(d, k + ": " + nm); b.querySelector(".paint").append(s);
+  }
+  const bay = { car, el: b, st, img, frame: DATA.cover, imgs: null, spinning: true, touched: false };
+  let dx = null, df = 0;
+  st.addEventListener("pointerdown", e => { dx = e.clientX; df = bay.frame; bay.spinning = false; bay.touched = true; b.querySelector(".hint").style.opacity = 0; });
+  st.addEventListener("pointermove", e => { if (dx === null) return; show(bay, df + Math.round((e.clientX - dx) / (st.clientWidth / DATA.frames * 1.4))); });
+  for (const ev of ["pointerup", "pointercancel", "pointerleave"]) st.addEventListener(ev, () => { dx = null; });
+  return bay;
+}
+function preload(bay) {
+  if (bay.imgs) return; bay.imgs = []; let done = 0; const bar = bay.el.querySelector(".load");
+  for (let i = 0; i < DATA.frames; i++) {
+    const im = new Image(); im.onload = im.onerror = () => { done++; bar.style.width = (100 * done / DATA.frames) + "%"; if (done === DATA.frames) bar.style.opacity = 0; };
+    im.src = src(bay.car.ig, i); bay.imgs[i] = im;
+  }
+}
+function show(bay, i) {
+  bay.frame = ((i % DATA.frames) + DATA.frames) % DATA.frames;
+  const im = bay.imgs && bay.imgs[bay.frame]; if (im && im.complete && im.naturalWidth) bay.img.src = im.src;
+}
+function setActive(i) {
+  if (!inside || i === active) return; active = i;
+  document.querySelectorAll(".dots i").forEach((d, k) => d.classList.toggle("on", k === i));
+  const n = DATA.cars.length;
+  $("count").textContent = i < n ? (i + 1) + " / " + n : "";
+  if (i < n) {
+    preload(bays[i]); if (bays[i + 1]) preload(bays[i + 1]);
+    if (!bays[i].touched) bays[i].spinning = true;
+    try { history.replaceState(null, "", "#" + bays[i].car.ig); } catch (e) {}
+  }
+}
+function tick(t) { const b = inside && bays[active]; if (b && b.spinning && t - last > 110) { last = t; show(b, b.frame + 1); } requestAnimationFrame(tick); }
+
+// ---------- Pit lane (outside view) and the zoom between them
+function spotFor(i) { const n = DATA.cars.length; return i < n ? PIT.spots.find(s => s.ig === DATA.cars[i].ig) : PIT.spots.find(s => s.kind === "empty"); }
+function goInside(i, instant) {
+  const sp = spotFor(i), sc = $("pitscroll"), lane = $("lane");
+  if (sp) preload(bays[Math.min(i, bays.length - 1)]);
+  const enter = () => {
+    inside = true; active = -1;
+    const fd = $("feed"); fd.classList.add("open"); $("pit").classList.add("gone"); $("dots").classList.remove("gone");
+    $("backPit").hidden = false; $("backRes").hidden = true;
+    fd.scrollTo({ top: i * fd.clientHeight, behavior: "instant" }); setActive(i);
+  };
+  if (!sp || instant || matchMedia("(prefers-reduced-motion: reduce)").matches) return enter();
+  // Center the bay, then zoom the camera into its door
+  const W = lane.clientWidth, H = lane.clientHeight, cx = (sp.x + sp.w / 2) * W, cy = (sp.y + sp.h / 2) * H;
+  const k = Math.min(9, Math.max(2.5, .9 / Math.max(sp.w * W / sc.clientWidth, sp.h)));
+  sc.scrollTo({ left: cx - sc.clientWidth / 2, behavior: "smooth" });
+  setTimeout(() => {
+    const vx = cx - sc.scrollLeft;                       // bay centre in the visible window
+    lane.style.transformOrigin = cx + "px " + cy + "px";
+    lane.style.transform = "translate(" + (sc.clientWidth / 2 - vx) + "px," + (H / 2 - cy) + "px) scale(" + k + ")";
+    setTimeout(enter, 650);
+  }, 320);
+}
+function goOutside() {
+  inside = false; $("feed").classList.remove("open"); $("pit").classList.remove("gone"); $("dots").classList.add("gone");
+  $("backPit").hidden = true; $("backRes").hidden = false; $("count").textContent = "";
+  requestAnimationFrame(() => { $("lane").style.transform = ""; });
+  try { history.replaceState(null, "", location.pathname); } catch (e) {}
+}
+$("backPit").addEventListener("click", goOutside);
+
+async function load() {
+  try {
+    [DATA, PIT] = await Promise.all([fetch("cars.json", { cache: "no-cache" }).then(r => r.json()), fetch("pitlane.json", { cache: "no-cache" }).then(r => r.json())]);
+  } catch (e) { $("pintro").textContent = "Couldn't load the garages. Refresh to try again."; return; }
+  const n = DATA.cars.length, feed = $("feed");
+  DATA.cars.forEach((car, i) => { const bay = makeBay(car, i, n); bays.push(bay); feed.append(bay.el); });
+  const end = document.createElement("section"); end.className = "bay"; end.dataset.i = n;
+  end.innerHTML = '<div class="empty"><div class="q">?</div><div class="t">Your car here</div><p>Pick your body color, roof color and number. Your car races in every race after that and gets its own garage on pit lane.</p></div>' +
+    '<a class="buy" href="https://ko-fi.com/internetmotorspeedway" target="_blank" rel="noopener">Get your custom car $1 <span aria-hidden="true">→</span></a>' +
+    '<p class="foot">Custom cars are looks only. They never change who wins.<br>Follow <a href="https://instagram.com/internetmotorspeedway">@internetmotorspeedway</a></p>';
+  feed.append(end);
+  for (let k = 0; k <= n; k++) $("dots").append(document.createElement("i"));
+  // Tap spots on the pit lane image, and the same garages as chips under it
+  const lane = $("lane");
+  const open = i => () => goInside(i);
+  PIT.spots.forEach(sp => {
+    if (sp.kind === "closed") return;
+    const i = sp.kind === "empty" ? n : DATA.cars.findIndex(c => c.ig === sp.ig); if (i < 0) return;
+    const b = document.createElement("button"); b.type = "button"; b.className = "spot" + (sp.kind === "empty" ? " empty" : "");
+    Object.assign(b.style, { left: sp.x * 100 + "%", top: sp.y * 100 + "%", width: sp.w * 100 + "%", height: sp.h * 100 + "%" });
+    b.innerHTML = '<span class="tag"></span>'; b.querySelector(".tag").textContent = sp.kind === "empty" ? "Your car here" : "@" + sp.ig;
+    b.setAttribute("aria-label", sp.kind === "empty" ? "Empty garage, get your own custom car" : "Go into @" + sp.ig + "'s garage");
+    b.addEventListener("click", open(i)); lane.append(b);
+  });
+  DATA.cars.forEach((car, i) => {
+    const c = document.createElement("button"); c.type = "button"; c.innerHTML = "<i></i><span></span>";
+    c.querySelector("i").style.background = car.bodyHex; c.querySelector("span").textContent = "@" + car.ig + (car.num ? " #" + car.num : "");
+    c.addEventListener("click", open(i)); $("chips").append(c);
+  });
+  const y = document.createElement("button"); y.type = "button"; y.className = "you"; y.textContent = "+ Your car here"; y.addEventListener("click", open(n)); $("chips").append(y);
+  $("pintro").textContent = n + " custom car" + (n === 1 ? "" : "s") + " on pit lane so far. Tap a garage to go inside and spin the car 360.";
+  // Phone: start the pit lane slid to the first garage; wide screens see it all and need no hint
+  const sc = $("pitscroll");
+  const fit = () => { $("slide").hidden = lane.clientWidth <= sc.clientWidth + 2; };
+  $("laneimg").addEventListener("load", fit); fit(); addEventListener("resize", fit);
+  const first = PIT.spots[0]; if (first) sc.scrollLeft = Math.max(0, first.x * lane.clientWidth - 12);
+  const io = new IntersectionObserver(es => es.forEach(e => { e.target.classList.toggle("in", e.isIntersecting); if (e.isIntersecting) setActive(+e.target.dataset.i); }), { root: feed, threshold: .6 });
+  feed.querySelectorAll(".bay").forEach(el => io.observe(el));
+  const want = decodeURIComponent(location.hash.slice(1)).toLowerCase().replace(/^@/, "");
+  const wi = DATA.cars.findIndex(c => c.ig === want); if (wi >= 0) goInside(wi, true);
+  requestAnimationFrame(tick);
+}
+load();
+</script>
+</body>
+</html>
