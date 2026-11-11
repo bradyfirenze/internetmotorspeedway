@@ -2,8 +2,15 @@
   "frames": 36,
   "cover": 4,
   "cars": [
-    { "ig": "cadenmayle05", "num": "05", "body": "Dark blue", "roof": "Sky blue", "bodyHex": "#0b2f8a", "roofHex": "#5fb4f5", "since": "2026-11-09" },
-    { "ig": "uh.bokein", "num": "53", "body": "Yellow", "roof": "Black", "bodyHex": "#ffd000", "roofHex": "#111111", "since": "2026-11-09" },
-    { "ig": "m4rvin_s", "num": "26", "body": "Black", "roof": "Red", "bodyHex": "#141416", "roofHex": "#d9201c", "since": "2026-11-08" }
+    {"ig": "quinns_garage_gaming", "num": "77", "body": "Black", "roof": "Red", "bodyHex": "#141416", "roofHex": "#d9201c", "since": "2026-11-10"},
+    {"ig": "thehighdinosaurlabs", "num": "4", "body": "Papaya orange", "roof": "Black", "bodyHex": "#ff6a00", "roofHex": "#111111", "since": "2026-11-10"},
+    {"ig": "0.knucklehead.0", "num": "45", "body": "Silver", "roof": "Kona blue", "bodyHex": "#a4a8ae", "roofHex": "#1d4690", "since": "2026-11-10"},
+    {"ig": "baldosimone", "num": "2", "body": "Red", "roof": "Black", "bodyHex": "#d9201c", "roofHex": "#111111", "since": "2026-11-10"},
+    {"ig": "trellfrvr", "num": "2", "body": "Black", "roof": "Purple", "bodyHex": "#141416", "roofHex": "#7a2ee0", "since": "2026-11-10"},
+    {"ig": "tzo.designs", "num": "15", "body": "Light blue", "roof": "Navy blue", "bodyHex": "#7fbef5", "roofHex": "#0d1b4a", "since": "2026-11-10"},
+    {"ig": "realcadethorn", "num": "3", "body": "Black", "roof": "Black", "bodyHex": "#141416", "roofHex": "#141416", "since": "2026-11-10"},
+    {"ig": "cadenmayle05", "num": "05", "body": "Dark blue", "roof": "Sky blue", "bodyHex": "#0b2f8a", "roofHex": "#5fb4f5", "since": "2026-11-09"},
+    {"ig": "uh.bokein", "num": "53", "body": "Yellow", "roof": "Black", "bodyHex": "#ffd000", "roofHex": "#111111", "since": "2026-11-09"},
+    {"ig": "m4rvin_s", "num": "26", "body": "Black", "roof": "Red", "bodyHex": "#141416", "roofHex": "#d9201c", "since": "2026-11-08"}
   ]
 }

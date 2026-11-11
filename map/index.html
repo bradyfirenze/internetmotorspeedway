@@ -247,11 +247,11 @@ const CAR_PARTS = [[[0, 0, .75], [4.6, 2.2, .7], "b"], [[-.3, 0, 1.4], [2.2, 1.9
   [[-2.0, 0, 1.45], [.5, 2.2, .12], "k"], [[2.31, .72, .85], [.04, .5, .25], "l"], [[2.31, -.72, .85], [.04, .5, .25], "l"], [[2.31, 0, .62], [.04, 1.4, .2], "k"],
   [[-2.33, .72, .85], [.04, .5, .2], "t"], [[-2.33, -.72, .85], [.04, .5, .2], "t"]]
   .concat([1.5, -1.5].flatMap(f => [1.1, -1.1].map(sd => [[f, sd, .45], [.9, .4, .9], "k"])));
-function textTex(lines, w, h, bg, fg, font) {
+function textTex(lines, w, h, bg, fg, font, fit = .92) {
   const cv = document.createElement("canvas"); cv.width = w; cv.height = h; const x = cv.getContext("2d");
   if (bg) { x.fillStyle = bg; x.fillRect(0, 0, w, h); }
   x.fillStyle = fg; x.textAlign = "center"; x.textBaseline = "middle"; x.font = font;
-  let sz = +font.match(/(\d+)px/)[1]; while (x.measureText(lines).width > w * .92 && sz > 10) { sz -= 4; x.font = font.replace(/\d+px/, sz + "px"); }
+  let sz = +font.match(/(\d+)px/)[1]; while (x.measureText(lines).width > w * fit && sz > 10) { sz -= 4; x.font = font.replace(/\d+px/, sz + "px"); }
   x.fillText(lines, w / 2, h / 2 - sz * .06);
   const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
 }
@@ -305,7 +305,7 @@ function addGarages() {
       B(W - .3, .35, .05, new THREE.MeshLambertMaterial({ color: c.roofHex }), x, GY + .33, 2.95);
       if (c.num) { const nb = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 2.2), new THREE.MeshBasicMaterial({ map: textTex(c.num, 256, 256, null, "#1a1c22", "400 200px Anton, Impact, sans-serif"), transparent: true }));
         nb.position.copy(V(x, GY + .34, 4.15)); nb.rotation.y = Math.PI; scene.add(nb); }
-      const sg = new THREE.Mesh(new THREE.PlaneGeometry(W - .8, 1.1), new THREE.MeshBasicMaterial({ map: textTex("@" + c.ig.toUpperCase(), 512, 64, "#1a1c22", "#ffcc18", "400 44px Anton, Impact, sans-serif") }));
+      const sg = new THREE.Mesh(new THREE.PlaneGeometry(W - .8, 1.1), new THREE.MeshBasicMaterial({ map: textTex("@" + c.ig.toUpperCase(), 512, 64, "#1a1c22", "#ffcc18", "400 44px Anton, Impact, sans-serif", .66) }));
       sg.position.copy(V(x, GY + D + .45, H - .4)); sg.rotation.y = Math.PI; scene.add(sg);
       const g = raceCar(c);
       g.position.copy(V(x, GY + 4.6, .12)); g.rotation.y = Math.PI / 2 - .35;      // nose out toward the infield, angled a bit like a showroom
