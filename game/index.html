@@ -568,41 +568,56 @@ document.addEventListener("visibilitychange", () => { if (document.hidden && mod
 document.addEventListener("contextmenu", e => e.preventDefault());
 
 // ---------- engine sound (one soft tone that follows speed)
-let AC = null, oscs = null, gain = null, roar = null, roarF = null, tone = null, muted = store.get("mute") === "1", revs = .3;
+let AC = null, eng = null, gain = null, muted = store.get("mute") === "1", revs = .3;
 const paintMute = () => { $("mute").style.opacity = muted ? .45 : 1; $("mute").setAttribute("aria-pressed", String(!muted)); };
+// Engine built to match Brady's reference recordings (in-car racing car, F1 pass): a V6 style stack of many low harmonics of the
+// engine cycle (strongest on every 3rd, the firing rate), random phases so it rumbles instead of buzzing, energy kept under ~1 kHz,
+// cycle to cycle roughness, and exhaust noise underneath.
+function buildEngine(ctx) {
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const wave = () => { const n = 64, re = new Float32Array(n), im = new Float32Array(n);
+    for (let k = 1; k < n; k++) { const fire = k % 3 === 0, amp = (fire ? 1 : .42 + .25 * rnd()) / Math.pow(Math.max(k, 3) / 3, fire ? .75 : 1.0), ph = rnd() * Math.PI * 2; re[k] = amp * Math.cos(ph); im[k] = amp * Math.sin(ph); }
+    return ctx.createPeriodicWave(re, im); };
+  const mix = ctx.createGain(); mix.gain.value = .5;
+  const oscs = [1, 1.006, .5].map((m, i) => { const o = ctx.createOscillator(); o.setPeriodicWave(wave()); const g = ctx.createGain(); g.gain.value = i === 2 ? .35 : .5; o.connect(g).connect(mix); o.start(); return { o, m }; });
+  const shape = ctx.createWaveShaper(), curve = new Float32Array(1024); for (let i = 0; i < 1024; i++) { const x = i / 511.5 - 1; curve[i] = Math.tanh(x * 1.8); } shape.curve = curve;
+  const p1 = ctx.createBiquadFilter(); p1.type = "peaking"; p1.frequency.value = 140; p1.Q.value = .9; p1.gain.value = 5;
+  const p2 = ctx.createBiquadFilter(); p2.type = "peaking"; p2.frequency.value = 290; p2.Q.value = .9; p2.gain.value = 4;
+  const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.Q.value = .5; const lp2 = ctx.createBiquadFilter(); lp2.type = "lowpass"; lp2.Q.value = .5;
+  const hp = ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 38;
+  const am = ctx.createGain(); am.gain.value = 1; const out = ctx.createGain(); out.gain.value = 0;
+  mix.connect(shape).connect(p1).connect(p2).connect(lp).connect(lp2).connect(hp).connect(am).connect(out);
+  const loop = (fill, len) => { const b = ctx.createBuffer(1, Math.floor(ctx.sampleRate * len), ctx.sampleRate); fill(b.getChannelData(0)); const src = ctx.createBufferSource(); src.buffer = b; src.loop = true; src.start(); return src; };
+  // exhaust: soft noise in the same low band
+  const nz = loop(d => { let l = 0; for (let i = 0; i < d.length; i++) { l = (l + .05 * (rnd() * 2 - 1)) / 1.05; d[i] = l * 7; } }, 2.3);
+  const nf = ctx.createBiquadFilter(); nf.type = "bandpass"; nf.Q.value = .6; const ng = ctx.createGain(); ng.gain.value = 0; nz.connect(nf).connect(ng).connect(am);
+  // roughness: a slow random wobble on loudness and pitch, like uneven firing
+  const wob = loop(d => { let l = 0, m = 0; const k = 2 * Math.PI * 22 / ctx.sampleRate; for (let i = 0; i < d.length; i++) { l += k * ((rnd() * 2 - 1) - l); d[i] = l; m = Math.max(m, Math.abs(l)); } for (let i = 0; i < d.length; i++) d[i] /= m; }, 3.1);
+  const wa = ctx.createGain(); wa.gain.value = .3; wob.connect(wa).connect(am.gain);
+  const wd = ctx.createGain(); wd.gain.value = 22; wob.connect(wd); for (const x of oscs) wd.connect(x.o.detune);
+  return { out, set(r, gas, t, tc) {
+    const fc = 26 + r * 50;                                   // engine cycle, 26 to 76 Hz. Firing tone = 3x that, 78 to 228 Hz.
+    for (const x of oscs) x.o.frequency.setTargetAtTime(fc * x.m, t, tc);
+    const cut = gas ? 480 + r * 620 : 300 + r * 260; lp.frequency.setTargetAtTime(cut, t, tc * 2); lp2.frequency.setTargetAtTime(cut * 1.3, t, tc * 2);
+    nf.frequency.setTargetAtTime(170 + r * 330, t, tc * 2); ng.gain.setTargetAtTime(gas ? .18 + .3 * r : .1, t, tc * 2);
+    wa.gain.setTargetAtTime(gas ? .28 : .42, t, tc * 2);       // off the gas it burbles more
+  } };
+}
 function audioOn() {
   if (muted) return;
   try {
-    if (!AC) {
-      AC = new (window.AudioContext || window.webkitAudioContext)();
-      // low stacked tones pushed hard into distortion = growl. Phone speakers can't play real bass, the grit carries the depth.
-      const shape = AC.createWaveShaper(), curve = new Float32Array(1024); for (let i = 0; i < 1024; i++) { const x = i / 511.5 - 1; curve[i] = Math.tanh(x * 6); } shape.curve = curve; shape.oversample = "2x";
-      const hp = AC.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 45;
-      const body = AC.createBiquadFilter(); body.type = "peaking"; body.frequency.value = 260; body.Q.value = .8; body.gain.value = 7;
-      tone = AC.createBiquadFilter(); tone.type = "lowpass"; tone.frequency.value = 1400; tone.Q.value = .6;
-      gain = AC.createGain(); gain.gain.value = 0; shape.connect(hp).connect(body).connect(tone).connect(gain).connect(AC.destination);
-      oscs = [["sawtooth", 1, .5], ["sawtooth", 1.012, .4], ["sawtooth", .5, .55], ["square", .503, .3], ["sawtooth", 1.5, .16]].map(([type, mult, vol]) => { const o = AC.createOscillator(), g = AC.createGain(); o.type = type; g.gain.value = vol; o.connect(g).connect(shape); o.start(); return { o, mult }; });
-      // exhaust roar: looped noise through a filter that follows the revs
-      const buf = AC.createBuffer(1, AC.sampleRate * 2, AC.sampleRate), d = buf.getChannelData(0); let last = 0; for (let i = 0; i < d.length; i++) { last = (last + .04 * (Math.random() * 2 - 1)) / 1.04; d[i] = last * 6; }
-      const src = AC.createBufferSource(); src.buffer = buf; src.loop = true;
-      roarF = AC.createBiquadFilter(); roarF.type = "bandpass"; roarF.frequency.value = 300; roarF.Q.value = .7;
-      roar = AC.createGain(); roar.gain.value = 0; src.connect(roarF).connect(roar).connect(gain); src.start();
-    }
-    AC.resume(); gain.gain.setTargetAtTime(.09, AC.currentTime, .2);
+    if (!AC) { AC = new (window.AudioContext || window.webkitAudioContext)(); eng = buildEngine(AC); gain = eng.out; gain.connect(AC.destination); eng.set(.2, 0, AC.currentTime, .01); }
+    AC.resume(); gain.gain.setTargetAtTime(.5, AC.currentTime, .2);
   } catch (e) {}
 }
-// revs rise with speed in five long gears with only a small drop at each shift, so it roars instead of going up and down
+// six gears: revs climb through each gear and drop on the shift
 function engineNote(dt) {
-  if (!oscs || muted) return;
-  const f = clamp(car.v / (ST.vmax * 1.02), 0, .999) * 5, gear = Math.floor(f), t = f - gear;
-  const want = (gear === 0 ? .25 + .75 * t : .8 + .2 * t) * (.55 + .45 * (gear + t) / 5 + .0) * (gasOn ? 1 : .88);
-  revs += (want - revs) * Math.min(1, dt * 6);
-  const hz = 52 + revs * 118, now = AC.currentTime;       // about 55 to 170 Hz
-  for (const x of oscs) x.o.frequency.setTargetAtTime(hz * x.mult, now, .04);
-  tone.frequency.setTargetAtTime((gasOn ? 900 : 520) + revs * 1500, now, .08);
-  roarF.frequency.setTargetAtTime(180 + revs * 650, now, .08);
-  roar.gain.setTargetAtTime(gasOn ? .5 + revs * .5 : .2, now, .08);
-  gain.gain.setTargetAtTime(gasOn ? .09 : .05, now, .08);
+  if (!eng || muted) return;
+  const f = clamp(car.v / (ST.vmax * 1.02), 0, .999) * 6, gear = Math.floor(f), t = f - gear;
+  const want = (gear === 0 ? .12 + .88 * t : .5 + .5 * t) * (.6 + .4 * (gear + t) / 6) * (gasOn ? 1 : .9);
+  revs += (want - revs) * Math.min(1, dt * (want < revs ? 9 : 5));
+  eng.set(revs, gasOn, AC.currentTime, .04);
+  gain.gain.setTargetAtTime(gasOn ? .5 : .3, AC.currentTime, .08);
 }
 function audioOff() { if (gain) gain.gain.setTargetAtTime(0, AC.currentTime, .08); }
 $("mute").onclick = () => { muted = !muted; store.set("mute", muted ? "1" : "0"); paintMute(); if (muted) audioOff(); else if (mode !== "menu") audioOn(); };
@@ -610,7 +625,13 @@ paintMute();
 
 const DBG = /[?&]debug/.test(location.search) ? (window.__ims = { car, proj, bots, auto: null,
   sim(sec) { mode = "drive"; for (let i = 0; i < sec / STEP && !finished; i++) { const r = DBG.auto(car, proj), u = clamp(typeof r === "number" ? r : r.s, -1, 1), tg = Math.sign(u) * Math.pow(Math.abs(u), 1.4); gasOn = typeof r === "number" ? 1 : r.g; brkOn = typeof r === "number" ? 0 : r.b; steer += (tg - steer) * Math.min(1, STEP * 14); step(STEP); if (kind === "race") botStep(STEP); } },
-  get me() { return me; }, get audio() { return { made: !!oscs, state: AC && AC.state, n: oscs && oscs.length, hz: oscs && Math.round(oscs[0].o.frequency.value) }; }, get lap() { return { lapT, laps, lastLap, runBest, mode, kind, finished, place, raceT, prog }; } }) : null;
+  get me() { return me; }, get audio() { return { made: !!eng, state: AC && AC.state }; },
+  async render(r, gas) { const sr = 22050, oc = new OfflineAudioContext(1, sr * 3, sr), e = buildEngine(oc); e.out.gain.value = .5; e.out.connect(oc.destination); e.set(r, gas, 0, .001); const d = (await oc.startRendering()).getChannelData(0).slice(sr, sr + 8192);
+    const N = 8192, mag = []; let peak = 0; for (let i = 0; i < N; i++) peak = Math.max(peak, Math.abs(d[i]));
+    for (let k = 0; k < 1500; k++) { let re = 0, im = 0; const w = 2 * Math.PI * k / N; for (let i = 0; i < N; i++) { const h = .5 - .5 * Math.cos(2 * Math.PI * i / N); re += d[i] * h * Math.cos(w * i); im -= d[i] * h * Math.sin(w * i); } mag.push(re * re + im * im); }
+    const hz = k => k * sr / N, tot = mag.reduce((a, b) => a + b, 0), bands = [[30, 60], [60, 120], [120, 250], [250, 500], [500, 1000], [1000, 2000], [2000, 4000]].map(([a, b]) => a + "-" + b + ":" + Math.round(100 * mag.filter((m, k) => hz(k) >= a && hz(k) < b).reduce((x, y) => x + y, 0) / tot));
+    const mx = Math.max(...mag), pk = []; for (let k = 2; k < 1498; k++) if (mag[k] > mx * .06 && mag[k] > mag[k - 1] && mag[k] >= mag[k + 1]) pk.push(Math.round(hz(k)));
+    return { peak: +peak.toFixed(2), bands, peaks: pk.slice(0, 12) }; }, get lap() { return { lapT, laps, lastLap, runBest, mode, kind, finished, place, raceT, prog }; } }) : null;
 
 // ---------- frame loop
 let lastNow = 0, slow = 0, menuA = 0;
