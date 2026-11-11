@@ -165,14 +165,14 @@ input { flex: 1; min-width: 0; font: 700 18px var(--body); color: var(--fg); bac
 <div id="hud" hidden>
   <div class="hrow">
     <div style="display:flex;gap:8px;align-items:flex-start">
-      <div id="posBig" hidden>P8<small>/8</small></div>
+      <div id="posBig" hidden>P20<small>/20</small></div>
       <div class="pill"><span class="k">Best</span><b id="hBest">--</b></div>
       <div class="pill"><span class="k">Last</span><b id="hLast">--</b></div>
     </div>
     <div style="display:flex;gap:6px"><button class="alt hbtn" id="mute" aria-label="Sound on or off">♪</button><button class="alt hbtn" id="pit">Pit</button></div>
   </div>
   <div id="mid"><div id="lapnow">0.00</div><div id="lapsub">Warm up lap</div></div>
-  <div id="tip">Left thumb: slide to steer. Right thumb: gas and brake. Slow down for the corners.</div>
+  <div id="tip">Left thumb: slide to steer. Right thumb: gas and brake. Brake before the corners or you hit the wall.</div>
   <div id="bot">
     <div>
       <div id="spd"><span id="spdN">0</span><small>MPH</small></div>
@@ -266,10 +266,10 @@ const IG = "https://instagram.com/internetmotorspeedway";
 const HX = 500, HY = 100, R = 250, W = 100, ARC = Math.PI * R / 2, LEN = 4 * HX + 4 * HY + 4 * ARC, S0 = HX;   // finish line at x = 0
 const LIM = W / 2 - 2.2;        // how far from the centerline a car can get before the wall
 const STEP = 1 / 120;           // fixed physics step, so every phone gets the same lap for the same driving
-const RACE_LAPS = 3, NB = 7;    // race length and number of bot cars
+const RACE_LAPS = 3, NB = 19;    // race length and number of bot cars
 const UPG = [
   { id: "e", name: "Engine", what: "Higher top speed", vals: [130, 135, 140, 145] },
-  { id: "t", name: "Tires", what: "More grip in the corners", vals: [34, 35, 36, 37] },
+  { id: "t", name: "Tires", what: "More grip in the corners", vals: [22, 23, 24, 25] },
   { id: "a", name: "Turbo", what: "Faster off the corners", vals: [22, 26, 30, 34] } ];
 const GOLD = "#ffa808", PAL = ["#f3932b", "#f987c2", "#41d187", "#4187ec", "#41d8e6", "#f3f3f3", "#ec4141", "#ca59df"];
 
@@ -413,16 +413,16 @@ function spot(s, d) {
 }
 
 // ---------- driving
-const car = { x: 0, y: 0, h: 0, v: 0, skid: 0, slip: 0, d: 0 };
+const car = { x: 0, y: 0, h: 0, v: 0, skid: 0, slip: 0, d: 0, wall: 0 };
 let mode = "menu";                // menu | lights | drive
 let kind = "practice";            // practice (alone, with your ghost) | race (against the bots)
 let steer = 0, steerIn = 0, keyL = 0, keyR = 0, keyG = 0, keyB = 0, touchId = null, touchX0 = 0, gasOn = 0, brkOn = 0;
 let lapT = -1, lapDist = 0, lastS = 0, prog = 0, runBest = 0, lastLap = 0, laps = 0, rec = [], recT = 0, ghost = null, raceT = 0, acc = 0, hitT = 0, camH = 0, tipT = 0, place = 0, finished = false;
-function gridSlot(i) { const row = Math.floor(i / 2), col = i % 2; return { s: -10 - row * 12 - col * 4, d: col ? 7 : -7 }; }
+function gridSlot(i) { const row = Math.floor(i / 3), col = i % 3; return { s: -10 - row * 11 - col * 3, d: (col - 1) * 9 }; }
 function resetCar() {
   if (kind === "race") { const g = gridSlot(NB), q = spot(S0 + g.s, g.d); car.x = q.x; car.y = q.y; prog = g.s; }
   else { car.x = -330; car.y = -(HY + R); prog = -330; }
-  car.h = 0; car.v = 0; car.skid = 0; car.slip = 0; camH = 0; const p = proj(car.x, car.y); lastS = p.s; car.d = p.d; lapT = -1; lapDist = 0; rec = []; steer = 0; steerIn = 0; placeCar();
+  car.h = 0; car.v = 0; car.wall = 0; car.skid = 0; car.slip = 0; camH = 0; const p = proj(car.x, car.y); lastS = p.s; car.d = p.d; lapT = -1; lapDist = 0; rec = []; steer = 0; steerIn = 0; placeCar();
 }
 function placeCar() { if (!myCar) return; myCar.position.copy(V(car.x, car.y, .1)); myCar.rotation.y = car.h + car.slip; }
 function stats() { return { vmax: UPG[0].vals[me.up.e], grip: UPG[1].vals[me.up.t], accel: UPG[2].vals[me.up.a] }; }
@@ -440,11 +440,12 @@ function step(dt) {
   car.v = Math.max(0, v + (push - drag) * dt);
   car.x += Math.cos(car.h) * car.v * dt; car.y += Math.sin(car.h) * car.v * dt;
   let p = proj(car.x, car.y);
+  car.wall = Math.max(0, car.wall - dt);
   if (Math.abs(p.d) > LIM) {      // wall: push back on track, lose speed by how square the hit was, point the car along the wall
     const over = p.d - Math.sign(p.d) * LIM; car.x -= Math.sin(p.th) * over; car.y += Math.cos(p.th) * over;
     const rel = wrap(car.h - p.th), impact = Math.abs(Math.sin(rel));
-    if (impact > .02) { car.v *= 1 - Math.min(.75, impact * 1.6); car.h = p.th + rel * .25; if (impact > .06) hitT = .35; }
-    car.v *= 1 - 1.2 * dt;
+    if (!car.wall && car.v > 20) { car.v *= 1 - Math.min(.85, .35 + impact * 2.2); hitT = .45; }      // a crash costs a third of your speed or more
+    car.h = p.th + rel * .25; if (car.v > 22) car.v -= 40 * dt; car.wall = .3;                          // and the wall keeps dragging while you lean on it
     p = proj(car.x, car.y);
   }
   if (kind === "race") for (const b of bots) {             // bumping the bots
@@ -483,16 +484,18 @@ function flash(big, small, good) { const f = $("flash"); f.innerHTML = esc(big) 
 
 // ---------- bot cars: each one keeps a lane, slows for the corners and moves over to pass
 const bots = [];
+const BOT = { vmax: [133, 125], grip: [31, 24], acc: [25, 20] };     // quickest bot to slowest. The bots hold a lane, so they get a bit more grip than you to make up for it.
 function makeBots() {
   if (bots.length) return;
   const cols = PAL.filter(c => c.toLowerCase() !== me.body.toLowerCase());
-  const lanes = [4, -16, 22, -30, 12, -8, 32];
   for (let i = 0; i < NB; i++) {      // i = 0 is the quickest and starts at the front
-    const b = { i, mesh: raceCar({ body: cols[i % cols.length] }), vmax: 131 - i * 1.3, grip: 33.5 - i * 1.15, acc: 23 - i * .5, base: lanes[i], s: 0, d: 0, dOff: 0, v: 0, fin: null, wait: 0 };
+    const t = i / (NB - 1), c = cols[i % cols.length], roof = i % 3 === 1 ? "#16171b" : i % 3 === 2 ? "#f3f3f3" : null;
+    const b = { i, mesh: raceCar({ body: c, roof: roof === c ? null : roof }), vmax: BOT.vmax[0] + (BOT.vmax[1] - BOT.vmax[0]) * t, grip: BOT.grip[0] + (BOT.grip[1] - BOT.grip[0]) * t, acc: BOT.acc[0] + (BOT.acc[1] - BOT.acc[0]) * t,
+      base: -40 + ((i * 7) % NB) * (80 / (NB - 1)), s: 0, d: 0, dOff: 0, v: 0, fin: null, wait: 0 };
     scene.add(b.mesh); bots.push(b);
   }
 }
-function resetBots() { for (const b of bots) { const g = gridSlot(b.i); b.s = g.s; b.d = g.d; b.dOff = 0; b.v = 0; b.fin = null; b.wait = .12 + b.i * .05; b.mesh.visible = true; placeBot(b, 0); } }
+function resetBots() { for (const b of bots) { const g = gridSlot(b.i); b.s = g.s; b.d = g.d; b.dOff = 0; b.v = 0; b.fin = null; b.wait = .1 + (b.i % 5) * .04; b.mesh.visible = true; placeBot(b, 0); } }
 function placeBot(b, drift) { const q = spot(S0 + b.s, b.d); b.mesh.position.copy(V(q.x, q.y, .1)); b.mesh.rotation.y = q.th - drift; }
 function botLimit(b, s) { const q = spot(S0 + s, b.d); return q.arc ? Math.sqrt(b.grip * (R + b.d)) : b.vmax; }
 function botStep(dt) {
@@ -562,22 +565,40 @@ document.addEventListener("visibilitychange", () => { if (document.hidden && mod
 document.addEventListener("contextmenu", e => e.preventDefault());
 
 // ---------- engine sound (one soft tone that follows speed)
-let AC = null, osc = null, gain = null, muted = store.get("mute") === "1";
+let AC = null, oscs = null, gain = null, muted = store.get("mute") === "1", revs = .3;
 const paintMute = () => { $("mute").style.opacity = muted ? .45 : 1; $("mute").setAttribute("aria-pressed", String(!muted)); };
 function audioOn() {
   if (muted) return;
   try {
-    if (!AC) { AC = new (window.AudioContext || window.webkitAudioContext)(); osc = AC.createOscillator(); osc.type = "sawtooth"; const lp = AC.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 520; gain = AC.createGain(); gain.gain.value = 0; osc.connect(lp).connect(gain).connect(AC.destination); osc.start(); }
-    AC.resume(); gain.gain.setTargetAtTime(.05, AC.currentTime, .2);
+    if (!AC) {
+      AC = new (window.AudioContext || window.webkitAudioContext)();
+      const shape = AC.createWaveShaper(), curve = new Float32Array(512); for (let i = 0; i < 512; i++) { const x = i / 255.5 - 1; curve[i] = Math.tanh(x * 3.2); } shape.curve = curve;
+      const hp = AC.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 170;
+      const pk = AC.createBiquadFilter(); pk.type = "peaking"; pk.frequency.value = 1500; pk.Q.value = 1.1; pk.gain.value = 9;      // the nasal scream
+      const lp = AC.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 5200;
+      gain = AC.createGain(); gain.gain.value = 0; shape.connect(hp).connect(pk).connect(lp).connect(gain).connect(AC.destination);
+      oscs = [["sawtooth", 1, .5], ["sawtooth", 1.007, .4], ["square", 2, .22], ["sawtooth", .5, .3], ["sawtooth", 3, .1]].map(([type, mult, vol]) => { const o = AC.createOscillator(), g = AC.createGain(); o.type = type; g.gain.value = vol; o.connect(g).connect(shape); o.start(); return { o, mult }; });
+    }
+    AC.resume(); gain.gain.setTargetAtTime(.07, AC.currentTime, .2);
   } catch (e) {}
+}
+// six gears: revs climb, drop at each shift, and scream near the top
+function engineNote(dt) {
+  if (!oscs || muted) return;
+  const f = clamp(car.v / (ST.vmax * 1.02), 0, .999) * 6, gear = Math.floor(f), t = f - gear;
+  const want = (gear === 0 ? .32 + .68 * t : .62 + .38 * t) * (gasOn ? 1 : .9);
+  revs += (want - revs) * Math.min(1, dt * 14);
+  const hz = 95 + revs * 430;       // about 525 Hz flat out, like a V6 near 10,500 rpm
+  for (const x of oscs) x.o.frequency.setTargetAtTime(hz * x.mult, AC.currentTime, .02);
+  gain.gain.setTargetAtTime(gasOn ? .07 : .035, AC.currentTime, .06);
 }
 function audioOff() { if (gain) gain.gain.setTargetAtTime(0, AC.currentTime, .08); }
 $("mute").onclick = () => { muted = !muted; store.set("mute", muted ? "1" : "0"); paintMute(); if (muted) audioOff(); else if (mode !== "menu") audioOn(); };
 paintMute();
 
 const DBG = /[?&]debug/.test(location.search) ? (window.__ims = { car, proj, bots, auto: null,
-  sim(sec) { mode = "drive"; for (let i = 0; i < sec / STEP && !finished; i++) { const u = clamp(DBG.auto(car, proj), -1, 1), tg = Math.sign(u) * Math.pow(Math.abs(u), 1.4); gasOn = 1; steer += (tg - steer) * Math.min(1, STEP * 14); step(STEP); if (kind === "race") botStep(STEP); } },
-  get me() { return me; }, get lap() { return { lapT, laps, lastLap, runBest, mode, kind, finished, place, raceT, prog }; } }) : null;
+  sim(sec) { mode = "drive"; for (let i = 0; i < sec / STEP && !finished; i++) { const r = DBG.auto(car, proj), u = clamp(typeof r === "number" ? r : r.s, -1, 1), tg = Math.sign(u) * Math.pow(Math.abs(u), 1.4); gasOn = typeof r === "number" ? 1 : r.g; brkOn = typeof r === "number" ? 0 : r.b; steer += (tg - steer) * Math.min(1, STEP * 14); step(STEP); if (kind === "race") botStep(STEP); } },
+  get me() { return me; }, get audio() { return { made: !!oscs, state: AC && AC.state, n: oscs && oscs.length, hz: oscs && Math.round(oscs[0].o.frequency.value) }; }, get lap() { return { lapT, laps, lastLap, runBest, mode, kind, finished, place, raceT, prog }; } }) : null;
 
 // ---------- frame loop
 let lastNow = 0, slow = 0, menuA = 0;
@@ -598,7 +619,7 @@ function frame(now) {
     $("knob").style.left = (50 + steerIn * 46) + "%";
     tipT += dt; if (tipT > 7) $("tip").style.opacity = 0;
     if (hitT > 0) { hitT -= dt; $("hit").style.opacity = hitT > 0 ? 1 : 0; if (hitT > .3 && navigator.vibrate) navigator.vibrate(30); }
-    if (osc && !muted) osc.frequency.setTargetAtTime(55 + car.v * 1.5 + car.skid * 25 - (gasOn ? 0 : 14), AC.currentTime, .05);
+    engineNote(dt);
     // practice: your best lap drives along as a ghost
     if (ghost && lapT >= 0 && ghost.length >= 6) {
       const f = lapT / .1, i = Math.floor(f), u = f - i, n = ghost.length / 3;
