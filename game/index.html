@@ -488,10 +488,10 @@ const BOT = { vmax: [133, 125], grip: [31, 24], acc: [25, 20] };     // quickest
 function makeBots() {
   if (bots.length) return;
   const cols = PAL.filter(c => c.toLowerCase() !== me.body.toLowerCase());
-  for (let i = 0; i < NB; i++) {      // i = 0 is the quickest and starts at the front
+  for (let i = 0; i < NB; i++) {      // i = 0 is the quickest and starts at the front. Left, middle and right grid columns keep to their own third of the track.
     const t = i / (NB - 1), c = cols[i % cols.length], roof = i % 3 === 1 ? "#16171b" : i % 3 === 2 ? "#f3f3f3" : null;
     const b = { i, mesh: raceCar({ body: c, roof: roof === c ? null : roof }), vmax: BOT.vmax[0] + (BOT.vmax[1] - BOT.vmax[0]) * t, grip: BOT.grip[0] + (BOT.grip[1] - BOT.grip[0]) * t, acc: BOT.acc[0] + (BOT.acc[1] - BOT.acc[0]) * t,
-      base: -40 + ((i * 7) % NB) * (80 / (NB - 1)), s: 0, d: 0, dOff: 0, v: 0, fin: null, wait: 0 };
+      base: (i % 3 - 1) * 27 + ((Math.floor(i / 3) * 3) % 7 - 3) * 3.6, s: 0, d: 0, dOff: 0, v: 0, fin: null, wait: 0 };
     scene.add(b.mesh); bots.push(b);
   }
 }
@@ -505,8 +505,11 @@ function botStep(dt) {
     let near = 1e9, block = null;
     for (const o of bots) if (o !== b) { const ds = lapDiff(o.s - b.s); if (ds > 0 && ds < 26 && Math.abs(o.d - b.d) < 3.4 && ds < near) { near = ds; block = o; } }
     { const ds = lapDiff(prog - b.s); if (ds > 0 && ds < 26 && Math.abs(car.d - b.d) < 3.4 && ds < near) { near = ds; block = car; } }
+    if (block && b.s < 220 && near >= 9) block = null;       // off the grid: hold your line, no darting around
+    if (block && near >= 9 && b.v < block.v + .5) block = null;   // not catching it, so leave it alone
     if (block) { let side = b.d <= block.d ? -1 : 1; if (Math.abs(b.d + side * 5) > 43) side = -side; b.dOff += side * 8 * dt; } else b.dOff -= Math.sign(b.dOff) * Math.min(Math.abs(b.dOff), 1.2 * dt);
-    const want = clamp(b.base + b.dOff, -44, 44), move = clamp(want - b.d, -7 * dt, 7 * dt); b.d += move;
+    const rate = b.s < 40 ? 0 : Math.min(6, b.v * .028) * dt;     // sideways moves start after the launch and stay gentle
+    const want = clamp(b.base + b.dOff, -44, 44), move = clamp(want - b.d, -rate, rate); b.d += move;
     const lim = Math.min(botLimit(b, b.s), botLimit(b, b.s + b.v * 1.3));
     b.v = b.v > lim ? Math.max(lim, b.v - 30 * dt) : Math.min(lim, b.v + b.acc * (1 - Math.pow(b.v / b.vmax, 2)) * dt);
     if (block && near < 9) b.v = Math.min(b.v, Math.max(block.v, 8));
@@ -565,32 +568,41 @@ document.addEventListener("visibilitychange", () => { if (document.hidden && mod
 document.addEventListener("contextmenu", e => e.preventDefault());
 
 // ---------- engine sound (one soft tone that follows speed)
-let AC = null, oscs = null, gain = null, muted = store.get("mute") === "1", revs = .3;
+let AC = null, oscs = null, gain = null, roar = null, roarF = null, tone = null, muted = store.get("mute") === "1", revs = .3;
 const paintMute = () => { $("mute").style.opacity = muted ? .45 : 1; $("mute").setAttribute("aria-pressed", String(!muted)); };
 function audioOn() {
   if (muted) return;
   try {
     if (!AC) {
       AC = new (window.AudioContext || window.webkitAudioContext)();
-      const shape = AC.createWaveShaper(), curve = new Float32Array(512); for (let i = 0; i < 512; i++) { const x = i / 255.5 - 1; curve[i] = Math.tanh(x * 3.2); } shape.curve = curve;
-      const hp = AC.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 170;
-      const pk = AC.createBiquadFilter(); pk.type = "peaking"; pk.frequency.value = 1500; pk.Q.value = 1.1; pk.gain.value = 9;      // the nasal scream
-      const lp = AC.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 5200;
-      gain = AC.createGain(); gain.gain.value = 0; shape.connect(hp).connect(pk).connect(lp).connect(gain).connect(AC.destination);
-      oscs = [["sawtooth", 1, .5], ["sawtooth", 1.007, .4], ["square", 2, .22], ["sawtooth", .5, .3], ["sawtooth", 3, .1]].map(([type, mult, vol]) => { const o = AC.createOscillator(), g = AC.createGain(); o.type = type; g.gain.value = vol; o.connect(g).connect(shape); o.start(); return { o, mult }; });
+      // low stacked tones pushed hard into distortion = growl. Phone speakers can't play real bass, the grit carries the depth.
+      const shape = AC.createWaveShaper(), curve = new Float32Array(1024); for (let i = 0; i < 1024; i++) { const x = i / 511.5 - 1; curve[i] = Math.tanh(x * 6); } shape.curve = curve; shape.oversample = "2x";
+      const hp = AC.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 45;
+      const body = AC.createBiquadFilter(); body.type = "peaking"; body.frequency.value = 260; body.Q.value = .8; body.gain.value = 7;
+      tone = AC.createBiquadFilter(); tone.type = "lowpass"; tone.frequency.value = 1400; tone.Q.value = .6;
+      gain = AC.createGain(); gain.gain.value = 0; shape.connect(hp).connect(body).connect(tone).connect(gain).connect(AC.destination);
+      oscs = [["sawtooth", 1, .5], ["sawtooth", 1.012, .4], ["sawtooth", .5, .55], ["square", .503, .3], ["sawtooth", 1.5, .16]].map(([type, mult, vol]) => { const o = AC.createOscillator(), g = AC.createGain(); o.type = type; g.gain.value = vol; o.connect(g).connect(shape); o.start(); return { o, mult }; });
+      // exhaust roar: looped noise through a filter that follows the revs
+      const buf = AC.createBuffer(1, AC.sampleRate * 2, AC.sampleRate), d = buf.getChannelData(0); let last = 0; for (let i = 0; i < d.length; i++) { last = (last + .04 * (Math.random() * 2 - 1)) / 1.04; d[i] = last * 6; }
+      const src = AC.createBufferSource(); src.buffer = buf; src.loop = true;
+      roarF = AC.createBiquadFilter(); roarF.type = "bandpass"; roarF.frequency.value = 300; roarF.Q.value = .7;
+      roar = AC.createGain(); roar.gain.value = 0; src.connect(roarF).connect(roar).connect(gain); src.start();
     }
-    AC.resume(); gain.gain.setTargetAtTime(.07, AC.currentTime, .2);
+    AC.resume(); gain.gain.setTargetAtTime(.09, AC.currentTime, .2);
   } catch (e) {}
 }
-// six gears: revs climb, drop at each shift, and scream near the top
+// revs rise with speed in five long gears with only a small drop at each shift, so it roars instead of going up and down
 function engineNote(dt) {
   if (!oscs || muted) return;
-  const f = clamp(car.v / (ST.vmax * 1.02), 0, .999) * 6, gear = Math.floor(f), t = f - gear;
-  const want = (gear === 0 ? .32 + .68 * t : .62 + .38 * t) * (gasOn ? 1 : .9);
-  revs += (want - revs) * Math.min(1, dt * 14);
-  const hz = 95 + revs * 430;       // about 525 Hz flat out, like a V6 near 10,500 rpm
-  for (const x of oscs) x.o.frequency.setTargetAtTime(hz * x.mult, AC.currentTime, .02);
-  gain.gain.setTargetAtTime(gasOn ? .07 : .035, AC.currentTime, .06);
+  const f = clamp(car.v / (ST.vmax * 1.02), 0, .999) * 5, gear = Math.floor(f), t = f - gear;
+  const want = (gear === 0 ? .25 + .75 * t : .8 + .2 * t) * (.55 + .45 * (gear + t) / 5 + .0) * (gasOn ? 1 : .88);
+  revs += (want - revs) * Math.min(1, dt * 6);
+  const hz = 52 + revs * 118, now = AC.currentTime;       // about 55 to 170 Hz
+  for (const x of oscs) x.o.frequency.setTargetAtTime(hz * x.mult, now, .04);
+  tone.frequency.setTargetAtTime((gasOn ? 900 : 520) + revs * 1500, now, .08);
+  roarF.frequency.setTargetAtTime(180 + revs * 650, now, .08);
+  roar.gain.setTargetAtTime(gasOn ? .5 + revs * .5 : .2, now, .08);
+  gain.gain.setTargetAtTime(gasOn ? .09 : .05, now, .08);
 }
 function audioOff() { if (gain) gain.gain.setTargetAtTime(0, AC.currentTime, .08); }
 $("mute").onclick = () => { muted = !muted; store.set("mute", muted ? "1" : "0"); paintMute(); if (muted) audioOff(); else if (mode !== "menu") audioOn(); };
