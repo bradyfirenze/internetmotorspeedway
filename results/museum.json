@@ -1,6 +1,14 @@
 {
  "winners": [
   {
+   "day": 5,
+   "name": "tom.worthington46",
+   "track": "Kyle Busch Motor Speedway",
+   "date": "Nov 10, 2026",
+   "cars": 3570,
+   "img": "museum/day5.jpg"
+  },
+  {
    "day": 4,
    "name": "jhr.1_",
    "track": "Sir Patrick Stewart Motor Speedway",
