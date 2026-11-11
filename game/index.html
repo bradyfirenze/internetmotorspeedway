@@ -172,7 +172,7 @@ input { flex: 1; min-width: 0; font: 700 18px var(--body); color: var(--fg); bac
     <div style="display:flex;gap:6px"><button class="alt hbtn" id="mute" aria-label="Sound on or off">♪</button><button class="alt hbtn" id="pit">Pit</button></div>
   </div>
   <div id="mid"><div id="lapnow">0.00</div><div id="lapsub">Warm up lap</div></div>
-  <div id="tip">Left thumb: slide to steer. Right thumb: gas and brake. Brake before the corners or you hit the wall.</div>
+  <div id="tip">Left thumb: slide to steer. Right thumb: gas and brake. Brake into the corners: braking makes the car turn sharper.</div>
   <div id="bot">
     <div>
       <div id="spd"><span id="spdN">0</span><small>MPH</small></div>
@@ -413,7 +413,7 @@ function spot(s, d) {
 }
 
 // ---------- driving
-const car = { x: 0, y: 0, h: 0, v: 0, skid: 0, slip: 0, d: 0, wall: 0 };
+const car = { x: 0, y: 0, h: 0, v: 0, skid: 0, slip: 0, d: 0, wall: 0, g: 1 };
 let mode = "menu";                // menu | lights | drive
 let kind = "practice";            // practice (alone, with your ghost) | race (against the bots)
 let steer = 0, steerIn = 0, keyL = 0, keyR = 0, keyG = 0, keyB = 0, touchId = null, touchX0 = 0, gasOn = 0, brkOn = 0;
@@ -422,7 +422,7 @@ function gridSlot(i) { const row = Math.floor(i / 3), col = i % 3; return { s: -
 function resetCar() {
   if (kind === "race") { const g = gridSlot(NB), q = spot(S0 + g.s, g.d); car.x = q.x; car.y = q.y; prog = g.s; }
   else { car.x = -330; car.y = -(HY + R); prog = -330; }
-  car.h = 0; car.v = 0; car.wall = 0; car.skid = 0; car.slip = 0; camH = 0; const p = proj(car.x, car.y); lastS = p.s; car.d = p.d; lapT = -1; lapDist = 0; rec = []; steer = 0; steerIn = 0; placeCar();
+  car.h = 0; car.v = 0; car.wall = 0; car.g = 1; car.skid = 0; car.slip = 0; camH = 0; const p = proj(car.x, car.y); lastS = p.s; car.d = p.d; lapT = -1; lapDist = 0; rec = []; steer = 0; steerIn = 0; placeCar();
 }
 function placeCar() { if (!myCar) return; myCar.position.copy(V(car.x, car.y, .1)); myCar.rotation.y = car.h + car.slip; }
 function stats() { return { vmax: UPG[0].vals[me.up.e], grip: UPG[1].vals[me.up.t], accel: UPG[2].vals[me.up.a] }; }
@@ -431,8 +431,11 @@ let ST = null;
 function step(dt) {
   const s = steer, v = car.v;
   // The car always grips. Too fast for a corner means it can't turn tight enough and runs wide, so you lift or brake.
-  const want = -s * ST.grip / Math.max(v, 30);      // yaw rate, + is left. Full steering is all the tires can hold, never more, so the car never slides.
-  const aLat = Math.abs(want) * v; let yaw = want, drag = 2 * Math.pow(Math.min(aLat / ST.grip, 1), 2);
+  // Braking throws the weight onto the front tires, so the car turns in much sharper. Lifting off the gas helps a little. Flat on the gas it pushes wide.
+  car.g += ((brkOn ? 1.6 : gasOn ? 1 : 1.25) - car.g) * Math.min(1, dt * 8);
+  const grip = ST.grip * car.g;
+  const want = -s * grip / Math.max(v, 30);      // yaw rate, + is left. Full steering is all the tires can hold, never more, so the car never slides.
+  const aLat = Math.abs(want) * v; let yaw = want, drag = 2 * Math.pow(Math.min(aLat / grip, 1), 2);
   car.skid = 0;
   if (v < 3) yaw *= v / 3;
   car.h += yaw * dt;
@@ -484,7 +487,7 @@ function flash(big, small, good) { const f = $("flash"); f.innerHTML = esc(big) 
 
 // ---------- bot cars: each one keeps a lane, slows for the corners and moves over to pass
 const bots = [];
-const BOT = { vmax: [133, 125], grip: [31, 24], acc: [25, 20] };     // quickest bot to slowest. The bots hold a lane, so they get a bit more grip than you to make up for it.
+const BOT = { vmax: [136, 127], grip: [34.5, 26], acc: [26, 20] };     // quickest bot to slowest. The bots hold a lane, so they get a bit more grip than you to make up for it.
 function makeBots() {
   if (bots.length) return;
   const cols = PAL.filter(c => c.toLowerCase() !== me.body.toLowerCase());
