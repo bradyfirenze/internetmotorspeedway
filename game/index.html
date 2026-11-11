@@ -4,87 +4,105 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
 <title>Race the Track | Internet Motor Speedway</title>
-<meta name="description" content="Followers only. Drive your car on the real track, set a lap time and get on the leaderboard.">
+<meta name="description" content="Followers only. Race your car on the real track, set a lap time and get on the leaderboard.">
 <meta name="theme-color" content="#111318">
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@500;700&display=swap">
 <style>
 :root { --yel: #ffcc18; --ink: #111318; --card: rgba(17,19,24,.9); --line: rgba(255,255,255,.14); --fg: #f3f4f6; --muted: #aab0bb; --red: #ff4b3e; --grn: #3ddc84;
-  --display: "Anton", Impact, "Arial Narrow", sans-serif; --body: "Archivo", -apple-system, "Helvetica Neue", Arial, sans-serif; color-scheme: dark; }
+  --display: "Anton", Impact, "Arial Narrow", sans-serif; --body: "Archivo", -apple-system, "Helvetica Neue", Arial, sans-serif; color-scheme: dark;
+  --sl: env(safe-area-inset-left); --sr: env(safe-area-inset-right); --st: env(safe-area-inset-top); --sb: env(safe-area-inset-bottom); }
+/* phone held upright: the whole game is turned on its side, so it is always landscape */
+:root.rot { --sl: env(safe-area-inset-top); --sr: env(safe-area-inset-bottom); --st: env(safe-area-inset-right); --sb: env(safe-area-inset-left); }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body { margin: 0; height: 100%; overflow: hidden; background: #111318; font-family: var(--body); color: var(--fg); touch-action: none; overscroll-behavior: none; -webkit-user-select: none; user-select: none; }
-#c { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: #111318; font-family: var(--body); color: var(--fg); touch-action: none; overscroll-behavior: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+#app { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; overflow: hidden; transform-origin: top left; }
+.rot #app { transform: rotate(90deg) translateY(-100%); }
+#c { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 [hidden] { display: none !important; }
-button, a.btn { font: 400 20px var(--display); letter-spacing: .04em; text-transform: uppercase; text-decoration: none; text-align: center; display: block; width: 100%; border: 0; border-radius: 12px; padding: 15px 12px; cursor: pointer; background: var(--yel); color: var(--ink); }
+button, a.btn { font: 400 18px var(--display); letter-spacing: .04em; text-transform: uppercase; text-decoration: none; text-align: center; display: block; width: 100%; border: 0; border-radius: 11px; padding: 12px 10px; cursor: pointer; background: var(--yel); color: var(--ink); touch-action: manipulation; }
 button.alt, a.btn.alt { background: #0b0d11; color: var(--fg); border: 1px solid var(--line); }
+button.big { font-size: 24px; padding: 14px 10px; }
 button:disabled { opacity: .45; cursor: default; }
 button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
-.screen { position: fixed; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; padding: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left)); pointer-events: none; z-index: 3; }
+.screen { position: fixed; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; padding: max(10px, var(--st)) max(14px, var(--sr)) max(12px, var(--sb)) max(14px, var(--sl)); pointer-events: none; z-index: 3; }
 .screen.mid { justify-content: center; background: rgba(8,9,12,.55); }
-.box { pointer-events: auto; width: 100%; max-width: 480px; margin: 0 auto; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); max-height: 100%; display: flex; flex-direction: column; }
-.k { font: 700 12px var(--body); letter-spacing: .09em; text-transform: uppercase; color: var(--yel); }
-h1 { margin: 2px 0 6px; font: 400 34px/1.02 var(--display); text-transform: uppercase; letter-spacing: .01em; }
-h2 { margin: 2px 0 10px; font: 400 26px/1.05 var(--display); text-transform: uppercase; }
-p { margin: 0 0 12px; font-size: 15px; line-height: 1.45; color: var(--muted); }
+.box { pointer-events: auto; width: 100%; max-width: 660px; margin: 0 auto; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 13px 14px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); max-height: 100%; display: flex; flex-direction: column; overflow-y: auto; touch-action: pan-y; }
+.k { font: 700 11px var(--body); letter-spacing: .09em; text-transform: uppercase; color: var(--yel); }
+h1 { margin: 2px 0 6px; font: 400 30px/1.02 var(--display); text-transform: uppercase; letter-spacing: .01em; overflow-wrap: anywhere; }
+h2 { margin: 2px 0 8px; font: 400 24px/1.05 var(--display); text-transform: uppercase; }
+p { margin: 0 0 10px; font-size: 14px; line-height: 1.4; color: var(--muted); }
 p b { color: var(--fg); }
-.stack { display: grid; gap: 8px; }
-.two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.field { display: flex; align-items: center; background: #0b0d11; border: 2px solid var(--line); border-radius: 12px; padding: 0 12px; margin-bottom: 8px; }
+.stack { display: grid; gap: 7px; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 14px; align-items: center; }
+.field { display: flex; align-items: center; background: #0b0d11; border: 2px solid var(--line); border-radius: 12px; padding: 0 12px; margin-bottom: 6px; }
 .field:focus-within { border-color: var(--yel); }
 .field span { font: 400 22px var(--display); color: var(--muted); }
-input { flex: 1; min-width: 0; font: 700 18px var(--body); color: var(--fg); background: none; border: 0; padding: 14px 6px; outline: none; -webkit-user-select: text; user-select: text; }
-.msg { font-size: 14px; line-height: 1.4; color: var(--muted); min-height: 20px; margin: 2px 0 8px; }
+input { flex: 1; min-width: 0; font: 700 18px var(--body); color: var(--fg); background: none; border: 0; padding: 12px 6px; outline: none; -webkit-user-select: text; user-select: text; }
+.msg { font-size: 13px; line-height: 1.4; color: var(--muted); min-height: 18px; margin: 2px 0 6px; }
 .msg.bad { color: #ffb0a8; } .msg.good { color: var(--grn); }
 .msg a { color: var(--yel); }
-.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 4px 0 12px; }
-.stat { background: #0b0d11; border: 1px solid var(--line); border-radius: 12px; padding: 9px 11px; }
-.stat b { display: block; font: 400 26px/1.1 var(--display); letter-spacing: .02em; }
-.small { font-size: 12px; color: var(--muted); text-align: center; margin: 10px 0 0; }
+.stats { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 7px; margin: 4px 0 8px; }
+.stat { background: #0b0d11; border: 1px solid var(--line); border-radius: 11px; padding: 7px 10px; }
+.stat b { display: block; font: 400 23px/1.1 var(--display); letter-spacing: .02em; }
+.small { font-size: 12px; color: var(--muted); margin: 6px 0 0; }
 .small a, .linkbtn { color: var(--muted); text-decoration: underline; background: none; border: 0; padding: 0; width: auto; display: inline; font: inherit; text-transform: none; letter-spacing: 0; cursor: pointer; }
+/* username screen: stays the normal way up so the keyboard works */
+#sGate { z-index: 6; }
+.rot #sGate { background: #111318; justify-content: center; }
 /* driving HUD */
-#hud { position: fixed; inset: 0; pointer-events: none; z-index: 2; padding: max(10px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); }
+#hud { position: fixed; inset: 0; pointer-events: none; z-index: 2; padding: max(8px, var(--st)) max(14px, var(--sr)) max(10px, var(--sb)) max(14px, var(--sl)); }
 .hrow { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
-.pill { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 7px 11px; }
+.pill { background: var(--card); border: 1px solid var(--line); border-radius: 11px; padding: 6px 10px; }
 .pill .k { font-size: 10px; }
-.pill b { font: 400 20px/1.1 var(--display); letter-spacing: .03em; display: block; font-variant-numeric: tabular-nums; }
-#lapnow { font: 400 54px/1 var(--display); text-align: center; margin-top: 8px; text-shadow: 0 3px 14px rgba(0,0,0,.6); font-variant-numeric: tabular-nums; letter-spacing: .02em; }
-#lapsub { text-align: center; font: 700 12px var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--fg); text-shadow: 0 2px 8px rgba(0,0,0,.7); margin-top: 3px; }
-#flash { position: fixed; left: 0; right: 0; top: 30%; text-align: center; font: 400 44px/1.05 var(--display); text-transform: uppercase; color: var(--yel); text-shadow: 0 4px 18px rgba(0,0,0,.7); opacity: 0; transition: opacity .25s; pointer-events: none; }
+.pill b { font: 400 19px/1.1 var(--display); letter-spacing: .03em; display: block; font-variant-numeric: tabular-nums; }
+#posBig { font: 400 40px/1 var(--display); text-shadow: 0 3px 12px rgba(0,0,0,.6); min-width: 74px; }
+#posBig small { font-size: 18px; color: var(--fg); opacity: .8; }
+#mid { position: absolute; left: 0; right: 0; top: max(6px, var(--st)); text-align: center; }
+#lapnow { font: 400 40px/1 var(--display); text-shadow: 0 3px 14px rgba(0,0,0,.6); font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+#lapsub { font: 700 11px var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--fg); text-shadow: 0 2px 8px rgba(0,0,0,.7); margin-top: 2px; }
+#flash { position: fixed; left: 0; right: 0; top: 27%; text-align: center; font: 400 40px/1.05 var(--display); text-transform: uppercase; color: var(--yel); text-shadow: 0 4px 18px rgba(0,0,0,.7); opacity: 0; transition: opacity .25s; pointer-events: none; z-index: 2; }
 #flash.on { opacity: 1; }
-#flash small { display: block; font: 700 14px var(--body); letter-spacing: .1em; color: var(--fg); margin-top: 6px; }
-#pit { pointer-events: auto; width: auto; font-size: 15px; padding: 9px 14px; border-radius: 10px; }
-#mute { pointer-events: auto; width: 42px; padding: 9px 0; font: 700 16px var(--body); border-radius: 10px; }
-#bot { position: absolute; left: 0; right: 0; bottom: max(14px, env(safe-area-inset-bottom)); padding: 0 14px; display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; }
-#spd { font: 400 46px/1 var(--display); text-shadow: 0 3px 12px rgba(0,0,0,.6); font-variant-numeric: tabular-nums; min-width: 96px; }
-#spd small { font: 700 12px var(--body); letter-spacing: .1em; display: block; color: var(--fg); }
-#wheel { flex: 1; max-width: 220px; height: 14px; border-radius: 7px; background: rgba(17,19,24,.7); border: 1px solid var(--line); position: relative; margin-bottom: 8px; }
+#flash small { display: block; font: 700 13px var(--body); letter-spacing: .1em; color: var(--fg); margin-top: 4px; }
+.hbtn { pointer-events: auto; width: auto; font-size: 14px; padding: 8px 13px; border-radius: 10px; }
+#mute { width: 40px; padding: 8px 0; font: 700 15px var(--body); }
+#bot { position: absolute; left: max(16px, var(--sl)); right: max(16px, var(--sr)); bottom: max(12px, var(--sb)); display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+#spd { font: 400 40px/1 var(--display); text-shadow: 0 3px 12px rgba(0,0,0,.6); font-variant-numeric: tabular-nums; }
+#spd small { font: 700 11px var(--body); letter-spacing: .1em; color: var(--fg); margin-left: 4px; }
+#wheel { width: 190px; height: 14px; border-radius: 7px; background: rgba(17,19,24,.7); border: 1px solid var(--line); position: relative; margin: 18px 0 8px; }
 #knob { position: absolute; top: -9px; left: 50%; width: 30px; height: 30px; margin-left: -15px; border-radius: 50%; background: var(--yel); box-shadow: 0 3px 10px rgba(0,0,0,.5); }
-#tip { position: absolute; left: 0; right: 0; bottom: 96px; text-align: center; font: 700 15px var(--body); color: var(--fg); text-shadow: 0 2px 8px rgba(0,0,0,.8); transition: opacity .5s; }
-#lights { position: fixed; left: 0; right: 0; top: 24%; display: flex; justify-content: center; gap: 12px; z-index: 2; pointer-events: none; }
-#lights i { width: 34px; height: 34px; border-radius: 50%; background: #2a0c0a; border: 3px solid #0b0d11; box-shadow: 0 3px 12px rgba(0,0,0,.5); }
+#pedals { display: flex; align-items: flex-end; gap: 12px; pointer-events: auto; }
+.pedal { width: 92px; border-radius: 20px; font-size: 20px; padding: 0; border: 3px solid rgba(0,0,0,.35); box-shadow: 0 5px 16px rgba(0,0,0,.45); touch-action: none; opacity: .92; }
+#brk { width: 82px; height: 76px; background: var(--red); color: #fff; }
+#gas { height: 112px; background: var(--grn); color: var(--ink); }
+.pedal.on { transform: scale(.94); opacity: 1; filter: brightness(1.2); }
+#tip { position: absolute; left: 225px; right: 215px; bottom: max(14px, var(--sb)); text-align: center; font: 700 14px var(--body); color: var(--fg); text-shadow: 0 2px 8px rgba(0,0,0,.8); transition: opacity .5s; }
+#lights { position: fixed; left: 0; right: 0; top: 22%; display: flex; justify-content: center; gap: 12px; z-index: 2; pointer-events: none; }
+#lights i { width: 32px; height: 32px; border-radius: 50%; background: #2a0c0a; border: 3px solid #0b0d11; box-shadow: 0 3px 12px rgba(0,0,0,.5); }
 #lights i.r { background: var(--red); box-shadow: 0 0 22px var(--red); }
 #lights i.g { background: var(--grn); box-shadow: 0 0 22px var(--grn); }
 #hit { position: fixed; inset: 0; pointer-events: none; box-shadow: inset 0 0 90px 30px rgba(255,75,62,.75); opacity: 0; transition: opacity .3s; z-index: 2; }
 /* leaderboard + upgrades */
-.list { overflow-y: auto; -webkit-overflow-scrolling: touch; touch-action: pan-y; margin: 0 -4px 12px; padding: 0 4px; min-height: 80px; }
-.lr { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 10px; font-size: 15px; font-weight: 700; }
+.list { overflow-y: auto; -webkit-overflow-scrolling: touch; touch-action: pan-y; margin: 0 -4px 8px; padding: 0 4px; min-height: 70px; }
+.lr { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 10px; font-size: 15px; font-weight: 700; }
 .lr:nth-child(odd) { background: rgba(255,255,255,.045); }
 .lr.me { background: var(--yel); color: var(--ink); }
 .lr .p { font: 400 18px var(--display); width: 30px; text-align: right; }
 .lr .n { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lr .n small { font-size: 10px; letter-spacing: .06em; border: 1px solid currentColor; border-radius: 5px; padding: 1px 4px; margin-left: 6px; opacity: .75; }
 .lr .t { font: 400 19px var(--display); letter-spacing: .03em; font-variant-numeric: tabular-nums; }
-.up { background: #0b0d11; border: 1px solid var(--line); border-radius: 12px; padding: 11px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
-.up .i { flex: 1; min-width: 0; }
-.up .i b { font: 400 20px var(--display); text-transform: uppercase; letter-spacing: .03em; }
-.up .i div { font-size: 13px; color: var(--muted); }
-.pips { display: flex; gap: 4px; margin-top: 6px; }
-.pips i { width: 26px; height: 7px; border-radius: 4px; background: rgba(255,255,255,.16); }
+.ups { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px; margin-bottom: 8px; }
+.up { background: #0b0d11; border: 1px solid var(--line); border-radius: 12px; padding: 9px; display: flex; flex-direction: column; gap: 6px; }
+.up b { font: 400 19px var(--display); text-transform: uppercase; letter-spacing: .03em; }
+.up div { font-size: 12px; color: var(--muted); }
+.pips { display: flex; gap: 4px; }
+.pips i { flex: 1; height: 7px; border-radius: 4px; background: rgba(255,255,255,.16); }
 .pips i.on { background: var(--yel); }
-.up a { width: auto; font-size: 15px; padding: 10px 12px; border-radius: 10px; white-space: nowrap; }
+.up a { font-size: 15px; padding: 9px 6px; border-radius: 10px; }
 .sw { display: inline-block; width: 13px; height: 13px; border-radius: 4px; vertical-align: -2px; margin-right: 5px; border: 1px solid rgba(255,255,255,.35); }
-#load { height: 6px; border-radius: 3px; background: #2a2e37; overflow: hidden; margin: 0 0 10px; }
+#load { height: 6px; border-radius: 3px; background: #2a2e37; overflow: hidden; margin: 0 0 7px; }
 #load i { display: block; height: 100%; width: 0; background: var(--yel); transition: width .2s; }
 </style>
 <script type="importmap">{ "imports": {
@@ -92,11 +110,10 @@ input { flex: 1; min-width: 0; font: 700 18px var(--body); color: var(--fg); bac
   "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
 </head>
 <body>
-<canvas id="c" aria-label="The speedway. Slide your thumb left and right to steer."></canvas>
 
-<!-- 1. follower check -->
+<!-- 1. follower check (outside the turned view, so typing works with the phone upright) -->
 <div class="screen" id="sGate">
-  <div class="box">
+  <div class="box" style="max-width:480px">
     <div class="k">Internet Motor Speedway</div>
     <h1>Race the real track</h1>
     <p>Followers only. Type your Instagram name to get your car.</p>
@@ -105,42 +122,56 @@ input { flex: 1; min-width: 0; font: 700 18px var(--body); color: var(--fg); bac
       <div class="msg" id="gateMsg" role="status"></div>
       <button type="submit">Get my car</button>
     </form>
-    <p class="small"><a href="../map/">Back to the track map</a></p>
+    <p class="small" style="text-align:center"><a href="../map/">Back to the track map</a></p>
   </div>
 </div>
+
+<div id="app">
+<canvas id="c" aria-label="The speedway. Left thumb steers, right thumb is gas and brake."></canvas>
 
 <!-- 2. garage -->
 <div class="screen" id="sGarage" hidden>
   <div class="box">
-    <div class="k" id="gKind">Your car</div>
-    <h1 id="gName">@you</h1>
-    <div class="stats">
-      <div class="stat"><span class="k">Best lap</span><b id="gBest">--</b></div>
-      <div class="stat"><span class="k">Leaderboard</span><b id="gRank">--</b></div>
+    <div class="cols">
+      <div>
+        <div class="k" id="gKind">Your car</div>
+        <h1 id="gName">@you</h1>
+        <div class="stats">
+          <div class="stat"><span class="k">Best lap</span><b id="gBest">--</b></div>
+          <div class="stat"><span class="k">Leaderboard</span><b id="gRank">--</b></div>
+        </div>
+        <p class="small">Not you? <button class="linkbtn" id="bSwitch">Switch username</button></p>
+      </div>
+      <div>
+        <div id="load" aria-hidden="true"><i id="lbar"></i></div>
+        <div class="stack">
+          <button class="big" id="bRace" disabled>Loading the track</button>
+          <div class="two"><button class="alt" id="bPrac" disabled>Practice lap</button><button class="alt" id="bBoard">Leaderboard</button></div>
+          <div class="two"><button class="alt" id="bUpg">Upgrades</button><button class="alt" id="bPaint">Paint &middot; $1</button></div>
+        </div>
+      </div>
     </div>
-    <div id="load" aria-hidden="true"><i id="lbar"></i></div>
-    <div class="stack">
-      <button id="bRace" disabled>Loading the track</button>
-      <div class="two"><button class="alt" id="bBoard">Leaderboard</button><button class="alt" id="bUpg">Upgrades</button></div>
-      <button class="alt" id="bPaint">Custom paint &middot; $1</button>
-    </div>
-    <p class="small">Not you? <button class="linkbtn" id="bSwitch">Switch username</button></p>
   </div>
 </div>
 
 <!-- 3. driving -->
 <div id="hud" hidden>
   <div class="hrow">
-    <div class="pill"><span class="k">Best</span><b id="hBest">--</b></div>
-    <div style="display:flex;gap:6px"><button class="alt" id="mute" aria-label="Sound on or off">♪</button><button class="alt" id="pit">Pit</button></div>
+    <div style="display:flex;gap:8px;align-items:flex-start">
+      <div id="posBig" hidden>P8<small>/8</small></div>
+      <div class="pill"><span class="k">Best</span><b id="hBest">--</b></div>
+      <div class="pill"><span class="k">Last</span><b id="hLast">--</b></div>
+    </div>
+    <div style="display:flex;gap:6px"><button class="alt hbtn" id="mute" aria-label="Sound on or off">♪</button><button class="alt hbtn" id="pit">Pit</button></div>
   </div>
-  <div id="lapnow">0.00</div>
-  <div id="lapsub">Warm up lap</div>
-  <div id="tip">Slide your thumb left and right to steer.<br>Turn too hard and you slide and lose speed.</div>
+  <div id="mid"><div id="lapnow">0.00</div><div id="lapsub">Warm up lap</div></div>
+  <div id="tip">Left thumb: slide to steer. Right thumb: gas and brake.</div>
   <div id="bot">
-    <div id="spd">0<small>MPH</small></div>
-    <div id="wheel" aria-hidden="true"><div id="knob"></div></div>
-    <div class="pill" style="text-align:right"><span class="k">Last</span><b id="hLast">--</b></div>
+    <div>
+      <div id="spd"><span id="spdN">0</span><small>MPH</small></div>
+      <div id="wheel" aria-hidden="true"><div id="knob"></div></div>
+    </div>
+    <div id="pedals"><button class="pedal" id="brk">Brake</button><button class="pedal" id="gas">Gas</button></div>
   </div>
 </div>
 <div id="lights" hidden><i></i><i></i><i></i></div>
@@ -153,13 +184,14 @@ input { flex: 1; min-width: 0; font: 700 18px var(--body); color: var(--fg); bac
     <div class="k" id="rKind">Back in the pits</div>
     <h2 id="rHead">Best lap this run</h2>
     <div class="stats">
-      <div class="stat"><span class="k">This run</span><b id="rRun">--</b></div>
+      <div class="stat" id="rPosBox"><span class="k">Finish</span><b id="rPos">--</b></div>
+      <div class="stat"><span class="k">Best lap this run</span><b id="rRun">--</b></div>
       <div class="stat"><span class="k">Your best ever</span><b id="rBest">--</b></div>
     </div>
     <div class="msg" id="rMsg" role="status"></div>
     <div class="stack">
       <button id="bSave" hidden>Save to leaderboard</button>
-      <button id="bAgain">Race again</button>
+      <div class="two"><button id="bAgain">Race again</button><button class="alt" id="bPrac2">Practice lap</button></div>
       <div class="two"><button class="alt" id="bBoard2">Leaderboard</button><button class="alt" id="bHome">Garage</button></div>
     </div>
   </div>
@@ -181,8 +213,8 @@ input { flex: 1; min-width: 0; font: 700 18px var(--body); color: var(--fg); bac
   <div class="box">
     <div class="k">Make it faster</div>
     <h2>Upgrades</h2>
-    <div class="list" id="uList"></div>
-    <p class="small" style="margin:0 0 10px">Pay on Ko-fi and put <b id="uNote"></b> in the message. Upgrades are added by hand, usually the same day.</p>
+    <div class="ups" id="uList"></div>
+    <p class="small" style="margin:0 0 8px">Pay on Ko-fi and put <b id="uNote"></b> in the message. Upgrades are added by hand, usually the same day.</p>
     <button class="alt" data-close>Back</button>
   </div>
 </div>
@@ -194,11 +226,12 @@ input { flex: 1; min-width: 0; font: 700 18px var(--body); color: var(--fg); bac
     <h2>Pick your colors</h2>
     <p>Tip <b>$1</b> on Ko-fi and put this in the message: <b id="pNote"></b>, your <b>body color</b> and your <b>roof color</b>. Any color but gold. Gold is for race winners.</p>
     <p id="pHave" hidden></p>
-    <div class="stack">
+    <div class="two">
       <a class="btn" id="pBuy" target="_blank" rel="noopener" href="https://ko-fi.com/internetmotorspeedway">Open Ko-fi</a>
       <button class="alt" data-close>Back</button>
     </div>
   </div>
+</div>
 </div>
 
 <script type="module">
@@ -210,15 +243,16 @@ import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
 const ENDPOINT = "";            // leaderboard web app URL (game-backend/Code.gs). Empty = times stay on this phone only.
 const KOFI = "https://ko-fi.com/internetmotorspeedway";
 const IG = "https://instagram.com/internetmotorspeedway";
-// Track, same numbers as blender/world.py (Blender x, y in meters). The car drives counterclockwise.
+// Track, same numbers as blender/world.py (Blender x, y in meters). Cars drive counterclockwise.
 const HX = 500, HY = 100, R = 250, W = 100, ARC = Math.PI * R / 2, LEN = 4 * HX + 4 * HY + 4 * ARC, S0 = HX;   // finish line at x = 0
-const LIM = W / 2 - 2.2;        // how far from the centerline the car can get before the wall
+const LIM = W / 2 - 2.2;        // how far from the centerline a car can get before the wall
 const STEP = 1 / 120;           // fixed physics step, so every phone gets the same lap for the same driving
+const RACE_LAPS = 3, NB = 7;    // race length and number of bot cars
 const UPG = [
   { id: "e", name: "Engine", what: "Higher top speed", vals: [130, 135, 140, 145] },
   { id: "t", name: "Tires", what: "More grip in the corners", vals: [34, 35, 36, 37] },
   { id: "a", name: "Turbo", what: "Faster off the corners", vals: [22, 26, 30, 34] } ];
-const GOLD = "#ffa808";
+const GOLD = "#ffa808", PAL = ["#f3932b", "#f987c2", "#41d187", "#4187ec", "#41d8e6", "#f3f3f3", "#ec4141", "#ca59df"];
 
 // ---------- small helpers
 const $ = id => document.getElementById(id);
@@ -227,10 +261,16 @@ const fmt = ms => { if (!ms) return "--"; const s = ms / 1000; return s >= 60 ? 
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const wrap = a => { while (a > Math.PI) a -= 2 * Math.PI; while (a < -Math.PI) a += 2 * Math.PI; return a; };
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const mod = (a, n) => ((a % n) + n) % n;
+const lapDiff = a => mod(a + LEN / 2, LEN) - LEN / 2;          // shortest way around between two spots on the lap
 const V = (x, y, z) => new THREE.Vector3(x, z, -y);            // Blender (x, y, z) to three (x, z, -y)
 const screens = ["sGate", "sGarage", "sResult", "sBoard", "sUpg", "sPaint"];
 let under = "sGarage";
 function show(id) { for (const s of screens) $(s).hidden = s !== id; if (id === "sGarage" || id === "sResult") under = id; }
+
+// ---------- always landscape: a phone held upright gets the whole game turned on its side
+let rot = false, LW = innerWidth, LH = innerHeight;
+const lx = e => rot ? e.clientY : e.clientX;                   // pointer position in the landscape view
 
 // ---------- data: followers, custom cars, upgrades, winners
 const getJ = (u, d) => fetch(u, { cache: "no-cache" }).then(r => r.ok ? r.json() : d).catch(() => d);
@@ -262,13 +302,13 @@ async function signIn(raw, quiet) {
   return true;
 }
 const upTotal = () => me.up.e + me.up.t + me.up.a;
+const best = () => +store.get("best:" + me.name) || 0;
 function fillGarage() {
   $("gName").textContent = "@" + me.name; $("gKind").textContent = me.kind;
   $("gBest").textContent = fmt(best());
   const rk = +store.get("rank:" + me.name) || 0;
   $("gRank").textContent = rk ? "P" + rk : "--";
 }
-const best = () => +store.get("best:" + me.name) || 0;
 $("gateForm").addEventListener("submit", e => { e.preventDefault(); $("uname").blur(); signIn($("uname").value); });
 $("bSwitch").onclick = () => { store.del("user"); me = null; $("uname").value = ""; $("gateMsg").textContent = ""; show("sGate"); };
 
@@ -279,19 +319,23 @@ let PR = Math.min(devicePixelRatio || 1, 2); renderer.setPixelRatio(PR);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x86b9ea); scene.fog = new THREE.Fog(0x86b9ea, 900, 3200);
-const camera = new THREE.PerspectiveCamera(64, 1, .5, 3400);
+const camera = new THREE.PerspectiveCamera(55, 1, .5, 3400);
 scene.add(new THREE.HemisphereLight(0xffffff, 0x5a7a4a, 1.6));
 const sun = new THREE.DirectionalLight(0xffffff, 1.9); sun.position.set(-600, 900, 400); scene.add(sun);
-function resize() { const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
-addEventListener("resize", resize); resize();
+function resize() {
+  rot = innerHeight > innerWidth; LW = rot ? innerHeight : innerWidth; LH = rot ? innerWidth : innerHeight;
+  document.documentElement.classList.toggle("rot", rot);
+  const a = $("app"); a.style.width = LW + "px"; a.style.height = LH + "px";
+  renderer.setSize(LW, LH, false); camera.aspect = LW / LH; camera.updateProjectionMatrix();
+}
+addEventListener("resize", resize); addEventListener("orientationchange", () => setTimeout(resize, 250)); resize();
 
-let trackReady = false;
 const draco = new DRACOLoader(); draco.setDecoderPath("https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/libs/draco/gltf/");
 const loader = new GLTFLoader(); loader.setDRACOLoader(draco);
 loader.load("../map/track.glb", g => {
   g.scene.traverse(o => { if (o.isMesh && o.material) o.material.side = THREE.FrontSide; });
-  scene.add(g.scene); trackReady = true; $("load").hidden = true;
-  $("bRace").disabled = false; $("bRace").textContent = "Race";
+  scene.add(g.scene); $("load").hidden = true;
+  $("bRace").disabled = false; $("bRace").textContent = "Race"; $("bPrac").disabled = false;
 }, x => { if (x.total) $("lbar").style.width = Math.round(x.loaded / x.total * 100) + "%"; },
   () => { $("bRace").textContent = "Track didn't load. Refresh."; });
 
@@ -322,9 +366,10 @@ function raceCar(c, ghost) {
   g.scale.setScalar(1.25); return g;
 }
 let myCar = null; const ghostCar = raceCar({ body: "#ffffff" }, true); ghostCar.visible = false; scene.add(ghostCar);
-function buildMyCar() { if (myCar) scene.remove(myCar); myCar = raceCar(me); scene.add(myCar); resetCar(); }
+function buildMyCar() { if (myCar) scene.remove(myCar); myCar = raceCar(me); scene.add(myCar); kind = "practice"; resetCar(); }
 
-// ---------- the track as math: where am I along the lap (s), how far from the centerline (d, + is toward the outside wall), which way the track points (th)
+// ---------- the track as math
+// proj: where am I along the lap (s), how far from the centerline (d, + is toward the outside wall), which way the track points (th)
 function proj(x, y) {
   if (Math.abs(x) <= HX) return y < 0 ? { s: x + HX, d: -y - (HY + R), th: 0 } : { s: 2 * HX + 2 * ARC + 2 * HY + (HX - x), d: y - (HY + R), th: Math.PI };
   if (Math.abs(y) <= HY) return x > 0 ? { s: 2 * HX + ARC + (y + HY), d: x - (HX + R), th: Math.PI / 2 } : { s: 4 * HX + 3 * ARC + 2 * HY + (HY - y), d: -x - (HX + R), th: -Math.PI / 2 };
@@ -335,13 +380,31 @@ function proj(x, y) {
   if (a > 0) a -= 2 * Math.PI;
   return { s: 4 * HX + 3 * ARC + 4 * HY + R * (a + Math.PI), d, th: a + Math.PI / 2 };
 }
+// the other way: a spot on the lap and an offset give x, y, heading and whether it is in a corner
+function spot(s, d) {
+  s = mod(s, LEN); let a;
+  if (s < 2 * HX) return { x: s - HX, y: -(HY + R) - d, th: 0, arc: false }; s -= 2 * HX;
+  if (s < ARC) { a = -Math.PI / 2 + s / R; return { x: HX + (R + d) * Math.cos(a), y: -HY + (R + d) * Math.sin(a), th: a + Math.PI / 2, arc: true }; } s -= ARC;
+  if (s < 2 * HY) return { x: HX + R + d, y: -HY + s, th: Math.PI / 2, arc: false }; s -= 2 * HY;
+  if (s < ARC) { a = s / R; return { x: HX + (R + d) * Math.cos(a), y: HY + (R + d) * Math.sin(a), th: a + Math.PI / 2, arc: true }; } s -= ARC;
+  if (s < 2 * HX) return { x: HX - s, y: HY + R + d, th: Math.PI, arc: false }; s -= 2 * HX;
+  if (s < ARC) { a = Math.PI / 2 + s / R; return { x: -HX + (R + d) * Math.cos(a), y: HY + (R + d) * Math.sin(a), th: a + Math.PI / 2, arc: true }; } s -= ARC;
+  if (s < 2 * HY) return { x: -HX - R - d, y: HY - s, th: -Math.PI / 2, arc: false }; s -= 2 * HY;
+  a = Math.PI + s / R; return { x: -HX + (R + d) * Math.cos(a), y: -HY + (R + d) * Math.sin(a), th: a + Math.PI / 2, arc: true };
+}
 
 // ---------- driving
-const car = { x: 0, y: 0, h: 0, v: 0, skid: 0, slip: 0 };
+const car = { x: 0, y: 0, h: 0, v: 0, skid: 0, slip: 0, d: 0 };
 let mode = "menu";                // menu | lights | drive
-let steer = 0, steerIn = 0, keyL = 0, keyR = 0, touchId = null, touchX0 = 0;
-let lapT = -1, lapDist = 0, lastS = 0, runBest = 0, lastLap = 0, laps = 0, rec = [], recT = 0, ghost = null, simT = 0, acc = 0, hitT = 0, camH = 0, tipT = 0;
-function resetCar() { car.x = -330; car.y = -(HY + R); car.h = 0; car.v = 0; car.skid = 0; car.slip = 0; camH = 0; lastS = proj(car.x, car.y).s; lapT = -1; lapDist = 0; rec = []; steer = 0; steerIn = 0; placeCar(); }
+let kind = "practice";            // practice (alone, with your ghost) | race (against the bots)
+let steer = 0, steerIn = 0, keyL = 0, keyR = 0, keyG = 0, keyB = 0, touchId = null, touchX0 = 0, gasOn = 0, brkOn = 0;
+let lapT = -1, lapDist = 0, lastS = 0, prog = 0, runBest = 0, lastLap = 0, laps = 0, rec = [], recT = 0, ghost = null, raceT = 0, acc = 0, hitT = 0, camH = 0, tipT = 0, place = 0, finished = false;
+function gridSlot(i) { const row = Math.floor(i / 2), col = i % 2; return { s: -10 - row * 12 - col * 4, d: col ? 7 : -7 }; }
+function resetCar() {
+  if (kind === "race") { const g = gridSlot(NB), q = spot(S0 + g.s, g.d); car.x = q.x; car.y = q.y; prog = g.s; }
+  else { car.x = -330; car.y = -(HY + R); prog = -330; }
+  car.h = 0; car.v = 0; car.skid = 0; car.slip = 0; camH = 0; const p = proj(car.x, car.y); lastS = p.s; car.d = p.d; lapT = -1; lapDist = 0; rec = []; steer = 0; steerIn = 0; placeCar();
+}
 function placeCar() { if (!myCar) return; myCar.position.copy(V(car.x, car.y, .1)); myCar.rotation.y = car.h + car.slip; }
 function stats() { return { vmax: UPG[0].vals[me.up.e], grip: UPG[1].vals[me.up.t], accel: UPG[2].vals[me.up.a] }; }
 let ST = null;
@@ -352,8 +415,10 @@ function step(dt) {
   const want = -s * 1.55 * ST.grip / Math.max(v, 26);      // yaw rate, + is left
   const aLat = Math.abs(want) * v; let yaw = want, drag = 2.6 * Math.pow(Math.min(aLat / ST.grip, 1), 2);
   if (aLat > ST.grip) { yaw = Math.sign(want) * ST.grip / Math.max(v, 1); drag += 24 * (aLat / ST.grip - 1); car.skid = Math.min(1, car.skid + dt * 6); } else car.skid = Math.max(0, car.skid - dt * 4);
+  if (v < 3) yaw *= v / 3;
   car.h += yaw * dt;
-  car.v = Math.max(0, v + (ST.accel * (1 - Math.pow(v / ST.vmax, 2)) - drag) * dt);
+  const push = brkOn ? -46 : gasOn ? ST.accel * (1 - Math.pow(v / ST.vmax, 2)) : -(3 + .0006 * v * v);     // brake, gas or coasting
+  car.v = Math.max(0, v + (push - drag) * dt);
   car.x += Math.cos(car.h) * car.v * dt; car.y += Math.sin(car.h) * car.v * dt;
   let p = proj(car.x, car.y);
   if (Math.abs(p.d) > LIM) {      // wall: push back on track, lose speed by how square the hit was, point the car along the wall
@@ -363,10 +428,21 @@ function step(dt) {
     car.v *= 1 - 1.2 * dt;
     p = proj(car.x, car.y);
   }
+  if (kind === "race") for (const b of bots) {             // bumping the bots
+    const ds = lapDiff(b.s - prog), dd = b.d - p.d;
+    if (Math.abs(ds) < 5.5 && Math.abs(dd) < 2.7) {
+      const penS = 5.5 - Math.abs(ds), penD = 2.7 - Math.abs(dd);
+      if (penD < penS) { const m = -Math.sign(dd || 1) * penD * .7; car.x += Math.sin(p.th) * m; car.y -= Math.cos(p.th) * m; b.dOff += Math.sign(dd || 1) * penD * .3; car.v *= 1 - .4 * dt; }
+      else if (ds > 0) { if (car.v - b.v > 6) hitT = .3; car.v = Math.min(car.v, b.v * .97); car.x -= Math.cos(p.th) * penS * .5; car.y -= Math.sin(p.th) * penS * .5; }
+      else b.v = Math.min(b.v, car.v);
+      p = proj(car.x, car.y);
+    }
+  }
+  car.d = p.d;
   // lap timing: count distance forward along the track, a lap only counts with a full trip around
   let ds = p.s - lastS; if (ds > LEN / 2) ds -= LEN; if (ds < -LEN / 2) ds += LEN;
-  const before = ((lastS - S0) % LEN + LEN) % LEN, after = ((p.s - S0) % LEN + LEN) % LEN;
-  lapDist += ds; lastS = p.s; simT += dt;
+  const before = mod(lastS - S0, LEN), after = mod(p.s - S0, LEN);
+  lapDist += ds; prog += ds; lastS = p.s; raceT += dt;
   if (lapT >= 0) { lapT += dt; recT += dt; if (recT >= .1) { recT -= .1; rec.push(+car.x.toFixed(1), +car.y.toFixed(1), +car.h.toFixed(3)); } }
   if (before > LEN * .8 && after < LEN * .2 && ds > 0) {     // crossed the line going forward
     const frac = clamp(after / ds, 0, 1);                    // how much of this step was past the line
@@ -378,44 +454,91 @@ function lapDone(t) {
   const ms = Math.round(t * 1000); laps++; lastLap = ms; $("hLast").textContent = fmt(ms);
   const prev = best(), isBest = !prev || ms < prev;
   if (!runBest || ms < runBest) runBest = ms;
-  if (isBest) { store.set("best:" + me.name, ms); ghost = rec.slice(); store.set("ghost:" + me.name, JSON.stringify(ghost)); $("hBest").textContent = fmt(ms); }
+  if (isBest) { store.set("best:" + me.name, ms); store.set("ghost:" + me.name, JSON.stringify(rec)); if (kind === "practice") ghost = rec.slice(); $("hBest").textContent = fmt(ms); }
+  if (kind === "race" && laps >= RACE_LAPS) { finished = true; place = 1 + bots.filter(b => b.fin !== null).length; return; }
   flash(fmt(ms), isBest ? (prev ? "New best lap" : "First lap on the board") : "+" + ((ms - prev) / 1000).toFixed(2) + " off your best", isBest);
   if (isBest && navigator.vibrate) navigator.vibrate(60);
 }
 let flashTo = 0;
 function flash(big, small, good) { const f = $("flash"); f.innerHTML = esc(big) + "<small>" + esc(small) + "</small>"; f.style.color = good ? "var(--yel)" : "var(--fg)"; f.classList.add("on"); clearTimeout(flashTo); flashTo = setTimeout(() => f.classList.remove("on"), 2200); }
 
-function startRun() {
-  ST = stats(); resetCar(); runBest = 0; lastLap = 0; laps = 0; simT = 0; acc = 0;
-  try { ghost = JSON.parse(store.get("ghost:" + me.name) || "null"); } catch (e) { ghost = null; }
-  $("hBest").textContent = fmt(best()); $("hLast").textContent = "--"; $("lapnow").textContent = "0.00"; $("lapsub").textContent = "Warm up lap";
+// ---------- bot cars: each one keeps a lane, slows for the corners and moves over to pass
+const bots = [];
+function makeBots() {
+  if (bots.length) return;
+  const cols = PAL.filter(c => c.toLowerCase() !== me.body.toLowerCase());
+  const lanes = [4, -16, 22, -30, 12, -8, 32];
+  for (let i = 0; i < NB; i++) {      // i = 0 is the quickest and starts at the front
+    const b = { i, mesh: raceCar({ body: cols[i % cols.length] }), vmax: 131 - i * 1.3, grip: 33.5 - i * 1.15, acc: 23 - i * .5, base: lanes[i], s: 0, d: 0, dOff: 0, v: 0, fin: null, wait: 0 };
+    scene.add(b.mesh); bots.push(b);
+  }
+}
+function resetBots() { for (const b of bots) { const g = gridSlot(b.i); b.s = g.s; b.d = g.d; b.dOff = 0; b.v = 0; b.fin = null; b.wait = .12 + b.i * .05; b.mesh.visible = true; placeBot(b, 0); } }
+function placeBot(b, drift) { const q = spot(S0 + b.s, b.d); b.mesh.position.copy(V(q.x, q.y, .1)); b.mesh.rotation.y = q.th - drift; }
+function botLimit(b, s) { const q = spot(S0 + s, b.d); return q.arc ? Math.sqrt(b.grip * (R + b.d)) : b.vmax; }
+function botStep(dt) {
+  for (const b of bots) {
+    if (b.wait > 0) { b.wait -= dt; continue; }
+    // car right in front in my lane: move over, and hold its speed until there is room
+    let near = 1e9, block = null;
+    for (const o of bots) if (o !== b) { const ds = lapDiff(o.s - b.s); if (ds > 0 && ds < 26 && Math.abs(o.d - b.d) < 3.4 && ds < near) { near = ds; block = o; } }
+    { const ds = lapDiff(prog - b.s); if (ds > 0 && ds < 26 && Math.abs(car.d - b.d) < 3.4 && ds < near) { near = ds; block = car; } }
+    if (block) { let side = b.d <= block.d ? -1 : 1; if (Math.abs(b.d + side * 5) > 43) side = -side; b.dOff += side * 8 * dt; } else b.dOff -= Math.sign(b.dOff) * Math.min(Math.abs(b.dOff), 1.2 * dt);
+    const want = clamp(b.base + b.dOff, -44, 44), move = clamp(want - b.d, -7 * dt, 7 * dt); b.d += move;
+    const lim = Math.min(botLimit(b, b.s), botLimit(b, b.s + b.v * 1.3));
+    b.v = b.v > lim ? Math.max(lim, b.v - 30 * dt) : Math.min(lim, b.v + b.acc * (1 - Math.pow(b.v / b.vmax, 2)) * dt);
+    if (block && near < 9) b.v = Math.min(b.v, Math.max(block.v, 8));
+    const q = spot(S0 + b.s, b.d), adv = b.v * dt * (q.arc ? R / (R + b.d) : 1);
+    if (b.fin === null && b.s + adv >= RACE_LAPS * LEN) b.fin = raceT;
+    b.s += adv; placeBot(b, move / dt / Math.max(b.v, 10));
+  }
+}
+
+function startRun(k) {
+  kind = k; ST = stats(); runBest = 0; lastLap = 0; laps = 0; raceT = 0; acc = 0; finished = false; place = 0; gasOn = brkOn = 0; touchId = null;
+  if (kind === "race") { makeBots(); resetBots(); ghost = null; }
+  else { for (const b of bots) b.mesh.visible = false; try { ghost = JSON.parse(store.get("ghost:" + me.name) || "null"); } catch (e) { ghost = null; } }
+  resetCar();
+  $("hBest").textContent = fmt(best()); $("hLast").textContent = "--"; $("lapnow").textContent = "0.00"; $("posBig").hidden = kind !== "race";
   for (const s of screens) $(s).hidden = true; $("hud").hidden = false; $("tip").style.opacity = 1; tipT = 0;
+  // Android can lock the screen sideways for real. iPhones can't, so they get the turned view.
+  try { if (rot && document.documentElement.requestFullscreen && screen.orientation && screen.orientation.lock) document.documentElement.requestFullscreen().then(() => screen.orientation.lock("landscape")).catch(() => {}); } catch (e) {}
   const L = $("lights"), dots = [...L.children]; dots.forEach(d => d.className = ""); L.hidden = false; mode = "lights"; audioOn();
   let i = 0; const tick = () => { if (mode !== "lights") return; if (i < 3) { dots[i++].className = "r"; setTimeout(tick, 550); } else { dots.forEach(d => d.className = "g"); mode = "drive"; setTimeout(() => L.hidden = true, 700); } };
   setTimeout(tick, 350);
 }
 function endRun() {
-  mode = "menu"; $("hud").hidden = true; $("lights").hidden = true; audioOff(); ghostCar.visible = false;
-  const b = best(), saved = +store.get("saved:" + me.name) || 0;
+  mode = "menu"; $("hud").hidden = true; $("lights").hidden = true; audioOff(); ghostCar.visible = false; gasOn = brkOn = 0; hitT = 0; $("hit").style.opacity = 0; $("gas").classList.remove("on"); $("brk").classList.remove("on");
+  try { if (document.fullscreenElement) document.exitFullscreen(); } catch (e) {}
+  const b = best(), saved = +store.get("saved:" + me.name) || 0, race = kind === "race";
   $("rRun").textContent = fmt(runBest); $("rBest").textContent = fmt(b);
-  $("rHead").textContent = !runBest ? "No full lap yet" : runBest === b ? "New best lap" : "Best lap this run";
+  $("rPosBox").hidden = !race; $("rPos").textContent = finished ? "P" + place : "--";
+  $("rKind").textContent = race ? (finished ? "Race finished" : "Race stopped") : "Practice";
+  $("rHead").textContent = race && finished ? (place === 1 ? "You won" : "P" + place + " of " + (NB + 1)) : !runBest ? "No full lap yet" : runBest === b ? "New best lap" : "Back in the pits";
+  $("bAgain").textContent = race ? "Race again" : "Race the bots";
   const can = b && (!saved || b < saved);
   $("bSave").hidden = !can; $("bSave").disabled = false; $("bSave").textContent = "Save " + fmt(b) + " to leaderboard";
   const m = $("rMsg"); m.className = "msg";
-  m.textContent = !runBest ? "Cross the line, go all the way around and cross it again to set a time." : can ? "" : saved ? "Your best lap is already on the leaderboard." : "";
+  m.textContent = !runBest && !race ? "Cross the line, go all the way around and cross it again to set a time." : can ? "" : saved && runBest ? "Your best lap is already on the leaderboard." : "";
   fillGarage(); show("sResult");
 }
-$("bRace").onclick = startRun; $("bAgain").onclick = startRun; $("pit").onclick = endRun;
+$("bRace").onclick = () => startRun("race"); $("bAgain").onclick = () => startRun("race");
+$("bPrac").onclick = () => startRun("practice"); $("bPrac2").onclick = () => startRun("practice");
+$("pit").onclick = endRun;
 $("bHome").onclick = () => { fillGarage(); show("sGarage"); };
 
-// ---------- controls: one thumb. Touch anywhere, slide left or right from where you touched.
-function setSteerFromTouch(x) { steerIn = clamp((x - touchX0) / Math.max(70, innerWidth * .2), -1, 1); }
-canvas.addEventListener("pointerdown", e => { if (mode === "menu" || touchId !== null) return; touchId = e.pointerId; touchX0 = e.clientX; steerIn = 0; canvas.setPointerCapture(e.pointerId); });
-canvas.addEventListener("pointermove", e => { if (e.pointerId === touchId) setSteerFromTouch(e.clientX); });
+// ---------- controls: left thumb slides to steer, right thumb holds gas or brake
+canvas.addEventListener("pointerdown", e => { if (mode === "menu" || touchId !== null) return; touchId = e.pointerId; touchX0 = lx(e); steerIn = 0; try { canvas.setPointerCapture(e.pointerId); } catch (x) {} });
+canvas.addEventListener("pointermove", e => { if (e.pointerId === touchId) steerIn = clamp((lx(e) - touchX0) / Math.max(60, LW * .11), -1, 1); });
 const up = e => { if (e.pointerId === touchId) { touchId = null; steerIn = 0; } };
 canvas.addEventListener("pointerup", up); canvas.addEventListener("pointercancel", up);
-addEventListener("keydown", e => { if (e.key === "ArrowLeft" || e.key === "a") keyL = 1; if (e.key === "ArrowRight" || e.key === "d") keyR = 1; });
-addEventListener("keyup", e => { if (e.key === "ArrowLeft" || e.key === "a") keyL = 0; if (e.key === "ArrowRight" || e.key === "d") keyR = 0; });
+function pedal(id, set) {
+  const el = $(id), on = e => { e.preventDefault(); set(1); el.classList.add("on"); try { el.setPointerCapture(e.pointerId); } catch (x) {} }, off = () => { set(0); el.classList.remove("on"); };
+  el.addEventListener("pointerdown", on); el.addEventListener("pointerup", off); el.addEventListener("pointercancel", off); el.addEventListener("lostpointercapture", off);
+}
+pedal("gas", v => gasOn = v || keyG); pedal("brk", v => brkOn = v || keyB);
+const keys = (e, v) => { const k = e.key; if (k === "ArrowLeft" || k === "a") keyL = v; else if (k === "ArrowRight" || k === "d") keyR = v; else if (k === "ArrowUp" || k === "w") { keyG = v; gasOn = v; } else if (k === "ArrowDown" || k === "s" || k === " ") { keyB = v; brkOn = v; } else return; if (mode !== "menu") e.preventDefault(); };
+addEventListener("keydown", e => { if (e.target.tagName !== "INPUT") keys(e, 1); }); addEventListener("keyup", e => { if (e.target.tagName !== "INPUT") keys(e, 0); });
 document.addEventListener("visibilitychange", () => { if (document.hidden && mode !== "menu") endRun(); });
 document.addEventListener("contextmenu", e => e.preventDefault());
 
@@ -433,7 +556,10 @@ function audioOff() { if (gain) gain.gain.setTargetAtTime(0, AC.currentTime, .08
 $("mute").onclick = () => { muted = !muted; store.set("mute", muted ? "1" : "0"); paintMute(); if (muted) audioOff(); else if (mode !== "menu") audioOn(); };
 paintMute();
 
-const DBG = /[?&]debug/.test(location.search) ? (window.__ims = { car, proj, auto: null, sim(sec) { ST = stats(); for (let i = 0; i < sec / STEP; i++) { const u = clamp(DBG.auto(car, proj), -1, 1), tg = Math.sign(u) * Math.pow(Math.abs(u), 1.4); steer += (tg - steer) * Math.min(1, STEP * 14); step(STEP); } }, get me() { return me; }, get lap() { return { lapT, laps, lastLap, runBest, mode }; } }) : null;
+const DBG = /[?&]debug/.test(location.search) ? (window.__ims = { car, proj, bots, auto: null,
+  sim(sec) { mode = "drive"; for (let i = 0; i < sec / STEP && !finished; i++) { const u = clamp(DBG.auto(car, proj), -1, 1), tg = Math.sign(u) * Math.pow(Math.abs(u), 1.4); gasOn = 1; steer += (tg - steer) * Math.min(1, STEP * 14); step(STEP); if (kind === "race") botStep(STEP); } },
+  get me() { return me; }, get lap() { return { lapT, laps, lastLap, runBest, mode, kind, finished, place, raceT, prog }; } }) : null;
+
 // ---------- frame loop
 let lastNow = 0, slow = 0, menuA = 0;
 function frame(now) {
@@ -441,36 +567,38 @@ function frame(now) {
   const dt = Math.min(.1, (now - lastNow) / 1000 || 0); lastNow = now;
   if (dt > .034) { if (++slow > 90 && PR > 1) { PR = Math.max(1, PR - .5); renderer.setPixelRatio(PR); resize(); slow = 0; } } else slow = Math.max(0, slow - 1);
   if (mode === "drive" && me) {
-    if (DBG && DBG.auto) steerIn = clamp(DBG.auto(car, proj), -1, 1);
-    const k = keyR - keyL; if (DBG && DBG.auto) {} else if (touchId === null) steerIn = k ? clamp(steerIn + k * dt * 3.2, -1, 1) : steerIn * Math.max(0, 1 - dt * 9);
+    if (DBG && DBG.auto) { steerIn = clamp(DBG.auto(car, proj), -1, 1); gasOn = 1; }
+    else if (touchId === null) { const k = keyR - keyL; steerIn = k ? clamp(steerIn + k * dt * 3.2, -1, 1) : steerIn * Math.max(0, 1 - dt * 9); }
     const target = Math.sign(steerIn) * Math.pow(Math.abs(steerIn), 1.4);
-    acc += dt; while (acc >= STEP) { steer += (target - steer) * Math.min(1, STEP * 14); step(STEP); acc -= STEP; }
+    acc += dt; while (acc >= STEP) { steer += (target - steer) * Math.min(1, STEP * 14); if (!finished) step(STEP); if (kind === "race") botStep(STEP); acc -= STEP; }
     car.slip += (-steer * (.05 + .22 * car.skid) - car.slip) * Math.min(1, dt * 8);
     $("lapnow").textContent = lapT >= 0 ? (lapT >= 60 ? fmt(lapT * 1000) : lapT.toFixed(2)) : "0.00";
-    $("lapsub").textContent = lapT >= 0 ? "Lap " + (laps + 1) : "Warm up lap";
-    $("spd").firstChild.nodeValue = Math.round(car.v * 2.237);
+    $("lapsub").textContent = kind === "race" ? "Lap " + Math.min(laps + 1, RACE_LAPS) + " of " + RACE_LAPS : lapT >= 0 ? "Lap " + (laps + 1) : "Warm up lap";
+    if (kind === "race") { const pl = 1 + bots.filter(b => b.fin !== null || b.s > prog).length; $("posBig").firstChild.nodeValue = "P" + pl; }
+    $("spdN").textContent = Math.round(car.v * 2.237);
     $("knob").style.left = (50 + steerIn * 46) + "%";
     tipT += dt; if (tipT > 7) $("tip").style.opacity = 0;
     if (hitT > 0) { hitT -= dt; $("hit").style.opacity = hitT > 0 ? 1 : 0; if (hitT > .3 && navigator.vibrate) navigator.vibrate(30); }
-    if (osc && !muted) osc.frequency.setTargetAtTime(55 + car.v * 1.5 + car.skid * 25, AC.currentTime, .05);
-    // your best lap drives along as a ghost
+    if (osc && !muted) osc.frequency.setTargetAtTime(55 + car.v * 1.5 + car.skid * 25 - (gasOn ? 0 : 14), AC.currentTime, .05);
+    // practice: your best lap drives along as a ghost
     if (ghost && lapT >= 0 && ghost.length >= 6) {
       const f = lapT / .1, i = Math.floor(f), u = f - i, n = ghost.length / 3;
       if (i + 1 < n) { const a = i * 3, b = a + 3; ghostCar.position.copy(V(ghost[a] + (ghost[b] - ghost[a]) * u, ghost[a + 1] + (ghost[b + 1] - ghost[a + 1]) * u, .1)); ghostCar.rotation.y = ghost[a + 2] + wrap(ghost[b + 2] - ghost[a + 2]) * u; ghostCar.visible = true; } else ghostCar.visible = false;
     } else ghostCar.visible = false;
+    if (finished) endRun();
   }
   placeCar();
   if (mode === "menu") {            // slow circle around the car behind the menus
     menuA += dt * .25; const cx = me ? car.x : -330, cy = me ? car.y : -(HY + R);
-    camera.fov = 50; camera.position.copy(V(cx + Math.cos(menuA) * 15, cy + Math.sin(menuA) * 15, 5.5)); camera.lookAt(V(cx, cy, 1.2));
-    camera.setViewOffset(innerWidth, innerHeight, 0, innerHeight * .24, innerWidth, innerHeight);     // car sits above the menu card
+    camera.fov = 38; camera.position.copy(V(cx + Math.cos(menuA) * 15, cy + Math.sin(menuA) * 15, 5)); camera.lookAt(V(cx, cy, 1.2));
+    camera.setViewOffset(LW, LH, 0, LH * .26, LW, LH);          // car sits above the menu card
   } else {
     if (camera.view) camera.clearViewOffset();
     camH += wrap(car.h - camH) * Math.min(1, dt * 5.5);
-    const sp = ST ? car.v / ST.vmax : 0, back = 12.5 + sp * 2.5, sh = hitT > 0 ? (Math.random() - .5) * .5 : 0;
-    camera.fov = 62 + sp * 16;
-    camera.position.copy(V(car.x - Math.cos(camH) * back, car.y - Math.sin(camH) * back + sh, 5.4));
-    camera.lookAt(V(car.x + Math.cos(camH) * 14, car.y + Math.sin(camH) * 14, 1.6));
+    const sp = ST ? car.v / ST.vmax : 0, back = 11 + sp * 2.5, sh = hitT > 0 ? (Math.random() - .5) * .5 : 0;
+    camera.fov = 52 + sp * 13;
+    camera.position.copy(V(car.x - Math.cos(camH) * back, car.y - Math.sin(camH) * back + sh, 4.4));
+    camera.lookAt(V(car.x + Math.cos(camH) * 14, car.y + Math.sin(camH) * 14, 1.5));
   }
   camera.updateProjectionMatrix();
   renderer.render(scene, camera);
@@ -482,9 +610,9 @@ async function api(body) {
   const r = await fetch(ENDPOINT, body ? { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(body) } : {});
   return r.json();
 }
-function drawBoard(rows, total) {
+function drawBoard(rows) {
   const L = $("bList");
-  if (!rows.length) { L.innerHTML = "<p style='text-align:center;margin:18px 0'>No laps saved yet. Be the first.</p>"; return; }
+  if (!rows.length) { L.innerHTML = "<p style='text-align:center;margin:14px 0'>No laps saved yet. Be the first.</p>"; return; }
   L.innerHTML = rows.map((r, i) => "<div class='lr" + (me && r.n === me.name ? " me" : "") + "'><span class='p'>" + (i + 1) + "</span><span class='n'>@" + esc(r.n) + (r.up ? "<small>UPGRADED</small>" : "") + "</span><span class='t'>" + fmt(r.t) + "</span></div>").join("");
   const mine = L.querySelector(".me"); if (mine) mine.scrollIntoView({ block: "center" });
 }
@@ -493,7 +621,7 @@ async function openBoard() {
   const m = $("bMsg"); m.className = "msg"; $("bList").innerHTML = "";
   if (!ENDPOINT) { m.textContent = "The shared leaderboard isn't switched on yet. These are the times saved on this phone."; const b = me && +store.get("saved:" + me.name); drawBoard(b ? [{ n: me.name, t: b, up: upTotal() }] : []); return; }
   m.textContent = "Loading...";
-  try { const d = await api(); m.textContent = d.total > d.rows.length ? "Top " + d.rows.length + " of " + d.total + " drivers" : d.total + (d.total === 1 ? " driver" : " drivers") + " so far"; drawBoard(d.rows, d.total); const i = me ? d.rows.findIndex(r => r.n === me.name) : -1; if (i >= 0) store.set("rank:" + me.name, i + 1); }
+  try { const d = await api(); m.textContent = d.total > d.rows.length ? "Top " + d.rows.length + " of " + d.total + " drivers" : d.total + (d.total === 1 ? " driver" : " drivers") + " so far"; drawBoard(d.rows); const i = me ? d.rows.findIndex(r => r.n === me.name) : -1; if (i >= 0) store.set("rank:" + me.name, i + 1); }
   catch (e) { m.className = "msg bad"; m.textContent = "Couldn't load the leaderboard. Try again in a bit."; }
 }
 $("bBoard").onclick = openBoard; $("bBoard2").onclick = openBoard;
@@ -513,7 +641,7 @@ $("bSave").onclick = async () => {
 $("bUpg").onclick = () => {
   $("uNote").textContent = "@" + me.name + " and the upgrade name";
   $("uList").innerHTML = UPG.map(u => { const lv = me.up[u.id], max = lv >= 3;
-    return "<div class='up'><div class='i'><b>" + u.name + "</b><div>" + u.what + "</div><div class='pips'>" + [0, 1, 2].map(i => "<i" + (i < lv ? " class='on'" : "") + "></i>").join("") + "</div></div>" +
+    return "<div class='up'><b>" + u.name + "</b><div>" + u.what + "</div><div class='pips'>" + [0, 1, 2].map(i => "<i" + (i < lv ? " class='on'" : "") + "></i>").join("") + "</div>" +
       (max ? "<span class='k'>Maxed</span>" : "<a class='btn' target='_blank' rel='noopener' href='" + KOFI + "'>Level " + (lv + 1) + " &middot; $" + PRICE + "</a>") + "</div>"; }).join("");
   for (const s of screens) $(s).hidden = s !== "sUpg";
 };
