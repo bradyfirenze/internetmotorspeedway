@@ -1,6 +1,14 @@
 {
  "winners": [
   {
+   "day": 6,
+   "name": "rorring3",
+   "track": "Greg Biffle Motor Speedway",
+   "date": "Nov 11, 2026",
+   "cars": 4126,
+   "img": "museum/day6.jpg"
+  },
+  {
    "day": 5,
    "name": "tom.worthington46",
    "track": "Kyle Busch Motor Speedway",
