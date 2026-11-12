@@ -156,7 +156,7 @@ function ease(u) { return u < .5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) /
 const VIEWS = {
   track: () => flyTo(new THREE.Vector3(-150, 950, 1050), new THREE.Vector3(0, 0, 60)),
   grid: () => { const f = DATA.front; flyTo(V(f.x + 70, f.y - 120, 60), V(f.x - 150, f.y + 20, 0)); },
-  ads: (() => { let k = 0; return () => { const x = (k++ % 2 ? -1 : 1) * DATA.rect_x; flyTo(V(x * .86, -330, 520), V(x, -30, 0)); }; })(),
+  ads: (() => { let k = 0; return () => { const e = k++ % 2, x = (e ? -1 : 1) * DATA.rect_x; if (e) flyTo(V(x * .86, -330, 520), V(x, -30, 0)); else flyTo(V(x + 300 * Math.max(1, .95 / camera.aspect), 0, 260 * Math.max(1, .95 / camera.aspect)), V(x - 10, 0, 0)); }; })(),
   boards: (() => { let k = 0; return () => { const b = DATA.boards[k++ % DATA.boards.length];
     flyTo(V(b.x + b.fx * 190, b.y + b.fy * 190, b.z + 6), V(b.x, b.y, b.z - 4)); }; })(),
   museum: () => { const m = DATA.museum; flyTo(V(m.x, m.y - m.d / 2 - 42, 9), V(m.x, m.y - 6, 4)); },
@@ -169,7 +169,7 @@ document.querySelectorAll(".chip").forEach(b => b.addEventListener("click", () =
   if (DATA) VIEWS[b.dataset.v]();
   setTag(null);
   const m = document.getElementById("msg");
-  if (b.dataset.v === "ads") m.innerHTML = 'Today\'s infield: <b>Stardubs</b> and <b>Rust-eze</b>. Tap again for the other end. <a href="' + KOFI + '" target="_blank" rel="noopener">Get yours: $30</a>';
+  if (b.dataset.v === "ads") m.innerHTML = 'Today\'s infield: <b>TZO Designs</b> in turns 1 and 2, <b>Rust-eze</b> in turns 3 and 4. Tap again for the other end. <a href="' + KOFI + '" target="_blank" rel="noopener">Get yours: $30</a>';
   else if (b.dataset.v === "boards") m.innerHTML = 'Tap again for the next billboard. 8 spots on the stands. <a href="' + KOFI + '" target="_blank" rel="noopener">Get one: $5</a>';
   else m.textContent = "";
 }));
@@ -233,7 +233,7 @@ Promise.all([carsP, glbP]).then(([d, gltf]) => {
   ring.rotation.x = -Math.PI / 2; ring.position.y = .3; hl.add(ring);
   const beam = new THREE.Mesh(new THREE.CylinderGeometry(.35, .35, 40, 12), new THREE.MeshBasicMaterial({ color: 0xffcc18, transparent: true, opacity: .55 }));
   beam.position.y = 22; hl.add(beam); hl.visible = false; scene.add(hl);
-  addGarages(); addMuseum(gltf.scene);
+  addGarages(); addMuseum(gltf.scene); addInfield();
   camera.position.set(-150, 950, 1050); controls.target.set(0, 0, 60); controls.update();
   document.getElementById("load").hidden = true;
   const u = new URLSearchParams(location.search).get("u");
@@ -370,6 +370,14 @@ function goldCar(x, y, k, mat, blk) {
   for (const a of [.72, -.72]) add(new THREE.BoxGeometry(.5 * k, .25 * k, .04 * k), LIT_M, a * k, -2.31 * k, .85 * k);
   for (const a of [1.1, -1.1]) for (const b of [1.5, -1.5]) add(new THREE.BoxGeometry(.4 * k, .9 * k, .9 * k), blk, a * k, b * k, .45 * k);
   g.position.copy(V(x, y, 2.2)); scene.add(g); return g;
+}
+// Infield sponsor on the turn 1/2 box (+rect_x): TZO Designs (Nov 11), laid over the baked art. Logo reads upright from turn 1/2.
+function addInfield() {
+  new THREE.TextureLoader().load("tzo_infield.jpg", t => {
+    t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(188, 308), new THREE.MeshLambertMaterial({ map: t }));
+    p.rotation.x = -Math.PI / 2; p.position.copy(V(DATA.rect_x, 0, .95)); scene.add(p);
+  });
 }
 function addMuseum(root) {
   fetch("../results/museum.json", { cache: "no-cache" }).then(r => r.json()).then(mj => {
