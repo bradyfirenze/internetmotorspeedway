@@ -2,6 +2,12 @@
   "frames": 36,
   "cover": 4,
   "cars": [
+    {"ig": "fixit_felix", "num": "9", "body": "White", "roof": "Black", "bodyHex": "#eeeeee", "roofHex": "#111111", "since": "2026-11-12"},
+    {"ig": "zac_cronn01", "num": "3", "body": "Black", "roof": "Silver", "bodyHex": "#141416", "roofHex": "#9a9da2", "since": "2026-11-12"},
+    {"ig": "its.jaydubs", "num": "32", "body": "Orange", "roof": "Light blue", "bodyHex": "#ff6a00", "roofHex": "#8ccbf7", "since": "2026-11-12"},
+    {"ig": "outsiderz_jay", "num": "17", "body": "Gray", "roof": "Black", "bodyHex": "#6f7276", "roofHex": "#111111", "since": "2026-11-12"},
+    {"ig": "frankieferrara16", "num": "16", "body": "Grey", "roof": "Purple", "bodyHex": "#6f7276", "roofHex": "#7a2ee0", "since": "2026-11-12"},
+    {"ig": "df13lds", "num": "13", "body": "Black", "roof": "Dark green", "bodyHex": "#141416", "roofHex": "#0f4d1e", "since": "2026-11-12"},
     {"ig": "quinns_garage_gaming", "num": "77", "body": "Black", "roof": "Red", "bodyHex": "#141416", "roofHex": "#d9201c", "since": "2026-11-10"},
     {"ig": "thehighdinosaurlabs", "num": "4", "body": "Papaya orange", "roof": "Black", "bodyHex": "#ff6a00", "roofHex": "#111111", "since": "2026-11-10"},
     {"ig": "0.knucklehead.0", "num": "45", "body": "Silver", "roof": "Kona blue", "bodyHex": "#a4a8ae", "roofHex": "#1d4690", "since": "2026-11-10"},
