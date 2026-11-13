@@ -1,6 +1,14 @@
 {
  "winners": [
   {
+   "day": 7,
+   "name": "_polmat_",
+   "track": "Charlie Kirk Motor Speedway",
+   "date": "Nov 12, 2026",
+   "cars": 11467,
+   "img": "museum/day7.jpg"
+  },
+  {
    "day": 6,
    "name": "rorring3",
    "track": "Greg Biffle Motor Speedway",
