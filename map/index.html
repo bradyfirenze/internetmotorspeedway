@@ -168,6 +168,7 @@ let DATA = null, carsByName = new Map(), hl = null, tagAt = null;
 
 function resize() { const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
 addEventListener("resize", resize); resize();
+if (new URLSearchParams(location.search).has("debug")) window.__map = { flyTo, V };   // ?debug only: camera moves for checks
 
 // smooth camera moves
 let fly = null;
