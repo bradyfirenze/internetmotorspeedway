@@ -1,5 +1,5 @@
 {
-  "note": "Brady Nov 12: NO sponsor art on the map's infield (mode 'off'). Sponsors are listed in the Sponsors panel instead (from ../sponsors/sponsors.json). mode 'rotate' / 'four' still work for previews with ?infield=rotate|four. prices = the Ko-fi buttons and lines (Brady Nov 12: car $1, wall $10, billboard $15, infield $50 or $200 a week).",
+  "note": "Brady Nov 12: NO sponsor art on the map's infield (mode 'off'). Sponsors are listed in the Sponsors panel instead (from ../sponsors/sponsors.json). mode 'rotate' / 'four' still work for previews with ?infield=rotate|four. prices = the Ko-fi buttons and lines (Brady Nov 12: car $1, wall $10, billboard $15, infield $50 or $200 a week; Nov 13: infield back to $30 a race, $200 a week stays).",
   "mode": "off",
   "today": [],
   "sponsors": [
@@ -37,10 +37,10 @@
     "car": "Custom car $1",
     "wall": "Wall ad $10",
     "board": "Billboard $15",
-    "infield": "Infield ad $50",
+    "infield": "Infield ad $30",
     "board_line": "8 spots on the stands. Get one: $15 a race.",
     "wall_line": "Logo slots on the track wall. Get one: $10 a race.",
-    "infield_line": "Get yours: $50 a race, or a full week for $200.",
+    "infield_line": "Get yours: $30 a race, or a full week for $200.",
     "long_line": "Want a weekly or monthly deal, or to present the trophy or the track? DM @internetmotorspeedway."
   }
 }

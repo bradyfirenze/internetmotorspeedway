@@ -123,7 +123,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
       <a class="main" id="pcar" href="https://ko-fi.com/internetmotorspeedway" target="_blank" rel="noopener">Custom car $1</a>
       <a href="https://ko-fi.com/internetmotorspeedway" target="_blank" rel="noopener" id="pwall">Wall ad $10</a>
       <a href="https://ko-fi.com/internetmotorspeedway" target="_blank" rel="noopener" id="pboard">Billboard $15</a>
-      <a href="https://ko-fi.com/internetmotorspeedway" target="_blank" rel="noopener" id="pinfield">Infield ad $50</a>
+      <a href="https://ko-fi.com/internetmotorspeedway" target="_blank" rel="noopener" id="pinfield">Infield ad $30</a>
     </div>
     <div class="hint">Drag to move · pinch or scroll to zoom · two fingers to turn</div>
   </div>
@@ -134,7 +134,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
   <div class="acts" id="cacts"></div>
   <div class="dots" id="cdots"></div>
 </div>
-<aside id="spons" aria-label="Sponsors"><button class="x" id="sx" aria-label="Close sponsors">&times;</button><h2>Sponsors</h2><ol id="slist"><li><span>Loading</span></li></ol><div class="deal" id="sdeal"><b>Sponsor the speedway</b><span id="sinf">Infield: $50 a race, or a full week for $200.</span><span id="swall">Logo slots on the track wall. Get one: $10 a race.</span><span id="sboard">8 spots on the stands. Get one: $15 a race.</span><span id="slong">Want a weekly or monthly deal, or to present the trophy or the track? <a href="https://instagram.com/internetmotorspeedway" target="_blank" rel="noopener">DM @internetmotorspeedway</a>.</span><a class="kofi" href="https://ko-fi.com/internetmotorspeedway" target="_blank" rel="noopener">Get a spot on Ko-fi</a></div><a class="all" href="../sponsors/">See every sponsor &rarr;</a></aside>
+<aside id="spons" aria-label="Sponsors"><button class="x" id="sx" aria-label="Close sponsors">&times;</button><h2>Sponsors</h2><ol id="slist"><li><span>Loading</span></li></ol><div class="deal" id="sdeal"><b>Sponsor the speedway</b><span id="sinf">Infield: $30 a race, or a full week for $200.</span><span id="swall">Logo slots on the track wall. Get one: $10 a race.</span><span id="sboard">8 spots on the stands. Get one: $15 a race.</span><span id="slong">Want a weekly or monthly deal, or to present the trophy or the track? <a href="https://instagram.com/internetmotorspeedway" target="_blank" rel="noopener">DM @internetmotorspeedway</a>.</span><a class="kofi" href="https://ko-fi.com/internetmotorspeedway" target="_blank" rel="noopener">Get a spot on Ko-fi</a></div><a class="all" href="../sponsors/">See every sponsor &rarr;</a></aside>
 <div class="foot"><div><b id="cnt">0</b> followers have a car</div><button id="sbtn" aria-controls="spons" aria-expanded="false">Sponsors</button><a href="../results/">Race results</a></div>
 <script type="module">
 import * as THREE from "three";
@@ -418,7 +418,7 @@ let SP = null; const SPTEX = [];
 renderer.domElement.addEventListener("webglcontextrestored", () => SPTEX.forEach(t => t.needsUpdate = true));   // phones can drop the GL context: redraw the sponsor art
 const esc0 = s => String(s).replace(/[&<>"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[ch]);
 function adsMsg() {
-  const buy = ' <a href="' + KOFI + '" target="_blank" rel="noopener">' + esc0((SP && SP.prices && SP.prices.infield_line) || "Get yours: $50 a race, or a full week for $200.") + '</a>';
+  const buy = ' <a href="' + KOFI + '" target="_blank" rel="noopener">' + esc0((SP && SP.prices && SP.prices.infield_line) || "Get yours: $30 a race, or a full week for $200.") + '</a>';
   if (!SP) return "Infield sponsors are loading." + buy;
   const all = SP.sponsors.map(x => "<b>" + esc0(x.name) + "</b>");
   if (SP.mode === "four") return "Infield sponsors: " + all.slice(0, -1).join(", ") + " and " + all[all.length - 1] + ", all down at once. Tap again for the other end." + buy;
