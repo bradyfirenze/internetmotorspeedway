@@ -335,6 +335,7 @@ function addGarages() {
       g.userData.href = "../cars/#" + encodeURIComponent(c.ig); g.userData.show = ["garages", c.ig]; scene.add(g); PICK.push(g);
       CTAGS.push({ el: mkTag((c.noig ? "" : "@") + c.ig + (c.num ? " #" + c.num : ""), g.userData.href), at: V(x, GY + 4.6, 4.6) });
     }
+    GCARS.reverse();   // seen from the infield, higher x is on the LEFT: list runs left to right on screen (empty bay, newest ... oldest), so the right arrow moves right
     CTAGS.push({ el: mkTag("Custom car garages", "#cars", true, true), at: V(GX, GY + D, 10.5) });
     if (pendingShow) { const p = pendingShow; pendingShow = null; startShow(...p); }
   }).catch(() => {});
@@ -498,8 +499,9 @@ function startShow(kind, pick) {
   document.querySelectorAll("[data-show]").forEach(a => a.classList.toggle("on", a.dataset.show === kind));
   let i = 0;
   if (typeof pick === "number" && pick >= 0) i = pick;
-  else if (pick === "__empty") i = list.length - 1;
+  else if (pick === "__empty") i = Math.max(0, list.findIndex(c => c.empty));
   else if (pick) i = Math.max(0, list.findIndex(c => c.ig === pick));
+  else if (kind !== "museum") i = Math.max(0, list.findIndex(c => !c.empty));   // start on the newest car, not the empty bay
   const fresh = !SHOW || SHOW.kind !== kind;
   SHOW = { kind, list, i: -1 };
   history.replaceState(null, "", kind === "museum" ? "#museum" : "#cars");
