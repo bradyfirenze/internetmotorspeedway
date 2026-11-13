@@ -113,6 +113,9 @@ const $ = id => document.getElementById(id);
 let DATA, PIT, bays = [], active = -1, last = 0, inside = false;
 const src = (ig, i) => "img/" + ig + "/" + String(i).padStart(2, "0") + ".jpg";
 
+// Cars with no IG handle yet (noig) show the Ko-fi name with no @ and no link.
+const AT = c => (c && c.noig ? "" : "@") + (c ? c.ig : "");
+const carOf = ig => (DATA.cars || []).find(c => c.ig === ig);
 // ---------- Garages (inside view)
 function makeBay(car, i, n) {
   const b = document.createElement("section"); b.className = "bay"; b.dataset.i = i;
@@ -120,9 +123,9 @@ function makeBay(car, i, n) {
     '<div class="who"><div class="nm"><a target="_blank" rel="noopener"></a></div><div class="no"></div></div><div class="paint"></div>' +
     '<div class="next">' + (i < n - 1 ? "Swipe up for the next car<b>↑</b>" : "Swipe up to get yours<b>↑</b>") + '</div>';
   const st = b.querySelector(".stage"), img = b.querySelector("img"), a = b.querySelector(".nm a");
-  st.setAttribute("aria-label", "@" + car.ig + " custom car, drag to spin");
-  img.src = src(car.ig, DATA.cover); img.alt = "@" + car.ig + " custom car" + (car.num ? " #" + car.num : "");
-  a.href = "https://instagram.com/" + car.ig; a.textContent = "@" + car.ig;
+  st.setAttribute("aria-label", AT(car) + " custom car, drag to spin");
+  img.src = src(car.ig, DATA.cover); img.alt = AT(car) + " custom car" + (car.num ? " #" + car.num : "");
+  if (!car.noig) a.href = "https://instagram.com/" + car.ig; a.textContent = AT(car);
   b.querySelector(".no").textContent = car.num ? "#" + car.num : "";
   for (const [k, hex, nm] of [["Body", car.bodyHex, car.body], ["Roof", car.roofHex, car.roof]]) {
     const s = document.createElement("span"), d = document.createElement("i"); d.style.background = hex; s.append(d, k + ": " + nm); b.querySelector(".paint").append(s);
@@ -209,13 +212,13 @@ async function load() {
     const i = sp.kind === "empty" ? n : DATA.cars.findIndex(c => c.ig === sp.ig); if (i < 0) return;
     const b = document.createElement("button"); b.type = "button"; b.className = "spot" + (sp.kind === "empty" ? " empty" : "");
     Object.assign(b.style, { left: sp.x * 100 + "%", top: sp.y * 100 + "%", width: sp.w * 100 + "%", height: sp.h * 100 + "%" });
-    b.innerHTML = '<span class="tag"></span>'; b.querySelector(".tag").textContent = sp.kind === "empty" ? "Your car here" : "@" + sp.ig;
-    b.setAttribute("aria-label", sp.kind === "empty" ? "Empty garage, get your own custom car" : "Go into @" + sp.ig + "'s garage");
+    b.innerHTML = '<span class="tag"></span>'; b.querySelector(".tag").textContent = sp.kind === "empty" ? "Your car here" : AT(carOf(sp.ig));
+    b.setAttribute("aria-label", sp.kind === "empty" ? "Empty garage, get your own custom car" : "Go into " + AT(carOf(sp.ig)) + "'s garage");
     b.addEventListener("click", open(i)); lane.append(b);
   });
   DATA.cars.forEach((car, i) => {
     const c = document.createElement("button"); c.type = "button"; c.innerHTML = "<i></i><span></span>";
-    c.querySelector("i").style.background = car.bodyHex; c.querySelector("span").textContent = "@" + car.ig + (car.num ? " #" + car.num : "");
+    c.querySelector("i").style.background = car.bodyHex; c.querySelector("span").textContent = AT(car) + (car.num ? " #" + car.num : "");
     c.addEventListener("click", open(i)); $("chips").append(c);
   });
   const y = document.createElement("button"); y.type = "button"; y.className = "you"; y.textContent = "+ Your car here"; y.addEventListener("click", open(n)); $("chips").append(y);

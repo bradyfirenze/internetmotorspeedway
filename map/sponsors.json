@@ -1,0 +1,43 @@
+{
+  "note": "Brady Nov 12: NO sponsor art on the map's infield (mode 'off'). Sponsors are listed in the Sponsors panel instead (from ../sponsors/sponsors.json). mode 'rotate' / 'four' still work for previews with ?infield=rotate|four. prices = the Ko-fi button labels and lines (Brady Nov 12: infield $50 a race or $200 a week, billboards unchanged).",
+  "mode": "off",
+  "today": [],
+  "sponsors": [
+    {
+      "name": "TZO Designs",
+      "ig": "tzo.designs",
+      "img": "tzo_infield.jpg",
+      "turned": -90
+    },
+    {
+      "name": "Stardubs",
+      "img": "stardubs_infield.jpg"
+    },
+    {
+      "name": "Black Flag Motorsports",
+      "img": "blackflag_infield.jpg"
+    },
+    {
+      "name": "Nobelle",
+      "text": "NOBELLE.COM"
+    },
+    {
+      "name": "Efii",
+      "img": "efii_infield.jpg",
+      "img34": "efii_infield_turn34.jpg",
+      "turned": -90
+    },
+    {
+      "name": "Wristify",
+      "ig": "wristify.me",
+      "img": "wristify_infield.jpg"
+    }
+  ],
+  "prices": {
+    "car": "Custom car $1",
+    "board": "Billboard $5",
+    "infield": "Infield ad $50",
+    "infield_line": "Get yours: $50 a race, or a full week for $200.",
+    "board_line": "8 spots on the stands. Get one: $5"
+  }
+}

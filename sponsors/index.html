@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sponsors | Internet Motor Speedway</title>
+<meta name="description" content="Every sponsor of the Internet Motor Speedway, on the track today or not.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;600;700&display=swap">
+<style>
+:root {
+  --bg: #111318; --card: #1c2028; --line: #2d323d; --fg: #f3f4f6; --muted: #9aa1ad; --yel: #ffcc18;
+  --display: "Anton", Impact, "Arial Narrow", sans-serif;
+  --body: "Archivo", -apple-system, "Helvetica Neue", Arial, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--body); }
+.bar { position: sticky; top: 0; z-index: 2; padding: calc(10px + env(safe-area-inset-top)) 16px 10px; display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--bg); border-bottom: 1px solid var(--line); }
+.bar a { color: var(--muted); text-decoration: none; font: 600 14px var(--body); }
+.bar h1 { font-family: var(--display); font-weight: 400; text-transform: uppercase; font-size: 24px; margin: 0; }
+.bar h1 span { color: var(--yel); }
+main { max-width: 760px; margin: 0 auto; padding: 18px 16px calc(28px + env(safe-area-inset-bottom)); }
+.lede { color: var(--muted); font-size: 15px; line-height: 1.45; margin: 0 0 18px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+.sp { background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; }
+.art { aspect-ratio: 4 / 3; background: #0b0c10; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.art img { width: 100%; height: 100%; object-fit: contain; }
+.art .word { font-family: var(--display); text-transform: uppercase; font-size: 30px; color: var(--fg); padding: 0 12px; text-align: center; line-height: 1.05; word-break: break-word; }
+.info { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.name { font-weight: 700; font-size: 17px; }
+.meta { color: var(--muted); font-size: 13px; }
+.tag { color: var(--fg); font-style: italic; font-size: 14px; }
+.about { color: var(--muted); font-size: 13px; line-height: 1.4; }
+.info a { color: var(--yel); text-decoration: none; font-weight: 600; font-size: 14px; }
+.cta { margin-top: 22px; background: var(--card); border: 1px dashed var(--yel); border-radius: 14px; padding: 16px; }
+.cta b { color: var(--yel); }
+.cta p { margin: 0 0 10px; color: var(--muted); line-height: 1.45; font-size: 15px; }
+.cta a { display: inline-block; background: var(--yel); color: #111; text-decoration: none; font-weight: 700; padding: 10px 14px; border-radius: 999px; }
+</style>
+</head>
+<body>
+<div class="bar"><a href="../">← Home</a><h1>Our <span>sponsors</span></h1><a href="../map/">3D track</a></div>
+<main>
+  <p class="lede">These are the people and brands who back the Internet Motor Speedway. Everyone who has ever sponsored stays on this list. Sponsors never change who wins. Every winner is random.</p>
+  <div class="grid" id="grid"></div>
+  <div class="cta">
+    <p>Want your logo on the track? <b>Sponsor a race</b> on Ko-fi and DM your logo to @internetmotorspeedway.</p>
+    <a href="https://ko-fi.com/internetmotorspeedway" target="_blank" rel="noopener">Become a sponsor</a>
+  </div>
+</main>
+<script>
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const fmt = d => new Date(d + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" });
+fetch("sponsors.json", { cache: "no-cache" }).then(r => r.json()).then(data => {
+  document.getElementById("grid").innerHTML = data.sponsors.map(s => {
+    const art = s.img ? `<img src="${esc(s.img)}" alt="${esc(s.name)} logo" loading="lazy"${s.turned ? ' class="turned"' : ""}>` : `<div class="word">${esc(s.name)}</div>`;
+    const link = s.ig ? `<a href="https://instagram.com/${esc(s.ig)}" target="_blank" rel="noopener">@${esc(s.ig)}</a>`
+               : s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.url.replace(/^https?:\/\//, ""))}</a>` : "";
+    return `<div class="sp"><div class="art">${art}</div><div class="info">
+      <div class="name">${esc(s.name)}</div>
+      <div class="meta">${esc(s.spot)} sponsor since ${fmt(s.since)}</div>
+      ${s.tagline ? `<div class="tag">&ldquo;${esc(s.tagline)}&rdquo;</div>` : ""}${s.about ? `<div class="about">${esc(s.about)}</div>` : ""}${link}</div></div>`;
+  }).join("");
+});
+</script>
+</body>
+</html>

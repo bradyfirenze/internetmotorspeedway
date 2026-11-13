@@ -1,0 +1,47 @@
+{
+ "note": "Every paid sponsor, ever. Newest first. Read by /sponsors/ AND the map's Sponsors list (site refresh chat), so keep it current. Art copies in sponsors/img/.",
+ "sponsors": [
+  {
+   "name": "Efii",
+   "spot": "Infield",
+   "since": "2026-11-12",
+   "about": "Mental health awareness from North Queensland, Australia. Efii is life spelled backwards.",
+   "img": "img/efii.jpg",
+   "tagline": "Live Life Backward"
+  },
+  {
+   "name": "Wristify",
+   "ig": "wristify.me",
+   "spot": "Infield",
+   "since": "2026-11-12",
+   "img": "img/wristify.jpg"
+  },
+  {
+   "name": "Nobelle",
+   "url": "https://nobelle.com",
+   "spot": "Infield",
+   "since": "2026-11-12",
+   "img": null
+  },
+  {
+   "name": "TZO Designs",
+   "ig": "tzo.designs",
+   "spot": "Infield",
+   "since": "2026-11-11",
+   "img": "img/tzo.jpg"
+  },
+  {
+   "name": "Black Flag Motorsports",
+   "spot": "Infield",
+   "since": "2026-11-08",
+   "img": "img/blackflag.jpg"
+  },
+  {
+   "name": "Stardubs",
+   "ig": "stardubs",
+   "spot": "Infield",
+   "since": "2026-11-08",
+   "img": "img/stardubs.jpg"
+  }
+ ]
+}

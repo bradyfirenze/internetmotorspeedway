@@ -36,6 +36,24 @@ input:focus { border-color: var(--yel); }
 .foot { position: fixed; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-between; gap: 8px; padding: 0 max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left)); pointer-events: none; }
 .foot div, .foot a { pointer-events: auto; background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 7px 9px; font: 700 11px var(--body); letter-spacing: .06em; text-transform: uppercase; color: var(--fg); text-decoration: none; }
 .foot b { color: var(--yel); }
+/* Sponsors list (Brady Nov 12): everyone who has ever sponsored. Right side on wide screens, a pull-up sheet on phones. */
+#spons { position: fixed; z-index: 2; right: max(10px, env(safe-area-inset-right)); top: max(10px, env(safe-area-inset-top)); width: 230px; max-height: calc(100% - 80px); overflow: auto;
+  background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+#spons h2 { margin: 0 0 8px; font: 400 20px var(--display); letter-spacing: .03em; text-transform: uppercase; color: var(--yel); }
+#spons ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+#spons li a, #spons li span { display: block; font: 700 14px var(--body); color: var(--fg); text-decoration: none; padding: 7px 9px; border-radius: 8px; background: #0b0d11; border: 1px solid var(--line); }
+#spons li a:hover { border-color: var(--yel); }
+#spons li small { display: block; font: 500 11px var(--body); color: var(--muted); margin-top: 2px; }
+#spons .all { display: block; margin-top: 10px; font: 700 12px var(--body); color: var(--yel); }
+#spons .x { display: none; }
+#sbtn { display: none; }
+.show #spons, .show #sbtn { display: none !important; }
+@media (max-width: 899px) {
+  #spons { display: none; top: auto; bottom: max(54px, calc(env(safe-area-inset-bottom) + 44px)); left: max(10px, env(safe-area-inset-left)); width: auto; max-height: 55%; }
+  #spons.open { display: block; }
+  #spons .x { display: block; position: absolute; right: 8px; top: 6px; background: none; border: 0; color: var(--fg); font: 700 22px var(--body); cursor: pointer; }
+  #sbtn { display: block; pointer-events: auto; background: var(--yel); color: var(--ink); border: 0; border-radius: 8px; padding: 7px 10px; font: 700 11px var(--body); letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
+}
 #tag { position: fixed; left: 0; top: 0; transform: translate(-50%, -100%); pointer-events: none; background: var(--yel); color: var(--ink); font: 400 17px var(--display); padding: 5px 10px; border-radius: 8px; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,.35); }
 #tag::after { content: ""; position: absolute; left: 50%; bottom: -7px; margin-left: -7px; border: 7px solid transparent; border-bottom: 0; border-top-color: var(--yel); }
 #load { position: fixed; inset: 0; display: grid; place-items: center; background: #111318; z-index: 5; }
@@ -85,23 +103,22 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 <div id="load"><div><div class="t">Loading the speedway</div><div class="bar"><i id="lbar"></i></div><div class="p" id="lp">0%</div></div></div>
 <div class="hud">
   <div class="panel">
-    <nav class="nav" aria-label="Pages"><a class="back" href="#" id="back" hidden>&larr; Whole track</a><a class="res" href="../results/">Results</a><a class="alt" href="#cars" data-show="garages">Custom cars</a><a class="alt" href="#museum" data-show="museum">Victory Museum</a></nav>
-    <div class="top"><span class="badge">IMS</span><h1 id="title">ThunderRing Motor Speedway</h1></div>
+    <nav class="nav" aria-label="Pages"><a class="back" href="#" id="back" hidden>&larr; Whole track</a><a class="res" href="../results/">Results</a><a class="alt" href="#cars" data-show="garages">Custom cars</a><a class="alt" href="#museum" data-show="museum">Victory Museum</a><a class="alt" href="../sponsors/">Sponsors</a></nav>
+    <div class="top"><span class="badge">IMS</span><h1 id="title">Internet Motor Speedway</h1></div>
     <div class="sub" id="sub">Every follower gets a car</div>
     <form id="f" autocomplete="off"><input id="q" type="search" placeholder="@YOUR NAME" autocapitalize="none" spellcheck="false" aria-label="Your Instagram name"><button class="go" type="submit">FIND MY CAR</button></form>
     <div class="msg" id="msg" aria-live="polite"></div>
     <div class="chips" role="group" aria-label="Views">
       <button class="chip" data-v="track" aria-pressed="true">Whole track</button>
       <button class="chip" data-v="grid" aria-pressed="false">Starting grid</button>
-      <button class="chip" data-v="ads" aria-pressed="false">Infield ads</button>
       <button class="chip" data-v="boards" aria-pressed="false">Billboards</button>
       <button class="chip" data-v="garages" aria-pressed="false">Custom car garages</button>
       <button class="chip" data-v="museum" aria-pressed="false">Victory Museum</button>
     </div>
     <div class="buy">
-      <a class="main" href="https://ko-fi.com/internetmotorspeedway" target="_blank" rel="noopener">Custom car $1</a>
-      <a href="https://ko-fi.com/internetmotorspeedway" target="_blank" rel="noopener">Billboard $5</a>
-      <a href="https://ko-fi.com/internetmotorspeedway" target="_blank" rel="noopener">Infield ad $30</a>
+      <a class="main" id="pcar" href="https://ko-fi.com/internetmotorspeedway" target="_blank" rel="noopener">Custom car $1</a>
+      <a href="https://ko-fi.com/internetmotorspeedway" target="_blank" rel="noopener" id="pboard">Billboard $5</a>
+      <a href="https://ko-fi.com/internetmotorspeedway" target="_blank" rel="noopener" id="pinfield">Infield ad $50</a>
     </div>
     <div class="hint">Drag to move · pinch or scroll to zoom · two fingers to turn</div>
   </div>
@@ -112,7 +129,8 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
   <div class="acts" id="cacts"></div>
   <div class="dots" id="cdots"></div>
 </div>
-<div class="foot"><div><b id="cnt">0</b> followers have a car</div><a href="../results/">Race results</a></div>
+<aside id="spons" aria-label="Sponsors"><button class="x" id="sx" aria-label="Close sponsors">&times;</button><h2>Sponsors</h2><ol id="slist"><li><span>Loading</span></li></ol><a class="all" href="../sponsors/">See every sponsor &rarr;</a></aside>
+<div class="foot"><div><b id="cnt">0</b> followers have a car</div><button id="sbtn" aria-controls="spons" aria-expanded="false">Sponsors</button><a href="../results/">Race results</a></div>
 <script type="module">
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
@@ -154,9 +172,9 @@ function flyTo(pos, target, ms = 1400) {
 function ease(u) { return u < .5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2; }
 
 const VIEWS = {
-  track: () => flyTo(new THREE.Vector3(-150, 950, 1050), new THREE.Vector3(0, 0, 60)),
+  track: () => flyTo(new THREE.Vector3(-170, 1150, 1300), new THREE.Vector3(0, 0, 60)),   // wide Day 7 track (290 m): pulled back so the outside edge fits
   grid: () => { const f = DATA.front; flyTo(V(f.x + 70, f.y - 120, 60), V(f.x - 150, f.y + 20, 0)); },
-  ads: (() => { let k = 0; return () => { const e = k++ % 2, x = (e ? -1 : 1) * DATA.rect_x; if (e) flyTo(V(x * .86, -330, 520), V(x, -30, 0)); else flyTo(V(x + 300 * Math.max(1, .95 / camera.aspect), 0, 260 * Math.max(1, .95 / camera.aspect)), V(x - 10, 0, 0)); }; })(),
+  ads: (() => { let k = 0; return () => { const e = k++ % 2, x = (e ? -1 : 1) * DATA.rect_x; const z = Math.max(1, .95 / camera.aspect), sx = e ? -1 : 1; flyTo(V(x + sx * 300 * z, 0, 260 * z), V(x - sx * 10, 0, 0)); }; })(),
   boards: (() => { let k = 0; return () => { const b = DATA.boards[k++ % DATA.boards.length];
     flyTo(V(b.x + b.fx * 190, b.y + b.fy * 190, b.z + 6), V(b.x, b.y, b.z - 4)); }; })(),
   museum: () => { const m = DATA.museum; flyTo(V(m.x, m.y - m.d / 2 - 42, 9), V(m.x, m.y - 6, 4)); },
@@ -169,8 +187,8 @@ document.querySelectorAll(".chip").forEach(b => b.addEventListener("click", () =
   if (DATA) VIEWS[b.dataset.v]();
   setTag(null);
   const m = document.getElementById("msg");
-  if (b.dataset.v === "ads") m.innerHTML = 'Today\'s infield: <b>TZO Designs</b> in turns 1 and 2, <b>Rust-eze</b> in turns 3 and 4. Tap again for the other end. <a href="' + KOFI + '" target="_blank" rel="noopener">Get yours: $30</a>';
-  else if (b.dataset.v === "boards") m.innerHTML = 'Tap again for the next billboard. 8 spots on the stands. <a href="' + KOFI + '" target="_blank" rel="noopener">Get one: $5</a>';
+  if (b.dataset.v === "ads") m.innerHTML = adsMsg();
+  else if (b.dataset.v === "boards") m.innerHTML = 'Tap again for the next billboard. <a href="' + KOFI + '" target="_blank" rel="noopener">' + esc0((SP && SP.prices && SP.prices.board_line) || "8 spots on the stands. Get one: $5") + '</a>';
   else m.textContent = "";
 }));
 
@@ -187,15 +205,15 @@ document.getElementById("f").addEventListener("submit", e => {
   const q = document.getElementById("q").value.toLowerCase().replace(/^@+/, "").trim(), m = document.getElementById("msg");
   if (!q) return;
   let car = carsByName.get(q);
-  if (!car) { const hit = DATA.cars.find(c => c.n.includes(q)); if (hit) car = hit; }
-  if (!car) { m.textContent = "No car under that name yet. Follow before the cutoff and you're in the next race."; setTag(null); return; }
+  if (!car) { const hit = DATA.cars.find(c => c.n && c.n.includes(q)); if (hit) car = hit; }
+  if (!car) { m.textContent = "No name on a car yet. New followers already have a car on the grid; names go on after the next race's follower pull."; setTag(null); return; }
   document.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", "false"));
   setTag(car);
   const fw = new THREE.Vector3(Math.cos(car.h), 0, -Math.sin(car.h));
   const p = V(car.x, car.y, 0);
   flyTo(p.clone().addScaledVector(fw, 30).add(new THREE.Vector3(0, 30, 0)), p.clone().addScaledVector(fw, -6), 1800);
   m.innerHTML = "";
-  const s = document.createElement("span"); s.innerHTML = "<b></b> starts <b></b> of " + DATA.count.toLocaleString() + ". ";
+  const s = document.createElement("span"); s.innerHTML = "<b></b> starts <b></b> of " + (DATA.label || DATA.count.toLocaleString()) + ". ";
   s.querySelectorAll("b")[0].textContent = "@" + car.n; s.querySelectorAll("b")[1].textContent = "#" + (car.i + 1).toLocaleString();
   const a = document.createElement("a"); a.href = "../results/?u=" + encodeURIComponent(car.n); a.textContent = "See your race results";
   m.append(s, a);
@@ -204,15 +222,15 @@ document.getElementById("f").addEventListener("submit", e => {
 // load cars + track
 const lbar = document.getElementById("lbar"), lp = document.getElementById("lp");
 const prog = { cars: 0, glb: 0 }; const showProg = () => { const v = Math.round(prog.cars * 5 + prog.glb * 95); lbar.style.width = v + "%"; lp.textContent = v + "%"; };
-const carsP = fetch("cars.json").then(r => r.json()).then(d => { prog.cars = 1; showProg(); return d; });
+const carsP = fetch("cars7.json", { cache: "no-cache" }).then(r => r.json()).then(d => { prog.cars = 1; showProg(); return d; });
 const draco = new DRACOLoader(); draco.setDecoderPath("https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/libs/draco/gltf/");
 const loader = new GLTFLoader(); loader.setDRACOLoader(draco);
-const glbP = new Promise((res, rej) => loader.load("track.glb", res, x => { if (x.total) { prog.glb = x.loaded / x.total; showProg(); } }, rej));
+const glbP = new Promise((res, rej) => loader.load("track7.glb", res, x => { if (x.total) { prog.glb = x.loaded / x.total; showProg(); } }, rej));
 
 Promise.all([carsP, glbP]).then(([d, gltf]) => {
   DATA = d;
-  d.cars.forEach((c, i) => { c.i = i; carsByName.set(c.n.toLowerCase(), c); });
-  document.getElementById("cnt").textContent = d.count.toLocaleString();
+  d.cars.forEach((c, i) => { c.i = i; c.n = c.n || ""; if (c.n) carsByName.set(c.n.toLowerCase(), c); });
+  document.getElementById("cnt").textContent = d.label || d.count.toLocaleString();
   document.getElementById("title").textContent = d.track;
   gltf.scene.traverse(o => { if (o.isMesh && o.material) { o.material.side = THREE.FrontSide; } });
   scene.add(gltf.scene);
@@ -234,7 +252,7 @@ Promise.all([carsP, glbP]).then(([d, gltf]) => {
   const beam = new THREE.Mesh(new THREE.CylinderGeometry(.35, .35, 40, 12), new THREE.MeshBasicMaterial({ color: 0xffcc18, transparent: true, opacity: .55 }));
   beam.position.y = 22; hl.add(beam); hl.visible = false; scene.add(hl);
   addGarages(); addMuseum(gltf.scene); addInfield();
-  camera.position.set(-150, 950, 1050); controls.target.set(0, 0, 60); controls.update();
+  camera.position.set(-170, 1150, 1300); controls.target.set(0, 0, 60); controls.update();
   document.getElementById("load").hidden = true;
   const u = new URLSearchParams(location.search).get("u");
   if (u) { document.getElementById("q").value = u; document.getElementById("f").requestSubmit(); }
@@ -305,12 +323,12 @@ function addGarages() {
       B(W - .3, .35, .05, new THREE.MeshLambertMaterial({ color: c.roofHex }), x, GY + .33, 2.95);
       if (c.num) { const nb = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 2.2), new THREE.MeshBasicMaterial({ map: textTex(c.num, 256, 256, null, "#1a1c22", "400 200px Anton, Impact, sans-serif"), transparent: true }));
         nb.position.copy(V(x, GY + .34, 4.15)); nb.rotation.y = Math.PI; scene.add(nb); }
-      const sg = new THREE.Mesh(new THREE.PlaneGeometry(W - .8, 1.1), new THREE.MeshBasicMaterial({ map: textTex("@" + c.ig.toUpperCase(), 512, 64, "#1a1c22", "#ffcc18", "400 44px Anton, Impact, sans-serif", .66) }));
+      const sg = new THREE.Mesh(new THREE.PlaneGeometry(W - .8, 1.1), new THREE.MeshBasicMaterial({ map: textTex((c.noig ? "" : "@") + c.ig.toUpperCase(), 512, 64, "#1a1c22", "#ffcc18", "400 44px Anton, Impact, sans-serif", .66) }));
       sg.position.copy(V(x, GY + D + .45, H - .4)); sg.rotation.y = Math.PI; scene.add(sg);
       const g = raceCar(c);
       g.position.copy(V(x, GY + 4.6, .12)); g.rotation.y = Math.PI / 2 - .35;      // nose out toward the infield, angled a bit like a showroom
       g.userData.href = "../cars/#" + encodeURIComponent(c.ig); g.userData.show = ["garages", c.ig]; scene.add(g); PICK.push(g);
-      CTAGS.push({ el: mkTag("@" + c.ig + (c.num ? " #" + c.num : ""), g.userData.href), at: V(x, GY + 4.6, 4.6) });
+      CTAGS.push({ el: mkTag((c.noig ? "" : "@") + c.ig + (c.num ? " #" + c.num : ""), g.userData.href), at: V(x, GY + 4.6, 4.6) });
     }
     CTAGS.push({ el: mkTag("Custom car garages", "#cars", true, true), at: V(GX, GY + D, 10.5) });
     if (pendingShow) { const p = pendingShow; pendingShow = null; startShow(...p); }
@@ -371,13 +389,71 @@ function goldCar(x, y, k, mat, blk) {
   for (const a of [1.1, -1.1]) for (const b of [1.5, -1.5]) add(new THREE.BoxGeometry(.4 * k, .9 * k, .9 * k), blk, a * k, b * k, .45 * k);
   g.position.copy(V(x, y, 2.2)); scene.add(g); return g;
 }
-// Infield sponsor on the turn 1/2 box (+rect_x): TZO Designs (Nov 11), laid over the baked art. Logo reads upright from turn 1/2.
+// Sponsors list: everyone who has ever sponsored, newest first, from the sponsors page data.
+(() => {
+  const L = document.getElementById("slist"), P = document.getElementById("spons"), btn = document.getElementById("sbtn");
+  const tog = o => { P.classList.toggle("open", o); btn.setAttribute("aria-expanded", String(o)); };
+  btn.addEventListener("click", () => tog(!P.classList.contains("open"))); document.getElementById("sx").addEventListener("click", () => tog(false));
+  fetch("../sponsors/sponsors.json", { cache: "no-cache" }).then(r => r.json()).then(d => {
+    const list = d.sponsors || []; L.textContent = ""; btn.textContent = "Sponsors (" + list.length + ")";
+    for (const s of list) {
+      const li = document.createElement("li"), href = s.ig ? "https://instagram.com/" + encodeURIComponent(s.ig) : (s.url || "");
+      const el = document.createElement(href ? "a" : "span"); if (href) { el.href = href; el.target = "_blank"; el.rel = "noopener"; }
+      el.textContent = s.name; if (s.ig || s.tagline) { const sm = document.createElement("small"); sm.textContent = s.tagline || "@" + s.ig; el.append(sm); }
+      li.append(el); L.append(li);
+    }
+  }).catch(() => { L.innerHTML = '<li><span>See the sponsors page</span></li>'; });
+})();
+// Infield sponsors (sponsors.json). mode "rotate": the 2 boxes show today's two, the rest are listed as in the rotation.
+// mode "four": each box is split in two so all four are down at once. ?infield=rotate|four overrides it for previews.
+// Boxes are blank in track7.glb; art is laid on top here. Upright art reads from the backstretch side like the race videos.
+let SP = null; const SPTEX = [];
+renderer.domElement.addEventListener("webglcontextrestored", () => SPTEX.forEach(t => t.needsUpdate = true));   // phones can drop the GL context: redraw the sponsor art
+const esc0 = s => String(s).replace(/[&<>"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[ch]);
+function adsMsg() {
+  const buy = ' <a href="' + KOFI + '" target="_blank" rel="noopener">' + esc0((SP && SP.prices && SP.prices.infield_line) || "Get yours: $50 a race, or a full week for $200.") + '</a>';
+  if (!SP) return "Infield sponsors are loading." + buy;
+  const all = SP.sponsors.map(x => "<b>" + esc0(x.name) + "</b>");
+  if (SP.mode === "four") return "Infield sponsors: " + all.slice(0, -1).join(", ") + " and " + all[all.length - 1] + ", all down at once. Tap again for the other end." + buy;
+  const t = SP.today.map(k => all[k]), rest = all.filter((_, k) => !SP.today.includes(k));
+  return "On the infield now: " + t[0] + " in turns 1 and 2, " + t[1] + " in turns 3 and 4." + (rest.length ? " Also in the rotation: " + rest.join(", ") + "." : "") + " Tap again for the other end." + buy + ' · <a href="../sponsors/">All sponsors</a>';
+}
+function spTexture(sp, w, h, rot, done) {        // art fitted inside a w x h panel (pixels), rotated rot degrees, on the box's dark blue
+  const cv = document.createElement("canvas"); cv.width = w; cv.height = h; const x = cv.getContext("2d");
+  x.fillStyle = "#0b1440"; x.fillRect(0, 0, w, h);
+  const fin = () => { const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; SPTEX.push(t); done(t); };
+  if (!sp.img) {
+    x.save(); x.translate(w / 2, h / 2); x.rotate(rot * Math.PI / 180);
+    const L = rot % 180 ? h : w; let sz = 400; x.font = "400 " + sz + "px Anton, Impact, sans-serif";
+    while (x.measureText(sp.text).width > L * .86 && sz > 20) { sz -= 10; x.font = "400 " + sz + "px Anton, Impact, sans-serif"; }
+    x.fillStyle = "#ffffff"; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(sp.text, 0, 0); x.restore(); fin(); return;
+  }
+  const im = new Image(); im.onload = () => {
+    const iw = rot % 180 ? im.height : im.width, ih = rot % 180 ? im.width : im.height, k = Math.min(w / iw, h / ih) * .96;
+    x.save(); x.translate(w / 2, h / 2); x.rotate(rot * Math.PI / 180); x.drawImage(im, -im.width * k / 2, -im.height * k / 2, im.width * k, im.height * k); x.restore(); fin();
+  }; im.src = sp.img;
+}
 function addInfield() {
-  new THREE.TextureLoader().load("tzo_infield.jpg", t => {
-    t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
-    const p = new THREE.Mesh(new THREE.PlaneGeometry(188, 308), new THREE.MeshLambertMaterial({ map: t }));
-    p.rotation.x = -Math.PI / 2; p.position.copy(V(DATA.rect_x, 0, .95)); scene.add(p);
-  });
+  fetch("sponsors.json", { cache: "no-cache" }).then(r => r.json()).then(sp => {
+    SP = sp; if (sp.prices) for (const [id, k] of [["pcar", "car"], ["pboard", "board"], ["pinfield", "infield"]]) if (sp.prices[k]) document.getElementById(id).textContent = sp.prices[k];
+    const q = new URLSearchParams(location.search).get("infield"); if (q === "four" || q === "rotate") SP.mode = q; const tq = new URLSearchParams(location.search).get("today"); if (tq) SP.today = tq.split(",").map(Number);   // preview a pairing: ?today=4,5
+    const W = (DATA.rect_w || 200) - 12, H = (DATA.rect_h || 320) - 12, PX = 5;   // 5 px per metre
+    const put = (s, cx, cy, w, h, rot) => spTexture(s, w * PX, h * PX, rot, t => {
+      const p = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshLambertMaterial({ map: t }));
+      p.rotation.x = -Math.PI / 2; p.position.copy(V(cx, cy, .95)); scene.add(p); });
+    const ends = [DATA.rect_x, -DATA.rect_x];
+    if (SP.mode === "off") { /* Brady Nov 12: nothing on the infield, sponsors live in the Sponsors list */ }
+    else if (SP.mode === "four") {
+      // every sponsor down at once: first half at the turn 1/2 end, the rest at turn 3/4, each box split into panels 6 m apart.
+      // Portrait art is turned to fill the wide panels and reads from that turn end.
+      const n = SP.sponsors.length, per = [Math.ceil(n / 2), Math.floor(n / 2)];
+      ends.forEach((x, e) => { const k0 = e ? per[0] : 0, cnt = per[e], hh = (H - 6 * (cnt - 1)) / cnt;
+        for (let k = 0; k < cnt; k++) { const s = SP.sponsors[k0 + k], cy = H / 2 - hh / 2 - k * (hh + 6);
+          put(s, x, e ? -cy : cy, W, hh, (e ? 90 : -90) - (s.turned || 0)); } });
+    } else ends.forEach((x, e) => { const s = SP.sponsors[SP.today[e]]; if (s) put(e && s.img34 ? { ...s, img: s.img34 } : s, x, 0, W, H, 0); });
+    const m = document.getElementById("msg"), on = document.querySelector('.chip[data-v="ads"]');
+    if (on && on.getAttribute("aria-pressed") === "true") m.innerHTML = adsMsg();
+  }).catch(() => {});
 }
 function addMuseum(root) {
   fetch("../results/museum.json", { cache: "no-cache" }).then(r => r.json()).then(mj => {
@@ -459,7 +535,7 @@ function fill(c) {
     ctxt.innerHTML = '<div class="k">Open garage</div><div class="nm">Your car here</div><div class="d">Pick your colors and number. It races in every video and gets its own garage.</div>';
     cacts.innerHTML = '<a class="main" href="' + KOFI + '" target="_blank" rel="noopener">Custom car $1</a>' + exit;
   } else {
-    ctxt.innerHTML = '<div class="k">Custom car' + (c.since ? ' &middot; since ' + esc(new Date(c.since + 'T12:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })) : '') + '</div><a class="nm" target="_blank" rel="noopener" href="https://instagram.com/' + encodeURIComponent(c.ig) + '">@' + esc(c.ig) + (c.num ? ' <span style="color:var(--yel)">#' + esc(c.num) + '</span>' : '') + '</a>' +
+    ctxt.innerHTML = '<div class="k">Custom car' + (c.since ? ' &middot; since ' + esc(new Date(c.since + 'T12:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })) : '') + '</div>' + (c.noig ? '<span class="nm">' : '<a class="nm" target="_blank" rel="noopener" href="https://instagram.com/' + encodeURIComponent(c.ig) + '">@') + esc(c.ig) + (c.num ? ' <span style="color:var(--yel)">#' + esc(c.num) + '</span>' : '') + (c.noig ? '</span>' : '</a>') +
       '<div class="d"><i style="background:' + esc(c.bodyHex) + '"></i>Body &nbsp; <i style="background:' + esc(c.roofHex) + '"></i>Roof</div>';
     cacts.innerHTML = '<a class="main" href="../cars/#' + encodeURIComponent(c.ig) + '">Go inside, spin it 360</a>' + exit;
   }
