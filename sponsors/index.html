@@ -55,8 +55,8 @@ const fmt = d => new Date(d + "T12:00:00").toLocaleDateString("en-US", { month: 
 fetch("sponsors.json", { cache: "no-cache" }).then(r => r.json()).then(data => {
   document.getElementById("grid").innerHTML = data.sponsors.map(s => {
     const art = s.img ? `<img src="${esc(s.img)}" alt="${esc(s.name)} logo" loading="lazy"${s.turned ? ' class="turned"' : ""}>` : `<div class="word">${esc(s.name)}</div>`;
-    const link = s.ig ? `<a href="https://instagram.com/${esc(s.ig)}" target="_blank" rel="noopener">@${esc(s.ig)}</a>`
-               : s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.url.replace(/^https?:\/\//, ""))}</a>` : "";
+    const link = (s.ig ? `<a href="https://instagram.com/${esc(s.ig)}" target="_blank" rel="noopener">@${esc(s.ig)}</a>` : "")
+               + (s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.url.replace(/^https?:\/\//, ""))}</a>` : "");
     return `<div class="sp"><div class="art">${art}</div><div class="info">
       <div class="name">${esc(s.name)}</div>
       <div class="meta">${esc(s.spot)} sponsor since ${fmt(s.since)}</div>

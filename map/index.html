@@ -46,6 +46,10 @@ input:focus { border-color: var(--yel); }
 #spons li small { display: block; font: 500 11px var(--body); color: var(--muted); margin-top: 2px; }
 #spons .all { display: block; margin-top: 10px; font: 700 12px var(--body); color: var(--yel); }
 #spons .x { display: none; }
+#spons .deal { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); display: grid; gap: 6px; font: 500 12px/1.35 var(--body); color: var(--muted); }
+#spons .deal b { color: var(--fg); font: 700 13px var(--body); }
+#spons .deal a { color: var(--yel); }
+#spons .deal .kofi { display: block; text-align: center; text-decoration: none; font: 700 13px var(--body); color: var(--ink); background: var(--yel); border-radius: 8px; padding: 8px; margin-top: 2px; }
 #sbtn { display: none; }
 .show #spons, .show #sbtn { display: none !important; }
 @media (max-width: 899px) {
@@ -117,7 +121,8 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
     </div>
     <div class="buy">
       <a class="main" id="pcar" href="https://ko-fi.com/internetmotorspeedway" target="_blank" rel="noopener">Custom car $1</a>
-      <a href="https://ko-fi.com/internetmotorspeedway" target="_blank" rel="noopener" id="pboard">Billboard $5</a>
+      <a href="https://ko-fi.com/internetmotorspeedway" target="_blank" rel="noopener" id="pwall">Wall ad $10</a>
+      <a href="https://ko-fi.com/internetmotorspeedway" target="_blank" rel="noopener" id="pboard">Billboard $15</a>
       <a href="https://ko-fi.com/internetmotorspeedway" target="_blank" rel="noopener" id="pinfield">Infield ad $50</a>
     </div>
     <div class="hint">Drag to move · pinch or scroll to zoom · two fingers to turn</div>
@@ -129,7 +134,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
   <div class="acts" id="cacts"></div>
   <div class="dots" id="cdots"></div>
 </div>
-<aside id="spons" aria-label="Sponsors"><button class="x" id="sx" aria-label="Close sponsors">&times;</button><h2>Sponsors</h2><ol id="slist"><li><span>Loading</span></li></ol><a class="all" href="../sponsors/">See every sponsor &rarr;</a></aside>
+<aside id="spons" aria-label="Sponsors"><button class="x" id="sx" aria-label="Close sponsors">&times;</button><h2>Sponsors</h2><ol id="slist"><li><span>Loading</span></li></ol><div class="deal" id="sdeal"><b>Sponsor the speedway</b><span id="sinf">Infield: $50 a race, or a full week for $200.</span><span id="swall">Logo slots on the track wall. Get one: $10 a race.</span><span id="sboard">8 spots on the stands. Get one: $15 a race.</span><span id="slong">Want a weekly or monthly deal, or to present the trophy or the track? <a href="https://instagram.com/internetmotorspeedway" target="_blank" rel="noopener">DM @internetmotorspeedway</a>.</span><a class="kofi" href="https://ko-fi.com/internetmotorspeedway" target="_blank" rel="noopener">Get a spot on Ko-fi</a></div><a class="all" href="../sponsors/">See every sponsor &rarr;</a></aside>
 <div class="foot"><div><b id="cnt">0</b> followers have a car</div><button id="sbtn" aria-controls="spons" aria-expanded="false">Sponsors</button><a href="../results/">Race results</a></div>
 <script type="module">
 import * as THREE from "three";
@@ -188,7 +193,7 @@ document.querySelectorAll(".chip").forEach(b => b.addEventListener("click", () =
   setTag(null);
   const m = document.getElementById("msg");
   if (b.dataset.v === "ads") m.innerHTML = adsMsg();
-  else if (b.dataset.v === "boards") m.innerHTML = 'Tap again for the next billboard. <a href="' + KOFI + '" target="_blank" rel="noopener">' + esc0((SP && SP.prices && SP.prices.board_line) || "8 spots on the stands. Get one: $5") + '</a>';
+  else if (b.dataset.v === "boards") m.innerHTML = 'Tap again for the next billboard. <a href="' + KOFI + '" target="_blank" rel="noopener">' + esc0((SP && SP.prices && SP.prices.board_line) || "8 spots on the stands. Get one: $15 a race.") + '</a>';
   else m.textContent = "";
 }));
 
@@ -435,7 +440,8 @@ function spTexture(sp, w, h, rot, done) {        // art fitted inside a w x h pa
 }
 function addInfield() {
   fetch("sponsors.json", { cache: "no-cache" }).then(r => r.json()).then(sp => {
-    SP = sp; if (sp.prices) for (const [id, k] of [["pcar", "car"], ["pboard", "board"], ["pinfield", "infield"]]) if (sp.prices[k]) document.getElementById(id).textContent = sp.prices[k];
+    SP = sp; if (sp.prices) for (const [id, k] of [["sinf", "infield_line"], ["swall", "wall_line"], ["sboard", "board_line"]]) if (sp.prices[k]) document.getElementById(id).textContent = id === "sinf" ? sp.prices[k].replace(/^Get yours: /, "Infield: ") : sp.prices[k];
+    if (sp.prices) for (const [id, k] of [["pcar", "car"], ["pwall", "wall"], ["pboard", "board"], ["pinfield", "infield"]]) if (sp.prices[k]) document.getElementById(id).textContent = sp.prices[k];
     const q = new URLSearchParams(location.search).get("infield"); if (q === "four" || q === "rotate") SP.mode = q; const tq = new URLSearchParams(location.search).get("today"); if (tq) SP.today = tq.split(",").map(Number);   // preview a pairing: ?today=4,5
     const W = (DATA.rect_w || 200) - 12, H = (DATA.rect_h || 320) - 12, PX = 5;   // 5 px per metre
     const put = (s, cx, cy, w, h, rot) => spTexture(s, w * PX, h * PX, rot, t => {
