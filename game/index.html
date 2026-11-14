@@ -108,6 +108,8 @@ input { flex: 1; min-width: 0; font: 700 18px var(--body); color: var(--fg); bac
 .pips i.on { background: var(--yel); }
 .up a { font-size: 15px; padding: 9px 6px; border-radius: 10px; }
 .sw { display: inline-block; width: 13px; height: 13px; border-radius: 4px; vertical-align: -2px; margin-right: 5px; border: 1px solid rgba(255,255,255,.35); }
+.fsb { font: 700 12px var(--body); letter-spacing: .03em; text-transform: none; padding: 8px 10px; margin-top: 8px; border-radius: 9px; background: #2a2410; color: var(--yel); border: 1px solid rgba(255,204,24,.5); }
+#fsSteps p { margin-bottom: 6px; }
 #load { height: 6px; border-radius: 3px; background: #2a2e37; overflow: hidden; margin: 0 0 7px; }
 #load i { display: block; height: 100%; width: 0; background: var(--yel); transition: width .2s; }
 </style>
@@ -147,7 +149,7 @@ input { flex: 1; min-width: 0; font: 700 18px var(--body); color: var(--fg); bac
           <div class="stat"><span class="k">Leaderboard</span><b id="gRank">--</b></div>
         </div>
         <p class="small">Not you? <button class="linkbtn" id="bSwitch">Switch username</button></p>
-        <p class="small" id="fsHint" hidden><button class="linkbtn" id="bFs" style="color:var(--yel)">Make it full screen</button></p>
+        <button class="fsb" id="bFs" hidden>&#128242; Address bar in the way? Save it as an app</button>
       </div>
       <div>
         <div id="load" aria-hidden="true"><i id="lbar"></i></div>
@@ -196,6 +198,7 @@ input { flex: 1; min-width: 0; font: 700 18px var(--body); color: var(--fg); bac
       <div class="stat"><span class="k">Your best ever</span><b id="rBest">--</b></div>
     </div>
     <div class="msg" id="rMsg" role="status"></div>
+    <button class="fsb" id="bFs2" hidden style="margin:0 0 7px">&#128242; Want the whole track on screen? Save it as an app</button>
     <div class="stack">
       <button id="bSave" hidden>Save to leaderboard</button>
       <div class="two"><button id="bAgain">Race again</button><button class="alt" id="bPrac2">Practice lap</button></div>
@@ -226,15 +229,13 @@ input { flex: 1; min-width: 0; font: 700 18px var(--body); color: var(--fg); bac
   </div>
 </div>
 
-<!-- full screen how-to (iPhone) -->
+<!-- full screen how-to: shown by itself in a browser tab, with the steps for this phone -->
 <div class="screen mid" id="sFs" hidden>
   <div class="box">
-    <div class="k">No tabs, no address bar</div>
-    <h2>Play full screen</h2>
-    <p style="margin-bottom:6px"><b>1.</b> Tap the <b>Share</b> button in Safari (the square with the arrow).</p>
-    <p style="margin-bottom:6px"><b>2.</b> Tap <b>Add to Home Screen</b>, then <b>Add</b>.</p>
-    <p><b>3.</b> Open <b>Speedway</b> from your home screen. It plays like an app.</p>
-    <button class="alt" data-close>Back</button>
+    <div class="k">Best way to play</div>
+    <h2>Save it as an app</h2>
+    <div id="fsSteps"></div>
+    <button class="alt" data-close>Got it</button>
   </div>
 </div>
 
@@ -318,6 +319,7 @@ async function signIn(raw, quiet) {
   if (won) { me.body = GOLD; me.roof = "#c98200"; me.kind = "Race winner"; }
   store.set("user", name); msg.textContent = "";
   buildMyCar(); fillGarage(); show("sGarage");
+  if (needApp) showFs();
   return true;
 }
 const upTotal = () => me.up.e + me.up.t + me.up.a;
@@ -549,6 +551,7 @@ function endRun() {
   const m = $("rMsg"); m.className = "msg";
   m.textContent = !runBest && !race ? "Cross the line, go all the way around and cross it again to set a time." : can ? "" : saved && runBest ? "Your best lap is already on the leaderboard." : "";
   fillGarage(); show("sResult");
+  if (needApp && ++fsRuns % 2 === 0) showFs();
 }
 $("bRace").onclick = () => startRun("race"); $("bAgain").onclick = () => startRun("race");
 $("bPrac").onclick = () => startRun("practice"); $("bPrac2").onclick = () => startRun("practice");
@@ -729,10 +732,23 @@ $("bPaint").onclick = () => {
 };
 for (const b of document.querySelectorAll("[data-close]")) b.onclick = () => show(under);
 
-// iPhone Safari can't hide its own bars for a web page. Opened from the home screen it runs with none.
+// A browser tab keeps its address bar on screen and it covers the track. Opened from the home screen the game runs full screen, like an app.
+// So in a browser tab on a phone the steps come up by themselves: when you get your car, after every second run, and as a button in the garage and on the results.
 const standalone = navigator.standalone || matchMedia("(display-mode: fullscreen), (display-mode: standalone)").matches;
-if (/iPhone|iPad|iPod/.test(navigator.userAgent) && !standalone) $("fsHint").hidden = false;
-$("bFs").onclick = () => { for (const s of screens) $(s).hidden = s !== "sFs"; };
+const UA = navigator.userAgent, isIG = /Instagram|FBAN|FBAV/i.test(UA), isAnd = /Android/i.test(UA), isIOS = !isAnd && (/iPhone|iPad|iPod/.test(UA) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1));
+const needApp = (isIOS || isAnd) && !standalone || /[?&]a2hs/.test(location.search);
+let fsRuns = 0;
+function showFs() {
+  const st = [];
+  if (isIG) st.push("Tap <b>&middot;&middot;&middot;</b> at the top right and pick <b>Open in browser</b>. Instagram can't save apps.");
+  if (isAnd && !isIOS) st.push("In Chrome, tap <b>&#8942;</b> at the top right.", "Tap <b>Add to Home screen</b> (or <b>Install app</b>).");
+  else st.push("Tap the <b>Share</b> button in Safari (the square with the arrow).", "Tap <b>Add to Home Screen</b>, then <b>Add</b>.");
+  st.push("Open <b>Speedway</b> from your home screen. Full screen, no address bar, like a real app.");
+  $("fsSteps").innerHTML = st.map((x, i) => "<p><b>" + (i + 1) + ".</b> " + x + "</p>").join("");
+  for (const s of screens) $(s).hidden = s !== "sFs";
+}
+if (needApp) { $("bFs").hidden = false; $("bFs2").hidden = false; $("tip").textContent += " Tip: save the game as an app to lose the address bar."; }
+$("bFs").onclick = showFs; $("bFs2").onclick = showFs;
 
 // ---------- start: remember the last username
 const saved = store.get("user");
