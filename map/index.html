@@ -74,6 +74,25 @@ input:focus { border-color: var(--yel); }
   #sponmod { top: auto; left: max(10px, env(safe-area-inset-left)); right: max(10px, env(safe-area-inset-right)); bottom: max(10px, env(safe-area-inset-bottom)); width: auto; max-height: 52%; overflow: auto; } .spmode .foot { display: none; } .spmode #home { bottom: auto; top: max(12px, env(safe-area-inset-top)); } }
 .lbl { display: block; text-align: center; margin-top: 6px; font: 700 12px var(--body); letter-spacing: .04em; color: var(--gold, #f5c542); text-decoration: none; }
 .lbl:hover { text-decoration: underline; }
+.hud { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.gamebox { width: min(520px, 100%); padding: 12px !important; border: 2px solid #ef3b2d !important; box-shadow: 0 10px 34px rgba(239,59,45,.35); }
+.gamebox .top { margin: 0 0 8px; }
+.gamebox .play { margin-top: 0; padding: 16px 12px 14px; }
+.play .pk { display: block; font: 700 11px var(--body); letter-spacing: .18em; text-transform: uppercase; opacity: .9; }
+.gamebox .play .pb { font-size: clamp(30px, 6vw, 40px); margin-top: 2px; }
+.play .pgo { display: inline-block; margin-top: 10px; font: 400 18px var(--display); letter-spacing: .04em; text-transform: uppercase; background: #fff; color: #c4160b; border-radius: 999px; padding: 6px 18px; }
+.champ { display: block; text-align: center; margin-top: 8px; font: 700 13px var(--body); color: var(--gold, #f5c542); text-decoration: none; }
+.champ:hover { text-decoration: underline; }
+.minibar { width: min(520px, 100%); padding: 6px !important; }
+.minibar .buy { margin-top: 0; }
+.finder { position: fixed; z-index: 2; left: max(10px, env(safe-area-inset-left)); bottom: max(10px, env(safe-area-inset-bottom)); width: min(420px, calc(100% - 20px)); }
+.finder .sub { margin: 0 0 2px; }
+.finder .fc { font: 600 12px var(--body); color: var(--muted); margin-bottom: 6px; }
+.finder .fc b { color: var(--yel); }
+.finder .hint { margin-top: 6px; }
+.foot { justify-content: flex-end !important; }
+.show .finder, .spmode .finder, .show .minibar { display: none !important; }
+@media (max-width: 899px) { .finder { bottom: max(54px, calc(env(safe-area-inset-bottom) + 44px)); padding: 8px !important; } .finder .hint, .finder .sub { display: none; } .gamebox { padding: 10px !important; } .gamebox .play { padding: 12px 10px 10px; } .play .pgo { margin-top: 6px; font-size: 15px; padding: 4px 14px; } }
 @keyframes pp { 50% { box-shadow: 0 0 0 2px #ff6b5e inset, 0 6px 26px rgba(239,59,45,.8); } }
 @media (prefers-reduced-motion: reduce) { .play { animation: none; } }
 #spons.flash { animation: fl 1.2s ease-out 1; }
@@ -155,21 +174,26 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 <canvas id="c" aria-label="3D map of the speedway. Drag to move, pinch or scroll to zoom."></canvas>
 <div id="load"><div><div class="t">Loading the speedway</div><div class="bar"><i id="lbar"></i></div><div class="p" id="lp">0%</div></div></div>
 <div class="hud">
-  <div class="panel">
-    <form id="f" autocomplete="off"><input id="q" type="search" placeholder="@YOUR NAME" autocapitalize="none" spellcheck="false" aria-label="Your Instagram name"><button class="go" type="submit">FIND MY CAR</button></form>
-    <div class="msg" id="msg" aria-live="polite"></div>
+  <div class="panel gamebox">
     <div class="top"><span class="badge">IMS</span><h1 id="title">Internet Motor Speedway</h1></div>
-    <div class="sub" id="sub">Every follower gets a car</div>
-    <a class="play" href="../game/"><span class="pb">&#127950;&#65039; Play the race car game</span><span class="ps">Drive your own car on this track. Set a lap, hit the leaderboard.</span></a>
-    <a class="lbl" href="../leaderboard/">&#127942; Game leaderboard: see the top 10 &rarr;</a>
+    <a class="play" href="../game/"><span class="pk">The official game</span><span class="pb">&#127950;&#65039; Play the race car game</span><span class="ps">Drive your own car on this track. Set a lap, hit the leaderboard.</span><span class="pgo">Play now &rarr;</span></a>
+    <a class="champ" id="champ" href="../leaderboard/">&#127942; <span id="champt">Game leaderboard: see the top 10</span> &rarr;</a>
+    <nav class="nav" aria-label="Pages"><a class="back" href="#" id="back" hidden>&larr; Whole track</a></nav>
+    <div class="chips" role="group" aria-label="Views" hidden><button class="chip" data-v="track" aria-pressed="true">Whole track</button></div>
+  </div>
+  <div class="panel minibar">
     <div class="buy">
       <button type="button" class="spon" id="pspon" aria-controls="spons">&#128227; Sponsor the speedway</button>
       <a class="main" id="pcar" href="https://ko-fi.com/internetmotorspeedway" target="_blank" rel="noopener">Custom car $1</a>
     </div>
-    <nav class="nav" aria-label="Pages"><a class="back" href="#" id="back" hidden>&larr; Whole track</a></nav>
-    <div class="chips" role="group" aria-label="Views" hidden><button class="chip" data-v="track" aria-pressed="true">Whole track</button></div>
-    <div class="hint">Tap a pulsing dot on the track to jump there · drag to move · pinch or scroll to zoom</div>
   </div>
+</div>
+<div class="panel finder">
+  <div class="sub" id="sub">Every follower gets a car</div>
+  <div class="fc"><b id="cnt">0</b> followers have a car. Find yours:</div>
+  <form id="f" autocomplete="off"><input id="q" type="search" placeholder="@YOUR NAME" autocapitalize="none" spellcheck="false" aria-label="Your Instagram name"><button class="go" type="submit">FIND MY CAR</button></form>
+  <div class="msg" id="msg" aria-live="polite"></div>
+  <div class="hint">Tap a pulsing dot to jump there · drag to move · pinch or scroll to zoom</div>
 </div>
 <div id="tag" hidden></div>
 <div id="nodes" aria-label="Places on the track"></div>
@@ -195,7 +219,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
   <div class="dots" id="cdots"></div>
 </div>
 <aside id="spons" aria-label="Sponsors"><button class="x" id="sx" aria-label="Close sponsors">&times;</button><h2>Sponsors</h2><ol id="slist"><li><span>Loading</span></li></ol><div class="deal" id="sdeal"><b>Sponsor the speedway</b><span id="sinf">Infield: $30 a race, or a full week for $200.</span><span id="swall">Logo slots on the track wall. Get one: $10 a race.</span><span id="sboard">8 spots on the stands. Get one: $15 a race.</span><span id="slong">Want a weekly or monthly deal, or to present the trophy or the track? <a href="https://instagram.com/internetmotorspeedway" target="_blank" rel="noopener">DM @internetmotorspeedway</a>.</span><a class="kofi" href="https://ko-fi.com/internetmotorspeedway" target="_blank" rel="noopener">Get a spot on Ko-fi</a></div><a class="all" href="../sponsors/">See every sponsor &rarr;</a></aside>
-<div class="foot"><div><b id="cnt">0</b> followers have a car</div><button id="sbtn" aria-controls="spons" aria-expanded="false">Sponsors</button><a href="../results/">Race results</a></div>
+<div class="foot"><button id="sbtn" aria-controls="spons" aria-expanded="false">Sponsors</button><a href="../results/">Race results</a></div>
 <script type="module">
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
@@ -259,6 +283,11 @@ document.querySelectorAll(".chip").forEach(b => b.addEventListener("click", () =
   else m.textContent = "";
 }));
 
+// fastest lap teaser under the game button (game leaderboard, GET only)
+fetch("https://script.google.com/macros/s/AKfycbwsMLdBQJagXvjV6hghdy0M1_dHmE7lLEi0lUAAvGOAkzO61HeWyTCYueeRo-jgBVQ2pQ/exec", { cache: "no-store" }).then(r => r.json()).then(d => {
+  const p = d && d.ok && d.rows && d.rows[0]; if (!p) return;
+  document.getElementById("champt").textContent = "Fastest lap: @" + p.n + " " + (p.t / 1000).toFixed(2) + "s. Can you beat it? See the top 10";
+}).catch(() => {});
 // ---- Pulsing map nodes: tap one to fly to that part of the track. Sponsor view: infield box, track wall and a billboard in one shot.
 const NODES = [], SLABS = [], homeBtn = document.getElementById("home"), sponMod = document.getElementById("sponmod");
 let away = false;
