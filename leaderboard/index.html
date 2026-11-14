@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Game Leaderboard | Internet Motor Speedway</title>
+<meta name="description" content="The 10 fastest laps in the Internet Motor Speedway game. Play to get on the board.">
+<link rel="icon" href="../game/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;600;700&display=swap">
+<style>
+:root {
+  --bg: #0d0f13; --card: #1a1e26; --line: #2d323d; --fg: #f3f4f6; --muted: #9aa1ad;
+  --yel: #ffcc18; --gold: #f5c542; --silver: #c9ced6; --bronze: #d08a4c; --red: #ef3b2d;
+  --display: "Anton", Impact, "Arial Narrow", sans-serif;
+  --body: "Archivo", -apple-system, "Helvetica Neue", Arial, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--body); }
+body { background: radial-gradient(1200px 520px at 50% -120px, rgba(245,197,66,.18), transparent 70%), var(--bg); min-height: 100vh; }
+a { color: inherit; }
+.wrap { max-width: 720px; margin: 0 auto; padding: 18px max(16px, env(safe-area-inset-left)) 56px; }
+.flag { height: 10px; border-radius: 3px; margin-bottom: 14px; background: repeating-conic-gradient(#fff 0 25%, #111 0 50%) 0 0 / 10px 10px; opacity: .9; }
+nav.pages { display: flex; gap: 8px; margin-bottom: 18px; }
+nav.pages a { flex: 1; text-align: center; padding: 10px 6px; border-radius: 10px; background: var(--card); border: 1px solid var(--line); text-decoration: none; font: 400 15px var(--display); text-transform: uppercase; letter-spacing: .02em; }
+.kicker { font: 700 12px var(--body); letter-spacing: .18em; text-transform: uppercase; color: var(--gold); text-align: center; }
+h1 { font: 400 clamp(40px, 9vw, 64px)/0.95 var(--display); text-transform: uppercase; text-align: center; margin: 6px 0 4px; letter-spacing: .01em; }
+h1 span { color: var(--gold); }
+.meta { color: var(--muted); text-align: center; font-size: 14px; margin: 6px 0 16px; }
+.tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; max-width: 380px; margin: 0 auto 18px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 4px; }
+.tabs button { font: 400 17px var(--display); text-transform: uppercase; letter-spacing: .03em; background: none; color: var(--muted); border: 0; border-radius: 9px; padding: 9px 6px; cursor: pointer; }
+.tabs button small { display: block; font: 600 10px var(--body); letter-spacing: .06em; opacity: .85; text-transform: none; }
+.tabs button[aria-pressed="true"] { background: var(--yel); color: #111; }
+
+/* voxel car in the driver's paint */
+.car { --b: #e33; --r: #e33; position: relative; width: 64px; height: 30px; flex: none; }
+.car i { position: absolute; display: block; }
+.car .body { left: 0; right: 0; bottom: 6px; height: 13px; background: var(--b); border-radius: 3px; box-shadow: inset 0 -3px 0 rgba(0,0,0,.25); }
+.car .roof { left: 16px; right: 18px; bottom: 18px; height: 10px; background: var(--r); border-radius: 3px 3px 0 0; box-shadow: inset 0 -2px 0 rgba(0,0,0,.2); }
+.car .win { left: 20px; right: 22px; bottom: 20px; height: 6px; background: #8fb3d9; border-radius: 1px; }
+.car .w1, .car .w2 { bottom: 0; width: 12px; height: 12px; background: #111; border-radius: 3px; border: 2px solid #333; }
+.car .w1 { left: 8px; } .car .w2 { right: 8px; }
+.car.big { transform: scale(2.1); transform-origin: center bottom; margin: 34px auto 0; }
+.car.mid { transform: scale(1.35); transform-origin: center bottom; margin: 10px auto 0; }
+
+/* P1 */
+.p1 { position: relative; text-align: center; border-radius: 20px; padding: 18px 16px 20px; margin-bottom: 14px; overflow: hidden;
+  background: linear-gradient(180deg, rgba(245,197,66,.22), rgba(245,197,66,.04) 60%), var(--card); border: 2px solid var(--gold);
+  box-shadow: 0 0 0 1px rgba(0,0,0,.4), 0 18px 48px rgba(245,197,66,.22); }
+.p1::before { content: ""; position: absolute; inset: 0; background: conic-gradient(from 0deg, transparent 0 20deg, rgba(245,197,66,.10) 20deg 30deg, transparent 30deg 60deg, rgba(245,197,66,.10) 60deg 70deg, transparent 70deg) 50% 0 / 200% 200%; animation: rays 18s linear infinite; pointer-events: none; }
+@keyframes rays { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .p1::before { animation: none; } }
+.p1 > * { position: relative; }
+.badge { display: inline-flex; align-items: center; gap: 6px; font: 400 15px var(--display); letter-spacing: .08em; text-transform: uppercase; background: var(--gold); color: #111; border-radius: 999px; padding: 4px 12px; }
+.p1 .name { display: block; font: 400 clamp(30px, 7.5vw, 46px)/1.05 var(--display); margin-top: 12px; text-decoration: none; word-break: break-all; }
+.p1 .time { font: 400 clamp(46px, 12vw, 72px)/1 var(--display); color: var(--gold); margin-top: 6px; letter-spacing: .02em; }
+.p1 .time small { font: 700 12px var(--body); color: var(--muted); letter-spacing: .1em; display: block; margin-top: 4px; text-transform: uppercase; }
+.lvl { display: inline-block; margin-top: 8px; font: 700 11px var(--body); letter-spacing: .1em; text-transform: uppercase; border: 1px solid var(--line); border-radius: 999px; padding: 4px 9px; color: var(--muted); }
+.lvl.up { border-color: var(--red); color: #ff8b82; }
+
+/* podium */
+.podium { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: end; margin-bottom: 16px; }
+.pod { text-align: center; }
+.pod .who { padding: 0 4px 8px; }
+.pod .name { display: block; font: 400 clamp(17px, 4.4vw, 24px)/1.1 var(--display); text-decoration: none; word-break: break-all; margin-top: 8px; }
+.pod .time { font: 400 clamp(24px, 6vw, 32px)/1 var(--display); margin-top: 4px; }
+.pod .gap { font: 600 12px var(--body); color: var(--muted); margin-top: 2px; }
+.block { border-radius: 12px 12px 6px 6px; display: grid; place-items: center; font: 400 44px var(--display); color: rgba(0,0,0,.55); }
+.pod.s .block { height: 92px; background: linear-gradient(180deg, #e3e7ee, #9da4af); }
+.pod.b .block { height: 70px; background: linear-gradient(180deg, #e7a46a, #a8622c); }
+.pod.s .time { color: var(--silver); } .pod.b .time { color: var(--bronze); }
+
+/* 4 to 10 */
+ol.rest { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+ol.rest li { display: grid; grid-template-columns: 34px 64px 1fr auto; gap: 12px; align-items: center; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; }
+ol.rest .pos { font: 400 24px var(--display); color: var(--muted); text-align: center; }
+ol.rest .name { font: 700 16px var(--body); text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+ol.rest .lvl { margin-top: 3px; }
+ol.rest .t { text-align: right; font: 400 22px var(--display); }
+ol.rest .t small { display: block; font: 600 11px var(--body); color: var(--muted); }
+.empty { text-align: center; color: var(--muted); padding: 22px; border: 1px dashed var(--line); border-radius: 12px; }
+.open { color: var(--muted); }
+
+.cta { display: block; margin: 22px 0 8px; text-decoration: none; text-align: center; color: #fff; border-radius: 14px; padding: 16px 12px 14px;
+  background: repeating-linear-gradient(90deg, #fff 0 10px, #111 10px 20px) top / 100% 6px no-repeat, repeating-linear-gradient(90deg, #111 0 10px, #fff 10px 20px) bottom / 100% 6px no-repeat, linear-gradient(180deg, #ef3b2d, #c4160b);
+  box-shadow: 0 0 0 2px #ff6b5e inset, 0 8px 24px rgba(239,59,45,.45); }
+.cta b { display: block; font: 400 30px/1.05 var(--display); text-transform: uppercase; letter-spacing: .03em; }
+.cta span { display: block; font: 700 13px var(--body); opacity: .92; margin-top: 4px; }
+.fine { text-align: center; color: var(--muted); font-size: 12px; margin-top: 10px; }
+@media (min-width: 640px) {
+  .podium { grid-template-columns: 1fr 1fr; gap: 16px; }
+  .p1 { padding: 24px 20px 26px; }
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="flag"></div>
+  <nav class="pages" aria-label="Pages"><a href="../map/">3D track</a><a href="../results/">Race results</a><a href="../game/" style="background:var(--red);border-color:var(--red)">Play</a></nav>
+  <div class="kicker">Internet Motor Speedway game</div>
+  <h1>Top 10 <span>fastest laps</span></h1>
+  <p class="meta" id="meta">Loading the board…</p>
+  <div class="tabs" role="group" aria-label="Board">
+    <button type="button" data-b="open" aria-pressed="true">Open<small>any upgrades</small></button>
+    <button type="button" data-b="stock" aria-pressed="false">Stock<small>no upgrades</small></button>
+  </div>
+  <section id="board" aria-live="polite"></section>
+  <a class="cta" href="../game/"><b>&#127950;&#65039; Play to get on the board</b><span>Race your own car on the real track. Beat a top 10 lap and your name goes up here.</span></a>
+  <p class="fine" id="fine">Best saved lap per driver. Followers only.</p>
+</main>
+<script>
+const ENDPOINT = "https://script.google.com/macros/s/AKfycbwsMLdBQJagXvjV6hghdy0M1_dHmE7lLEi0lUAAvGOAkzO61HeWyTCYueeRo-jgBVQ2pQ/exec";   // game leaderboard (GET only)
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const fmt = ms => { const s = ms / 1000; return s >= 60 ? Math.floor(s / 60) + ":" + (s % 60).toFixed(2).padStart(5, "0") : s.toFixed(2); };
+let ROWS = [], TOTAL = 0, PAINT = {}, CUSTOM = {}, which = "open";
+
+function paint(n) {
+  const c = CUSTOM[n]; if (c) return [c.bodyHex, c.roofHex || c.bodyHex];
+  const h = PAINT[n]; return h ? ["#" + h, "#" + h] : ["#e2e5ea", "#e2e5ea"];
+}
+function car(n, cls) {
+  const [b, r] = paint(n);
+  return '<div class="car ' + (cls || "") + '" style="--b:' + esc(b) + ';--r:' + esc(r) + '" aria-hidden="true"><i class="body"></i><i class="roof"></i><i class="win"></i><i class="w1"></i><i class="w2"></i></div>';
+}
+const lvl = up => up ? '<span class="lvl up">Upgrade level ' + up + '</span>' : '<span class="lvl">Stock</span>';
+const link = (n, cls) => '<a class="name ' + (cls || "") + '" href="https://instagram.com/' + encodeURIComponent(n) + '" target="_blank" rel="noopener">@' + esc(n) + '</a>';
+
+function draw() {
+  const rows = (which === "stock" ? ROWS.filter(r => !r.up) : ROWS).slice(0, 10), B = $("board");
+  document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.b === which)));
+  if (!rows.length) { B.innerHTML = '<p class="empty">No laps on this board yet. Be the first.</p>'; return; }
+  const p1 = rows[0], gap = r => "+" + ((r.t - p1.t) / 1000).toFixed(3);
+  let h = '<div class="p1"><span class="badge">&#127942; P1 · fastest lap</span>' + car(p1.n, "big") + link(p1.n) +
+    '<div class="time">' + fmt(p1.t) + '<small>best lap</small></div>' + lvl(p1.up) + '</div>';
+  if (rows.length > 1) {
+    h += '<div class="podium">';
+    for (const [r, k, cls] of [[rows[1], 2, "s"], [rows[2], 3, "b"]]) {
+      if (!r) { h += '<div></div>'; continue; }
+      h += '<div class="pod ' + cls + '"><div class="who">' + car(r.n, "mid") + link(r.n) + '<div class="time">' + fmt(r.t) + '</div><div class="gap">' + gap(r) + '</div>' + lvl(r.up) + '</div><div class="block">P' + k + '</div></div>';
+    }
+    h += '</div>';
+  }
+  if (rows.length > 3) h += '<ol class="rest" start="4">' + rows.slice(3).map((r, i) => '<li><span class="pos">' + (i + 4) + '</span>' + car(r.n) +
+    '<div>' + link(r.n) + '<div>' + lvl(r.up) + '</div></div><div class="t">' + fmt(r.t) + '<small>' + gap(r) + '</small></div></li>').join("") + '</ol>';
+  B.innerHTML = h;
+}
+document.querySelectorAll(".tabs button").forEach(b => b.addEventListener("click", () => { which = b.dataset.b; draw(); }));
+
+async function load() {
+  try {
+    const d = await (await fetch(ENDPOINT, { cache: "no-store" })).json();
+    if (!d.ok) throw 0;
+    ROWS = d.rows || []; TOTAL = d.total || ROWS.length;
+    $("meta").textContent = TOTAL.toLocaleString() + (TOTAL === 1 ? " driver has" : " drivers have") + " set a lap. Only 10 make the board.";
+    draw();
+  } catch (e) { $("meta").textContent = "Couldn't load the board. Refresh to try again."; }
+}
+Promise.all([
+  fetch("../game/followers.json").then(r => r.json()).then(d => { PAINT = d.f || {}; }).catch(() => {}),
+  fetch("../cars/cars.json").then(r => r.json()).then(d => { for (const c of d.cars || []) if (c.ig) CUSTOM[c.ig.toLowerCase()] = c; }).catch(() => {})
+]).then(() => ROWS.length && draw());
+load();
+setInterval(load, 60000);
+</script>
+</body>
+</html>

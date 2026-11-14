@@ -59,6 +59,11 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--fg); outlin
 .pres .v { font-family: var(--display); font-size: 22px; text-transform: uppercase; margin-top: 2px; line-height: 1.15; }
 .pres .v a { color: var(--fg); text-decoration: none; border-bottom: 2px solid var(--yel); }
 .pres .v span { color: var(--muted); }
+.crew { margin: -6px 0 18px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); }
+.crew .k { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.crew h3 { font: 400 17px var(--display); text-transform: uppercase; margin: 10px 0 6px; letter-spacing: .02em; }
+.crew .ppl { display: flex; flex-wrap: wrap; gap: 6px; }
+.crew .ppl a { font-size: 14px; font-weight: 600; color: var(--fg); text-decoration: none; border: 1px solid var(--line); border-radius: 999px; padding: 5px 10px; }
 .wins { display: flex; flex-direction: column; gap: 16px; }
 .win { background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
 .win img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; background: #222; }
@@ -78,7 +83,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--fg); outlin
     <button type="button" role="tab" id="t-res" aria-selected="true" aria-controls="v-res">Race Results</button>
     <button type="button" role="tab" id="t-mus" aria-selected="false" aria-controls="v-mus">Victory Museum</button>
   </div>
-  <nav style="display:flex;gap:8px;margin:-8px 0 20px" aria-label="Pages"><a href="../map/" style="flex:1;text-align:center;padding:11px 6px;border-radius:12px;background:var(--yel);color:#111;text-decoration:none;font:400 16px var(--display);text-transform:uppercase;letter-spacing:.02em">3D track</a><a href="../map/#cars" style="flex:1;text-align:center;padding:11px 6px;border-radius:12px;background:var(--card);border:1px solid var(--line);color:var(--fg);text-decoration:none;font:400 16px var(--display);text-transform:uppercase;letter-spacing:.02em">Custom cars</a><a href="../map/#museum" style="flex:1;text-align:center;padding:11px 6px;border-radius:12px;background:var(--card);border:1px solid var(--line);color:var(--fg);text-decoration:none;font:400 16px var(--display);text-transform:uppercase;letter-spacing:.02em">Victory Museum</a></nav>
+  <nav style="display:flex;gap:8px;margin:-8px 0 20px" aria-label="Pages"><a href="../map/" style="flex:1;text-align:center;padding:11px 6px;border-radius:12px;background:var(--yel);color:#111;text-decoration:none;font:400 16px var(--display);text-transform:uppercase;letter-spacing:.02em">3D track</a><a href="../map/#cars" style="flex:1;text-align:center;padding:11px 6px;border-radius:12px;background:var(--card);border:1px solid var(--line);color:var(--fg);text-decoration:none;font:400 16px var(--display);text-transform:uppercase;letter-spacing:.02em">Custom cars</a><a href="../map/#museum" style="flex:1;text-align:center;padding:11px 6px;border-radius:12px;background:var(--card);border:1px solid var(--line);color:var(--fg);text-decoration:none;font:400 16px var(--display);text-transform:uppercase;letter-spacing:.02em">Victory Museum</a><a href="../leaderboard/" style="flex:1;text-align:center;padding:11px 6px;border-radius:12px;background:var(--card);border:1px solid var(--line);color:var(--fg);text-decoration:none;font:400 16px var(--display);text-transform:uppercase;letter-spacing:.02em">Leaderboard</a></nav>
   <section id="v-mus" role="tabpanel" aria-labelledby="t-mus" hidden>
     <h1>Victory <span>Museum</span></h1>
     <p class="mintro">Every winner's car turns gold and goes in the museum forever.</p>
@@ -88,6 +93,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--fg); outlin
   <h1>Race <span>Results</span></h1>
   <p class="meta" id="meta">Loading…</p>
   <div class="pres" id="pres" hidden><div class="k">Presented by</div><div class="v" id="presv"></div></div>
+  <section class="crew" id="crew" hidden aria-label="Staff and crew"><div class="k">Staff &amp; Crew</div><div id="crewv"></div></section>
   <div class="days" id="days" role="group" aria-label="Race day"></div>
   <label for="q">Find your car</label>
   <div class="search"><span aria-hidden="true">@</span><input id="q" type="search" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="your instagram"></div>
@@ -146,6 +152,20 @@ function find() {
   }
   drawList();
 }
+// Staff & Crew: commenters who asked for a job, by role, per race day (results/staff_crew.json, {"9": [{"role": "Jet Pilots", "names": ["x"]}]})
+const crewP = fetch("staff_crew.json", { cache: "no-cache" }).then(r => r.ok ? r.json() : {}).catch(() => ({}));
+async function drawCrew(day) {
+  const all = await crewP, roles = ((all.days || all)[String(day)] || []).filter(r => r && r.role && (r.names || []).length), box = $("crewv");
+  if (!data || data.day !== day) return;
+  box.textContent = "";
+  roles.forEach(r => {
+    const h = document.createElement("h3"); h.textContent = r.role; box.appendChild(h);
+    const d = document.createElement("div"); d.className = "ppl";
+    r.names.forEach(n => { n = String(n).replace(/^@/, ""); const a = document.createElement("a"); a.textContent = "@" + n; a.href = "https://instagram.com/" + encodeURIComponent(n); a.target = "_blank"; a.rel = "noopener"; d.appendChild(a); });
+    box.appendChild(d);
+  });
+  $("crew").hidden = !roles.length;
+}
 function ordinal(n) { const s = ["th","st","nd","rd"], v = n % 100; return n.toLocaleString() + (s[(v - 20) % 10] || s[v] || s[0]); }
 async function load(day) {
   $("meta").textContent = "Loading…";
@@ -161,6 +181,7 @@ async function load(day) {
     pv.appendChild(a);
   });
   $("pres").hidden = !sp.length;
+  drawCrew(data.day);
   [...$("days").children].forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.id === day.id)));
   shown = STEP; find();
 }

@@ -13,12 +13,13 @@
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; overflow: hidden; background: #7fb2e5; font-family: var(--body); color: var(--fg); touch-action: none; }
 #c { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
-.hud { position: fixed; left: 0; right: 0; top: 0; padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) 0 max(10px, env(safe-area-inset-left)); pointer-events: none; }
+.hud { position: fixed; z-index: 2; left: 0; right: 0; top: 0; padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) 0 max(10px, env(safe-area-inset-left)); pointer-events: none; }
 .panel { pointer-events: auto; max-width: 560px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
 .top { display: flex; align-items: center; gap: 8px; }
 .badge { font-family: var(--display); background: var(--yel); color: var(--ink); border-radius: 6px; padding: 3px 6px; font-size: 13px; }
 h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 20px; text-transform: uppercase; letter-spacing: .02em; line-height: 1.1; }
-.sub { font-size: 11px; font-weight: 700; color: var(--yel); letter-spacing: .08em; text-transform: uppercase; margin: 2px 0 8px; }
+.sub { font-size: 11px; font-weight: 700; color: var(--yel); letter-spacing: .08em; text-transform: uppercase; margin: 2px 0 0; }
+.panel > .top { margin-top: 8px; }
 form { display: flex; gap: 6px; }
 input { flex: 1; min-width: 0; font: 700 16px var(--body); color: var(--fg); background: #0b0d11; border: 2px solid var(--line); border-radius: 8px; padding: 10px; outline: none; }
 input:focus { border-color: var(--yel); }
@@ -33,6 +34,50 @@ input:focus { border-color: var(--yel); }
 .buy { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
 .buy a { flex: 1 1 auto; text-align: center; font: 700 13px var(--body); text-decoration: none; border-radius: 8px; padding: 9px 8px; border: 1px solid var(--yel); color: var(--yel); background: rgba(255,204,24,.08); }
 .buy a.main { background: var(--yel); color: var(--ink); }
+.buy .spon { flex: 2 1 auto; font: 400 16px var(--display); letter-spacing: .03em; text-transform: uppercase; color: var(--ink); background: var(--yel); border: 0; border-radius: 8px; padding: 10px 8px; cursor: pointer; }
+.buy a.main { flex: 1 1 auto; background: transparent; color: var(--yel); border: 1px solid var(--yel); font: 700 13px var(--body); display: grid; place-items: center; }
+.play { display: block; margin-top: 8px; text-decoration: none; text-align: center; color: #fff; border-radius: 10px; padding: 11px 10px 10px;
+  background: repeating-linear-gradient(90deg, #fff 0 8px, #111 8px 16px) top / 100% 5px no-repeat, repeating-linear-gradient(90deg, #111 0 8px, #fff 8px 16px) bottom / 100% 5px no-repeat, linear-gradient(180deg, #ef3b2d, #c4160b);
+  box-shadow: 0 0 0 2px #ff6b5e inset, 0 6px 18px rgba(239,59,45,.45); animation: pp 1.6s ease-in-out infinite; }
+.play .pb { display: block; font: 400 26px/1.05 var(--display); text-transform: uppercase; letter-spacing: .03em; }
+.play .ps { display: block; font: 700 12px var(--body); opacity: .92; margin-top: 3px; }
+.play:hover { filter: brightness(1.08); }
+@media (max-width: 520px) { .nav a { font-size: 12px !important; white-space: nowrap; } .panel > .hint { display: none; } .play .pb { font-size: 23px; } .play .ps { font-size: 11px; } }
+.node { position: fixed; left: 0; top: 0; z-index: 1; transform: translate(-50%, -7px); display: flex; flex-direction: column; align-items: center; gap: 6px; background: none; border: 0; padding: 0; cursor: pointer; }
+.node .dot { width: 14px; height: 14px; border-radius: 50%; background: var(--yel); box-shadow: 0 0 0 2px #111; position: relative; }
+.node .dot::before, .node .dot::after { content: ""; position: absolute; inset: -2px; border-radius: 50%; border: 2px solid var(--yel); animation: sonar 2.4s ease-out infinite; }
+.node .dot::after { animation-delay: 1.2s; }
+.node.red .dot { background: #ef3b2d; } .node.red .dot::before, .node.red .dot::after { border-color: #ff6b5e; }
+.node .lb { font: 400 14px var(--display); text-transform: uppercase; letter-spacing: .03em; color: #fff; background: rgba(17,19,24,.88); border: 1px solid rgba(255,255,255,.12); border-radius: 6px; padding: 3px 8px; white-space: nowrap; }
+.node:hover .lb, .node:focus-visible .lb { background: var(--yel); color: var(--ink); }
+@keyframes sonar { 0% { transform: scale(1); opacity: .95; } 100% { transform: scale(4.4); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .node .dot::before, .node .dot::after { animation: none; opacity: .5; transform: scale(2); } }
+#home { position: fixed; z-index: 3; left: 50%; transform: translateX(-50%); bottom: max(58px, calc(env(safe-area-inset-bottom) + 48px)); font: 400 17px var(--display); text-transform: uppercase; letter-spacing: .03em; background: var(--fg); color: var(--ink); border: 0; border-radius: 999px; padding: 10px 18px; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,.35); }
+.slab { position: fixed; left: 0; top: 0; z-index: 1; transform: translate(-50%, -100%); pointer-events: none; background: #ef3b2d; color: #fff; font: 400 16px var(--display); text-transform: uppercase; letter-spacing: .03em; padding: 5px 10px; border-radius: 8px; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,.35); }
+.slab::after { content: ""; position: absolute; left: 50%; bottom: -7px; margin-left: -7px; border: 7px solid transparent; border-bottom: 0; border-top-color: #ef3b2d; }
+#sponmod { position: fixed; z-index: 3; right: max(10px, env(safe-area-inset-right)); top: max(10px, env(safe-area-inset-top)); width: 290px; background: var(--card); border: 2px solid var(--yel); border-radius: 14px; padding: 14px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+#sponmod h2 { margin: 0 24px 4px 0; font: 400 24px var(--display); text-transform: uppercase; color: var(--yel); letter-spacing: .02em; }
+#sponmod .lead { margin: 0 0 10px; font: 500 13px/1.35 var(--body); color: var(--muted); }
+#sponmod ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+#sponmod li { background: #0b0d11; border: 1px solid var(--line); border-left: 4px solid #ef3b2d; border-radius: 8px; padding: 8px 10px; }
+#sponmod li button { all: unset; display: block; width: 100%; cursor: pointer; }
+#sponmod li:has(button:hover), #sponmod li.on { border-color: var(--yel); border-left-color: var(--yel); }
+#sponmod li b i { display: none; font-style: normal; color: var(--yel); }
+#sponmod li b { display: block; font: 400 17px var(--display); text-transform: uppercase; letter-spacing: .02em; }
+#sponmod li span { display: block; font: 500 12px var(--body); color: var(--muted); margin-top: 1px; }
+#sponmod .kofi { display: block; margin-top: 10px; text-align: center; text-decoration: none; font: 400 20px var(--display); text-transform: uppercase; letter-spacing: .03em; color: var(--ink); background: var(--yel); border-radius: 10px; padding: 12px; }
+#sponmod .more { margin: 8px 0 0; font: 500 11px/1.4 var(--body); color: var(--muted); }
+#sponmod .more a { color: var(--yel); }
+#sponmod .x { position: absolute; right: 8px; top: 6px; background: none; border: 0; color: var(--fg); font: 700 24px var(--body); cursor: pointer; }
+.spmode #spons, .spmode #sbtn, .spmode .hud, .spmode #nodes { display: none !important; }
+@media (max-width: 899px) { #sponmod .lead, #sponmod .more { display: none; } #sponmod { padding: 10px 12px; } #sponmod h2 { font-size: 20px; } #sponmod ul { gap: 4px; } #sponmod ul { grid-template-columns: 1fr 1fr; } #sponmod li { padding: 6px 9px; } #sponmod li:last-child { grid-column: 1 / -1; } #sponmod li span { display: none; } #sponmod li b i { display: inline; } #sponmod li b { font-size: 15px; flex: none; } #sponmod li span { font-size: 11px; } #sponmod .kofi { margin-top: 8px; padding: 10px; font-size: 18px; }
+  #sponmod { top: auto; left: max(10px, env(safe-area-inset-left)); right: max(10px, env(safe-area-inset-right)); bottom: max(10px, env(safe-area-inset-bottom)); width: auto; max-height: 52%; overflow: auto; } .spmode .foot { display: none; } .spmode #home { bottom: auto; top: max(12px, env(safe-area-inset-top)); } }
+.lbl { display: block; text-align: center; margin-top: 6px; font: 700 12px var(--body); letter-spacing: .04em; color: var(--gold, #f5c542); text-decoration: none; }
+.lbl:hover { text-decoration: underline; }
+@keyframes pp { 50% { box-shadow: 0 0 0 2px #ff6b5e inset, 0 6px 26px rgba(239,59,45,.8); } }
+@media (prefers-reduced-motion: reduce) { .play { animation: none; } }
+#spons.flash { animation: fl 1.2s ease-out 1; }
+@keyframes fl { 0%, 40% { box-shadow: 0 0 0 3px var(--yel); } 100% { box-shadow: none; } }
 .foot { position: fixed; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-between; gap: 8px; padding: 0 max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left)); pointer-events: none; }
 .foot div, .foot a { pointer-events: auto; background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 7px 9px; font: 700 11px var(--body); letter-spacing: .06em; text-transform: uppercase; color: var(--fg); text-decoration: none; }
 .foot b { color: var(--yel); }
@@ -67,7 +112,11 @@ input:focus { border-color: var(--yel); }
 #load .bar i { display: block; height: 100%; width: 0; background: var(--yel); transition: width .2s; }
 #load .p { color: var(--muted); font-size: 13px; }
 .hint { font-size: 11px; color: var(--muted); margin-top: 6px; }
-.nav { display: flex; gap: 6px; margin-bottom: 8px; }
+.nav { display: flex; gap: 6px; margin-top: 0; }
+.nav:not(:has(a:not([hidden]))) { display: none; }
+.nav a { font-size: 13px !important; padding: 7px 4px !important; }
+.show .nav { margin-top: 0; }
+.show .nav a { font-size: 15px !important; padding: 9px 4px !important; }
 .nav a { flex: 1; text-align: center; font: 400 15px var(--display); letter-spacing: .03em; text-transform: uppercase; text-decoration: none; color: var(--ink); background: var(--yel); border-radius: 8px; padding: 9px 4px; }
 .nav a.alt { background: #0b0d11; color: var(--fg); border: 1px solid var(--line); }
 .ctag { position: fixed; left: 0; top: 0; transform: translate(-50%, -100%); background: var(--fg); color: var(--ink); font: 700 12px var(--body); padding: 4px 8px; border-radius: 999px; white-space: nowrap; text-decoration: none; box-shadow: 0 3px 10px rgba(0,0,0,.35); }
@@ -107,28 +156,39 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 <div id="load"><div><div class="t">Loading the speedway</div><div class="bar"><i id="lbar"></i></div><div class="p" id="lp">0%</div></div></div>
 <div class="hud">
   <div class="panel">
-    <nav class="nav" aria-label="Pages"><a class="back" href="#" id="back" hidden>&larr; Whole track</a><a class="res" href="../results/">Results</a><a class="alt" href="#cars" data-show="garages">Custom cars</a><a class="alt" href="#museum" data-show="museum">Victory Museum</a><a class="alt" href="../sponsors/">Sponsors</a><a class="res" href="../game/">Play</a></nav>
-    <div class="top"><span class="badge">IMS</span><h1 id="title">Internet Motor Speedway</h1></div>
-    <div class="sub" id="sub">Every follower gets a car</div>
     <form id="f" autocomplete="off"><input id="q" type="search" placeholder="@YOUR NAME" autocapitalize="none" spellcheck="false" aria-label="Your Instagram name"><button class="go" type="submit">FIND MY CAR</button></form>
     <div class="msg" id="msg" aria-live="polite"></div>
-    <div class="chips" role="group" aria-label="Views">
-      <button class="chip" data-v="track" aria-pressed="true">Whole track</button>
-      <button class="chip" data-v="grid" aria-pressed="false">Starting grid</button>
-      <button class="chip" data-v="boards" aria-pressed="false">Billboards</button>
-      <button class="chip" data-v="garages" aria-pressed="false">Custom car garages</button>
-      <button class="chip" data-v="museum" aria-pressed="false">Victory Museum</button>
-    </div>
+    <div class="top"><span class="badge">IMS</span><h1 id="title">Internet Motor Speedway</h1></div>
+    <div class="sub" id="sub">Every follower gets a car</div>
+    <a class="play" href="../game/"><span class="pb">&#127950;&#65039; Play the race car game</span><span class="ps">Drive your own car on this track. Set a lap, hit the leaderboard.</span></a>
+    <a class="lbl" href="../leaderboard/">&#127942; Game leaderboard: see the top 10 &rarr;</a>
     <div class="buy">
+      <button type="button" class="spon" id="pspon" aria-controls="spons">&#128227; Sponsor the speedway</button>
       <a class="main" id="pcar" href="https://ko-fi.com/internetmotorspeedway" target="_blank" rel="noopener">Custom car $1</a>
-      <a href="https://ko-fi.com/internetmotorspeedway" target="_blank" rel="noopener" id="pwall">Wall ad $10</a>
-      <a href="https://ko-fi.com/internetmotorspeedway" target="_blank" rel="noopener" id="pboard">Billboard $15</a>
-      <a href="https://ko-fi.com/internetmotorspeedway" target="_blank" rel="noopener" id="pinfield">Infield ad $30</a>
     </div>
-    <div class="hint">Drag to move · pinch or scroll to zoom · two fingers to turn</div>
+    <nav class="nav" aria-label="Pages"><a class="back" href="#" id="back" hidden>&larr; Whole track</a></nav>
+    <div class="chips" role="group" aria-label="Views" hidden><button class="chip" data-v="track" aria-pressed="true">Whole track</button></div>
+    <div class="hint">Tap a pulsing dot on the track to jump there · drag to move · pinch or scroll to zoom</div>
   </div>
 </div>
 <div id="tag" hidden></div>
+<div id="nodes" aria-label="Places on the track"></div>
+<button id="home" type="button" hidden>&larr; Whole track</button>
+<div id="sponlabs"></div>
+<section id="sponmod" hidden aria-label="Sponsor the speedway">
+  <button class="x" id="smx" type="button" aria-label="Close">&times;</button>
+  <h2>Sponsor the speedway</h2>
+  <p class="lead">Put your brand in tomorrow's race. Tap a spot to see it on the track.</p>
+  <ul>
+    <li><button type="button" data-spot="main"><b>Infield ad <i>$30</i></b><span id="mInf">$30 a race, or a full week for $200</span></button></li>
+    <li><button type="button" data-spot="main"><b>Wall ad <i>$10</i></b><span id="mWall">$10 a race, logo slot on the track wall</span></button></li>
+    <li><button type="button" data-spot="main"><b>Billboard <i>$15</i></b><span id="mBoard">$15 a race, 8 spots on the stands</span></button></li>
+    <li><button type="button" data-spot="blimp"><b>Blimp ad <i>DM</i></b><span>Your brand on the blimp over the track. DM for price.</span></button></li>
+    <li><button type="button" data-spot="trophy"><b>Trophy: Presented by <i>DM</i></b><span>The winner's trophy, presented by your brand. DM for price.</span></button></li>
+  </ul>
+  <a class="kofi" href="https://ko-fi.com/internetmotorspeedway" target="_blank" rel="noopener">Get a spot on Ko-fi</a>
+  <p class="more">Weekly or monthly deals, or presenting the trophy or the track: <a href="https://instagram.com/internetmotorspeedway" target="_blank" rel="noopener">DM @internetmotorspeedway</a> · <a href="../sponsors/">All sponsors</a></p>
+</section>
 <div class="card" id="card" hidden aria-live="polite">
   <div class="row"><button class="arr" id="prev" aria-label="Previous">&#8249;</button><div class="txt" id="ctxt"></div><button class="arr" id="next" aria-label="Next">&#8250;</button></div>
   <div class="acts" id="cacts"></div>
@@ -199,6 +259,95 @@ document.querySelectorAll(".chip").forEach(b => b.addEventListener("click", () =
   else m.textContent = "";
 }));
 
+// ---- Pulsing map nodes: tap one to fly to that part of the track. Sponsor view: infield box, track wall and a billboard in one shot.
+const NODES = [], SLABS = [], homeBtn = document.getElementById("home"), sponMod = document.getElementById("sponmod");
+let away = false;
+function setAway(on) { away = on; homeBtn.hidden = !on; }
+function goHome() { closeSponsor(); if (SHOW) endShow(false); setTag(null); document.getElementById("msg").textContent = ""; VIEWS.track(); setAway(false); }
+homeBtn.addEventListener("click", goHome);
+function addNode(label, at, act, red) {
+  const b = document.createElement("button"); b.type = "button"; b.className = "node" + (red ? " red" : ""); b.hidden = true;
+  b.innerHTML = '<span class="dot"></span><span class="lb"></span>'; b.querySelector(".lb").textContent = label;
+  b.addEventListener("click", () => { act(); });
+  document.getElementById("nodes").append(b); NODES.push({ el: b, at });
+}
+function sponTarget() {   // the infield box end nearest a billboard that faces it
+  const x = DATA.rect_x, b = DATA.boards.reduce((a, c) => Math.hypot(c.x - x, c.y) < Math.hypot(a.x - x, a.y) ? c : a);
+  return { x, b };
+}
+function openSponsor() {
+  if (!DATA) return; if (SHOW) endShow(false); setTag(null);
+  const { x, b } = sponTarget(), dx = b.x - x, dy = b.y, L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L, k = Math.max(1, .8 / camera.aspect);
+  // camera behind the box (infield side), up high, looking out over the box, the track wall and the stands billboard
+  sponFocus("main");
+  showBrandHere(x);
+  const wall = SPWALL || { x: x + ux * (L - 115), y: uy * (L - 115) };
+  SLABS.length = 0; const box = document.getElementById("sponlabs"); box.textContent = "";
+  for (const [t, at] of [[(SP && SP.prices && SP.prices.infield) || "Infield ad $30", V(x + ux * DATA.rect_w * .5, uy * DATA.rect_w * .5, 6)], [(SP && SP.prices && SP.prices.wall) || "Wall ad $10", V(wall.x, wall.y, 6)], [(SP && SP.prices && SP.prices.board) || "Billboard $15", V(b.x, b.y, b.z + 14)], ["Blimp ad · DM", V(BLIMP_AT.x, BLIMP_AT.y, BLIMP_AT.z + 26)], ["Trophy: presented by you", TROPHY_AT()]]) {
+    const d = document.createElement("div"); d.className = "slab"; d.textContent = t; d.hidden = true; box.append(d); SLABS.push({ el: d, at });
+  }
+  document.body.classList.add("spmode"); sponMod.hidden = false; setAway(true);
+}
+function closeSponsor() { if (BRAND) BRAND.visible = false; if (PLATE) PLATE.visible = false; if (sponMod.hidden) return; sponMod.hidden = true; document.body.classList.remove("spmode"); document.getElementById("sponlabs").textContent = ""; SLABS.length = 0; }
+document.getElementById("smx").addEventListener("click", goHome);
+let SPWALL = null, BRAND = null, BLIMP = null, BLIMP_AT = null, PLATE = null;
+const TROPHY_AT = () => V(DATA.museum.x, DATA.museum.y + 16, 23);      // the big trophy at the back of the Victory Museum (world.py TX, TY)
+function brandCanvas(w, h, lines, bg) {
+  const c = document.createElement("canvas"); c.width = w; c.height = h; const g = c.getContext("2d");
+  g.fillStyle = bg; g.fillRect(0, 0, w, h); g.textAlign = "center"; g.textBaseline = "middle";
+  lines.forEach(([t, px, col, y]) => { g.fillStyle = col; g.font = px + "px Anton, Impact, sans-serif"; g.fillText(t, w / 2, y); });
+  const tx = new THREE.CanvasTexture(c); tx.colorSpace = THREE.SRGBColorSpace; tx.anisotropy = 8; return tx;
+}
+function addBlimp() {   // a blimp over the far turn: an open sponsor slot (Brady Nov 14), drifts a little
+  const { x, b } = sponTarget(), dx = b.x - x, dy = b.y, L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L;
+  BLIMP_AT = { x: x + ux * L * .45 - uy * 150, y: uy * L * .45 + ux * 150, z: 175 };
+  const g = new THREE.Group(), skin = new THREE.MeshLambertMaterial({ color: 0xe9ecf1 }), dark = new THREE.MeshLambertMaterial({ color: 0x1b1f27 }), yel = new THREE.MeshLambertMaterial({ color: 0xffcc18 });
+  const body = new THREE.Mesh(new THREE.SphereGeometry(10, 24, 16), skin); body.scale.set(3.6, 1, 1); g.add(body);
+  for (const [px, py, pz, sx, sy, sz] of [[-32, 0, 9, 7, .8, 8], [-32, 0, -9, 7, .8, 8], [-32, 9, 0, 7, 8, .8], [-32, -9, 0, 7, 8, .8]]) { const f = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz), yel); f.position.set(px, py, pz); g.add(f); }
+  const gon = new THREE.Mesh(new THREE.BoxGeometry(9, 3, 4), dark); gon.position.set(2, -10.5, 0); g.add(gon);
+  const tex = brandCanvas(1024, 256, [["YOUR BRAND HERE", 150, "#111318", 128]], "#ffcc18");
+  for (const side of [1, -1]) { const pl = new THREE.Mesh(new THREE.PlaneGeometry(46, 11.5), new THREE.MeshBasicMaterial({ map: tex })); pl.position.set(0, 0, side * 10.15); if (side < 0) pl.rotation.y = Math.PI; g.add(pl); }
+  g.position.copy(V(BLIMP_AT.x, BLIMP_AT.y, BLIMP_AT.z)); g.rotation.y = Math.atan2(uy, ux) + Math.PI / 2 + .35;
+  g.scale.setScalar(2); scene.add(g); BLIMP = g;
+}
+function sponFocus(spot) {
+  document.querySelectorAll("#sponmod li").forEach(li => li.classList.toggle("on", li.querySelector("button").dataset.spot === spot));
+  const { x, b } = sponTarget(), dx = b.x - x, dy = b.y, L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L, k = Math.max(1, .8 / camera.aspect), tall = camera.aspect < 1;
+  if (PLATE) PLATE.visible = spot === "trophy";
+  if (spot === "trophy") { const m = DATA.museum;
+    if (!PLATE) { PLATE = new THREE.Mesh(new THREE.PlaneGeometry(13, 3.6), new THREE.MeshBasicMaterial({ map: brandCanvas(1024, 284, [["PRESENTED BY", 70, "#ffcc18", 70], ["YOUR BRAND HERE", 120, "#ffffff", 180]], "#111318") })); scene.add(PLATE); }
+    PLATE.position.copy(V(m.x, m.y + 16 - 7.6, 4.2)); PLATE.visible = true;
+    flyTo(V(m.x + 8, m.y - 26, 11), V(m.x, m.y + 16, 11), 1500); return; }
+  if (spot === "blimp") { const p = BLIMP_AT; flyTo(V(p.x - ux * 230 * k - uy * 60, p.y - uy * 230 * k + ux * 60, p.z + 10), V(p.x, p.y, p.z), 1500); return; }
+  const tf = tall ? .2 : .42, back = tall ? 300 : 420;
+  flyTo(V(x - ux * back * k - uy * 60, -uy * back * k + ux * 60, 300 * k), V(x + ux * L * tf, uy * L * tf, 10), 1600);
+}
+document.querySelectorAll("#sponmod li button").forEach(bt => bt.addEventListener("click", () => sponFocus(bt.dataset.spot)));
+function showBrandHere(x) {   // the open infield box reads "YOUR BRAND HERE" while the sponsor view is up
+  if (!BRAND) {
+    const c = document.createElement("canvas"); c.width = 640; c.height = 1024; const g = c.getContext("2d");
+    g.fillStyle = "#1d2a5a"; g.fillRect(0, 0, 640, 1024); g.strokeStyle = "#ffcc18"; g.lineWidth = 18; g.setLineDash([60, 34]); g.strokeRect(30, 30, 580, 964);
+    g.save(); g.translate(320, 512); g.rotate(Math.PI / 2); g.fillStyle = "#fff"; g.textAlign = "center"; g.textBaseline = "middle";
+    g.font = "150px Anton, Impact, sans-serif"; g.fillText("YOUR BRAND", 0, -95); g.fillText("HERE", 0, 70);
+    g.fillStyle = "#ffcc18"; g.font = "64px Anton, Impact, sans-serif"; g.fillText("INFIELD AD", 0, 215); g.restore();
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+    BRAND = new THREE.Mesh(new THREE.PlaneGeometry(DATA.rect_w * .92, DATA.rect_h * .92), new THREE.MeshBasicMaterial({ map: t }));
+    BRAND.rotation.x = -Math.PI / 2; scene.add(BRAND);
+  }
+  BRAND.position.copy(V(x, 0, 1.4)); BRAND.visible = true;
+}
+function initNodes() {
+  addBlimp();
+  const f = DATA.front, m = DATA.museum, { x, b } = sponTarget();
+  addNode("Starting grid", V(f.x, f.y, 6), () => { VIEWS.grid(); setAway(true); });
+  addNode("Custom car garages", V(GX, GY - 13, 16), () => { setAway(false); startShow("garages"); });
+  addNode("Victory Museum", V(m.x, m.y, 22), () => { setAway(false); startShow("museum"); });
+  const bb = DATA.boards.reduce((a, c) => c.y > a.y ? c : a);
+  addNode("Billboards", V(bb.x, bb.y, bb.z + 14), () => { VIEWS.boards(); setAway(true);
+    document.getElementById("msg").innerHTML = 'Tap Billboards again for the next one. <a href="' + KOFI + '" target="_blank" rel="noopener">' + esc0((SP && SP.prices && SP.prices.board_line) || "8 spots on the stands. Get one: $15 a race.") + "</a>"; });
+  addNode("Sponsor spots", V(x, 0, 8), openSponsor, true);
+  addNode("Race results", V(0, DATA.sign.y, DATA.sign.z + 18), () => { location.href = "../results/"; });
+}
 function setTag(car) {
   const t = document.getElementById("tag");
   if (!car) { t.hidden = true; tagAt = null; if (hl) hl.visible = false; return; }
@@ -218,7 +367,7 @@ document.getElementById("f").addEventListener("submit", e => {
   setTag(car);
   const fw = new THREE.Vector3(Math.cos(car.h), 0, -Math.sin(car.h));
   const p = V(car.x, car.y, 0);
-  flyTo(p.clone().addScaledVector(fw, 30).add(new THREE.Vector3(0, 30, 0)), p.clone().addScaledVector(fw, -6), 1800);
+  closeSponsor(); flyTo(p.clone().addScaledVector(fw, 30).add(new THREE.Vector3(0, 30, 0)), p.clone().addScaledVector(fw, -6), 1800); setAway(true);
   m.innerHTML = "";
   const s = document.createElement("span"); s.innerHTML = "<b></b> starts <b></b> of " + (DATA.label || DATA.count.toLocaleString()) + ". ";
   s.querySelectorAll("b")[0].textContent = "@" + car.n; s.querySelectorAll("b")[1].textContent = "#" + (car.i + 1).toLocaleString();
@@ -236,6 +385,7 @@ const glbP = new Promise((res, rej) => loader.load("track7.glb", res, x => { if 
 
 Promise.all([carsP, glbP]).then(([d, gltf]) => {
   DATA = d;
+  try { initNodes(); } catch (e) { console.error(e); }
   d.cars.forEach((c, i) => { c.i = i; c.n = c.n || ""; if (c.n) carsByName.set(c.n.toLowerCase(), c); });
   document.getElementById("cnt").textContent = d.label || d.count.toLocaleString();
   document.getElementById("title").textContent = d.track;
@@ -377,6 +527,17 @@ renderer.setAnimationLoop(t => {
     tagEl.hidden = !vis;
     if (vis) { tagEl.style.left = (tmp.x * .5 + .5) * innerWidth + "px"; tagEl.style.top = (-tmp.y * .5 + .5) * innerHeight + "px"; }
   }
+  if (BLIMP) BLIMP.position.y = BLIMP_AT.z + Math.sin(t / 1800) * 1.5;
+  for (const n of NODES) {
+    tmp.copy(n.at); const dist = tmp.distanceTo(camera.position); tmp.project(camera);
+    const vis = !SHOW && sponMod.hidden && dist > 380 && tmp.z < 1 && Math.abs(tmp.x) < .97 && Math.abs(tmp.y) < .97;
+    n.el.hidden = !vis;
+    if (vis) { n.el.style.left = (tmp.x * .5 + .5) * innerWidth + "px"; n.el.style.top = (-tmp.y * .5 + .5) * innerHeight + "px"; }
+  }
+  for (const n of SLABS) {
+    tmp.copy(n.at).project(camera); const vis = tmp.z < 1 && Math.abs(tmp.x) < 1 && Math.abs(tmp.y) < 1; n.el.hidden = !vis;
+    if (vis) { n.el.style.left = (tmp.x * .5 + .5) * innerWidth + "px"; n.el.style.top = (-tmp.y * .5 + .5) * innerHeight + "px"; }
+  }
   for (const ct of CTAGS) {
     tmp.copy(ct.at); const dist = tmp.distanceTo(camera.position); tmp.project(camera);
     const vis = !SHOW && dist < 420 && tmp.z < 1 && Math.abs(tmp.x) < 1.05 && Math.abs(tmp.y) < 1.05;
@@ -405,7 +566,8 @@ function goldCar(x, y, k, mat, blk) {
 (() => {
   const L = document.getElementById("slist"), P = document.getElementById("spons"), btn = document.getElementById("sbtn");
   const tog = o => { P.classList.toggle("open", o); btn.setAttribute("aria-expanded", String(o)); };
-  btn.addEventListener("click", () => tog(!P.classList.contains("open"))); document.getElementById("sx").addEventListener("click", () => tog(false));
+  btn.addEventListener("click", () => tog(!P.classList.contains("open")));
+  document.getElementById("pspon").addEventListener("click", () => { tog(false); openSponsor(); }); document.getElementById("sx").addEventListener("click", () => tog(false));
   fetch("../sponsors/sponsors.json", { cache: "no-cache" }).then(r => r.json()).then(d => {
     const list = d.sponsors || []; L.textContent = ""; btn.textContent = "Sponsors (" + list.length + ")";
     for (const s of list) {
@@ -448,7 +610,8 @@ function spTexture(sp, w, h, rot, done) {        // art fitted inside a w x h pa
 function addInfield() {
   fetch("sponsors.json", { cache: "no-cache" }).then(r => r.json()).then(sp => {
     SP = sp; if (sp.prices) for (const [id, k] of [["sinf", "infield_line"], ["swall", "wall_line"], ["sboard", "board_line"]]) if (sp.prices[k]) document.getElementById(id).textContent = id === "sinf" ? sp.prices[k].replace(/^Get yours: /, "Infield: ") : sp.prices[k];
-    if (sp.prices) for (const [id, k] of [["pcar", "car"], ["pwall", "wall"], ["pboard", "board"], ["pinfield", "infield"]]) if (sp.prices[k]) document.getElementById(id).textContent = sp.prices[k];
+    if (sp.prices) for (const [id, k] of [["pcar", "car"], ["pwall", "wall"], ["pboard", "board"], ["pinfield", "infield"]]) if (sp.prices[k] && document.getElementById(id)) document.getElementById(id).textContent = sp.prices[k];
+    if (sp.prices) { const t = (id, v) => v && (document.getElementById(id).textContent = v); t("mInf", (sp.prices.infield_line || "").replace(/^Get yours: /, "")); t("mWall", sp.prices.wall_line); t("mBoard", sp.prices.board_line); }
     const q = new URLSearchParams(location.search).get("infield"); if (q === "four" || q === "rotate") SP.mode = q; const tq = new URLSearchParams(location.search).get("today"); if (tq) SP.today = tq.split(",").map(Number);   // preview a pairing: ?today=4,5
     const W = (DATA.rect_w || 200) - 12, H = (DATA.rect_h || 320) - 12, PX = 5;   // 5 px per metre
     const put = (s, cx, cy, w, h, rot) => spTexture(s, w * PX, h * PX, rot, t => {
@@ -555,7 +718,7 @@ function fill(c) {
   }
 }
 const backBtn = document.getElementById("back");
-backBtn.addEventListener("click", e => { e.preventDefault(); endShow(true); });
+backBtn.addEventListener("click", e => { e.preventDefault(); endShow(true); setAway(false); });
 cacts.addEventListener("click", e => { if (e.target.dataset.x) endShow(true); });
 document.getElementById("prev").addEventListener("click", () => SHOW && go(SHOW.i - 1, -1));
 document.getElementById("next").addEventListener("click", () => SHOW && go(SHOW.i + 1, 1));
