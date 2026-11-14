@@ -2,6 +2,10 @@
   "frames": 36,
   "cover": 4,
   "cars": [
+    {"ig": "your_moms_shop", "num": "69", "body": "Dark brown", "roof": "Black", "bodyHex": "#291b12", "roofHex": "#202022", "since": "2026-11-14"},
+    {"ig": "itsaritho", "num": "37", "body": "Green", "roof": "Black", "bodyHex": "#3cc246", "roofHex": "#202022", "since": "2026-11-14"},
+    {"ig": "whipittillihaveasseizure", "num": "36", "body": "White", "roof": "Pink", "bodyHex": "#f6f6f6", "roofHex": "#ff60b4", "since": "2026-11-14", "noig": true},
+    {"ig": "macehemi", "num": "44", "body": "Red", "roof": "Black", "bodyHex": "#e83030", "roofHex": "#202022", "since": "2026-11-14"},
     {"ig": "tunayildirim1903", "num": "77", "body": "Black", "roof": "Orange", "bodyHex": "#202022", "roofHex": "#ff8900", "since": "2026-11-14"},
     {"ig": "1_22.am", "num": "23", "body": "Neon green", "roof": "Black", "bodyHex": "#89ff00", "roofHex": "#202022", "since": "2026-11-14"},
     {"ig": "nobelle", "num": "35", "body": "Navy", "roof": "Sand", "bodyHex": "#11263e", "roofHex": "#dfb688", "since": "2026-11-14"},
