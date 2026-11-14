@@ -1,6 +1,14 @@
 {
  "winners": [
   {
+   "day": 8,
+   "name": "keith200867",
+   "track": "Epstein Island Motor Speedway",
+   "date": "Nov 13, 2026",
+   "cars": 15257,
+   "img": "museum/day8.jpg"
+  },
+  {
    "day": 7,
    "name": "_polmat_",
    "track": "Charlie Kirk Motor Speedway",

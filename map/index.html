@@ -390,7 +390,7 @@ controls.addEventListener("start", () => { fly = null; });
 // ---- Victory Museum: gold cars for every winner on the plinths (newest in the centre, past winners left, right, left, right)
 const MUS = { x: 5, y: -50, d: 62 }, WINS = [];
 const GLASS_M = new THREE.MeshLambertMaterial({ color: 0x6f8aa3 }), LIT_M = new THREE.MeshBasicMaterial({ color: 0xffffff });
-const SLOTS = [[MUS.x - 24, MUS.y - 4], [MUS.x + 24, MUS.y - 4], [MUS.x - 38, MUS.y - 4], [MUS.x + 38, MUS.y - 4]];
+const SLOTS = [[MUS.x - 24, MUS.y - 4], [MUS.x + 24, MUS.y - 4], [MUS.x - 38, MUS.y - 4], [MUS.x + 38, MUS.y - 4], [MUS.x + 50, MUS.y - 4], [MUS.x - 50, MUS.y - 4]];   // 5th and 6th plinths (Day 7, Day 8), same as the videos
 function goldCar(x, y, k, mat, blk) {
   const g = new THREE.Group();
   const add = (geo, m, px, py, pz) => { const o = new THREE.Mesh(geo, m); o.position.copy(V(px, py, pz)); g.add(o); };
@@ -481,7 +481,7 @@ function addMuseum(root) {
       else if (sz.y < 4 && c.y > 2.4 && c.y < 6) baked.push(c.clone()); });
     const hasCar = (x, y) => { const p = V(x, y, 0); return baked.some(q => Math.hypot(q.x - p.x, q.z - p.z) < 3); };   // older exports already have some gold cars
     const past = W.slice(1).reverse();
-    const place = [{ w: W[0], x: MUS.x, y: MUS.y - 5, k: 2.2 }].concat(past.slice(0, 4).map((w, i) => ({ w, x: SLOTS[i][0], y: SLOTS[i][1], k: 1.9 })));
+    const place = [{ w: W[0], x: MUS.x, y: MUS.y - 5, k: 2.2 }].concat(past.slice(0, SLOTS.length).map((w, i) => ({ w, x: SLOTS[i][0], y: SLOTS[i][1], k: 1.9 })));
     for (const p of place) {
       if (p.k < 2.2 && !hasCar(p.x, p.y)) { const b = new THREE.Mesh(new THREE.BoxGeometry(10, 2.2, 12), plinth); b.position.copy(V(p.x, p.y, 1.1)); scene.add(b); goldCar(p.x, p.y, p.k, gold, blk); }
       CTAGS.push({ el: mkTag("@" + p.w.name, "#museum"), at: V(p.x, p.y, 2.2 + 3.4 * p.k), show: "museum" });
