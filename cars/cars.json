@@ -2,6 +2,7 @@
   "frames": 36,
   "cover": 4,
   "cars": [
+    {"ig": "jamesdixonii", "num": "95", "body": "White", "roof": "Red", "bodyHex": "#f4f4f4", "roofHex": "#d81b24", "since": "2026-11-13"},
     {"ig": "theoriginalcf", "num": "6", "body": "Pink", "roof": "Blue", "bodyHex": "#ff76b4", "roofHex": "#2563e0", "since": "2026-11-13"},
     {"ig": "frostedfire3", "num": "5", "body": "Orange", "roof": "White", "bodyHex": "#ff6a00", "roofHex": "#eeeeee", "since": "2026-11-13"},
     {"ig": "420smwhere", "num": "42", "body": "Purple", "roof": "Black", "bodyHex": "#7a2ee0", "roofHex": "#111111", "since": "2026-11-13"},
