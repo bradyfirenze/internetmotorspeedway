@@ -87,6 +87,8 @@ ol.rest .t small { display: block; font: 600 11px var(--body); color: var(--mute
   box-shadow: 0 0 0 2px #ff6b5e inset, 0 8px 24px rgba(239,59,45,.45); }
 .cta b { display: block; font: 400 30px/1.05 var(--display); text-transform: uppercase; letter-spacing: .03em; }
 .cta span { display: block; font: 700 13px var(--body); opacity: .92; margin-top: 4px; }
+.tip { margin: 6px 0 0; font: 500 13px/1.45 var(--body); color: var(--muted); background: var(--card); border: 1px dashed #3a404c; border-radius: 10px; padding: 10px 12px; }
+.tip b { color: var(--fg); }
 .fine { text-align: center; color: var(--muted); font-size: 12px; margin-top: 10px; }
 @media (min-width: 640px) {
   .podium { grid-template-columns: 1fr 1fr; gap: 16px; }
@@ -97,7 +99,7 @@ ol.rest .t small { display: block; font: 600 11px var(--body); color: var(--mute
 <body>
 <main class="wrap">
   <div class="flag"></div>
-  <nav class="pages" aria-label="Pages"><a href="../map/">3D track</a><a href="../results/">Race results</a><a href="../game/" style="background:var(--red);border-color:var(--red)">Play</a></nav>
+  <nav class="pages" aria-label="Pages"><a href="../map/">3D track</a><a href="../results/">Race results</a><a href="../game/" data-play style="background:var(--red);border-color:var(--red)">Play</a></nav>
   <div class="kicker">Internet Motor Speedway game</div>
   <h1>Top 10 <span>fastest laps</span></h1>
   <p class="meta" id="meta">Loading the board…</p>
@@ -106,7 +108,8 @@ ol.rest .t small { display: block; font: 600 11px var(--body); color: var(--mute
     <button type="button" data-b="stock" aria-pressed="false">Stock<small>no upgrades</small></button>
   </div>
   <section id="board" aria-live="polite"></section>
-  <a class="cta" href="../game/"><b>&#127950;&#65039; Play to get on the board</b><span>Race your own car on the real track. Beat a top 10 lap and your name goes up here.</span></a>
+  <a class="cta" href="../game/" data-play><b>&#127950;&#65039; Play to get on the board</b><span>Race your own car on the real track. Beat a top 10 lap and your name goes up here.</span></a>
+  <p class="tip" data-a2hs></p>
   <p class="fine" id="fine">Best saved lap per driver. Followers only.</p>
 </main>
 <script>
@@ -164,5 +167,6 @@ Promise.all([
 load();
 setInterval(load, 60000);
 </script>
+<script src="../a2hs.js"></script>
 </body>
 </html>
