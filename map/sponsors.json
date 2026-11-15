@@ -1,6 +1,6 @@
 {
-  "note": "Brady Nov 12: NO sponsor art on the map's infield (mode 'off'). Sponsors are listed in the Sponsors panel instead (from ../sponsors/sponsors.json). mode 'rotate' / 'four' still work for previews with ?infield=rotate|four. prices = the Ko-fi buttons and lines (Brady Nov 12: car $1, wall $10, billboard $15, infield $50 or $200 a week; Nov 13: infield back to $30 a race, $200 a week stays).",
-  "mode": "off",
+  "note": "Brady Nov 12: NO sponsor art on the map's infield (mode 'off'). Sponsors are listed in the Sponsors panel instead (from ../sponsors/sponsors.json). mode 'rotate' / 'four' still work for previews with ?infield=rotate|four. prices = the Ko-fi buttons and lines (Brady Nov 12: car $1, wall $10, billboard $15, infield $50 or $200 a week; Nov 13: infield back to $30 a race, $200 a week stays). Nov 15 (Brady): infield boxes CYCLE sponsor art every 8 s with a swipe (mode 'cycle', list 'cycle'), incl. a YOUR BRAND HERE slide.",
+  "mode": "cycle",
   "today": [],
   "sponsors": [
     {
@@ -42,5 +42,48 @@
     "wall_line": "Logo slots on the track wall. Get one: $10 a race.",
     "infield_line": "Get yours: $30 a race, or a full week for $200.",
     "long_line": "Want a weekly or monthly deal, or to present the trophy or the track? DM @internetmotorspeedway."
-  }
+  },
+  "cycle_ms": 8000,
+  "cycle": [
+    {
+      "name": "TZO Designs",
+      "img": "tzo_infield.jpg"
+    },
+    {
+      "name": "Stardubs",
+      "img": "stardubs_infield.jpg"
+    },
+    {
+      "name": "Black Flag Motorsports",
+      "img": "blackflag_infield.jpg"
+    },
+    {
+      "name": "Efii",
+      "img": "efii_infield.jpg"
+    },
+    {
+      "name": "Your brand here",
+      "img": "open_infield.jpg"
+    },
+    {
+      "name": "Wristify",
+      "img": "wristify_infield.jpg"
+    },
+    {
+      "name": "Broadcast Racing",
+      "img": "broadcast_infield.jpg"
+    },
+    {
+      "name": "Nobelle",
+      "img": "nobelle_infield.jpg"
+    },
+    {
+      "name": "Epoch",
+      "img": "epoch_infield.jpg"
+    },
+    {
+      "name": "Your brand here",
+      "img": "open_infield.jpg"
+    }
+  ]
 }

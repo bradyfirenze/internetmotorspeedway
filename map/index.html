@@ -304,6 +304,9 @@ document.querySelectorAll(".chip").forEach(b => b.addEventListener("click", () =
   else m.textContent = "";
 }));
 
+// followers who joined after the last race list (Day chat pull), so they can find themselves before their first race
+const NEXT = new Set(); let NEXT_RACE = "";
+fetch("next.json", { cache: "no-cache" }).then(r => r.json()).then(d => { NEXT_RACE = d.race; (d.names || []).forEach(n => NEXT.add(n)); }).catch(() => {});
 // fastest lap teaser under the game button (game leaderboard, GET only)
 fetch("https://script.google.com/macros/s/AKfycbwsMLdBQJagXvjV6hghdy0M1_dHmE7lLEi0lUAAvGOAkzO61HeWyTCYueeRo-jgBVQ2pQ/exec", { cache: "no-store" }).then(r => r.json()).then(d => {
   const p = d && d.ok && d.rows && d.rows[0]; if (!p) return;
@@ -333,7 +336,7 @@ function openSponsor() {
   const { x, b } = sponTarget(), dx = b.x - x, dy = b.y, L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L, k = Math.max(1, .8 / camera.aspect);
   // camera behind the box (infield side), up high, looking out over the box, the track wall and the stands billboard
   sponFocus("main");
-  showBrandHere(x);
+  if (!SP || SP.mode !== "cycle") showBrandHere(x);
   const wall = SPWALL || { x: x + ux * (L - 115), y: uy * (L - 115) };
   SLABS.length = 0; const box = document.getElementById("sponlabs"); box.textContent = "";
   for (const [t, at] of [[(SP && SP.prices && SP.prices.infield) || "Infield ad $30", V(x + ux * DATA.rect_w * .5, uy * DATA.rect_w * .5, 6)], [(SP && SP.prices && SP.prices.wall) || "Wall ad $10", V(wall.x, wall.y, 6)], [(SP && SP.prices && SP.prices.board) || "Billboard $15", V(b.x, b.y, b.z + 14)], ["Blimp ad · DM", V(BLIMP_AT.x, BLIMP_AT.y, BLIMP_AT.z + 26)], ["Trophy: presented by you", TROPHY_AT()]]) {
@@ -415,6 +418,7 @@ document.getElementById("f").addEventListener("submit", e => {
   if (!q) return;
   let car = carsByName.get(q);
   if (!car) { const hit = DATA.cars.find(c => c.n && c.n.includes(q)); if (hit) car = hit; }
+  if (!car && NEXT.has(q)) { m.innerHTML = "<b>You're in!</b> @" + esc0(q) + " followed after the last race's list was locked, so your car is on the grid for <b>Day " + NEXT_RACE + "</b>, the next race."; setTag(null); return; }
   if (!car) { m.textContent = "Not on the grid yet. Check the spelling (no @ needed). This race's list was locked at 10:30 am PT Nov 14. Followed later? You're in the next race."; setTag(null); return; }
   document.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", "false"));
   setTag(car);
@@ -672,6 +676,31 @@ function addInfield() {
       p.rotation.x = -Math.PI / 2; p.position.copy(V(cx, cy, .95)); scene.add(p); });
     const ends = [DATA.rect_x, -DATA.rect_x];
     if (SP.mode === "off") { /* Brady Nov 12: nothing on the infield, sponsors live in the Sponsors list */ }
+    else if (SP.mode === "cycle") {
+      // Brady Nov 15: each infield box shows sponsor art and swipes to the next one every 8 s (the two ends run half a list apart)
+      const L = (SP.cycle || []).filter(c => c.img), ms = SP.cycle_ms || 8000, CW = 520, CH = Math.round(CW * H / W);
+      if (L.length) {
+        const imgs = L.map(c => { const im = new Image(); im.src = c.img; return im; });
+        const draw = (g, im, dx) => { g.fillStyle = "#0b1440"; g.fillRect(dx, 0, CW, CH); if (im.complete && im.naturalWidth) { const k = Math.min(CW / im.width, CH / im.height); g.drawImage(im, dx + (CW - im.width * k) / 2, (CH - im.height * k) / 2, im.width * k, im.height * k); } };
+        const boxes = ends.map((x, e) => {
+          const cv = document.createElement("canvas"); cv.width = CW; cv.height = CH; const g = cv.getContext("2d");
+          const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; SPTEX.push(t);
+          const p = new THREE.Mesh(new THREE.PlaneGeometry(W, H), new THREE.MeshLambertMaterial({ map: t }));
+          p.rotation.x = -Math.PI / 2; if (e) p.rotation.z = Math.PI; p.position.copy(V(x, 0, .95)); scene.add(p);
+          return { g, t, i: e ? Math.floor(L.length / 2) : 0 };
+        });
+        const show = b => { draw(b.g, imgs[b.i % L.length], 0); b.t.needsUpdate = true; };
+        imgs.forEach(im => im.addEventListener("load", () => boxes.forEach(show)));
+        boxes.forEach(show);
+        setInterval(() => boxes.forEach(b => {
+          const a = imgs[b.i % L.length], n = imgs[(b.i + 1) % L.length], t0 = performance.now(), D = 650;
+          const step = now => { const u = Math.min(1, (now - t0) / D), k = u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2, off = Math.round(k * CW);
+            draw(b.g, a, -off); draw(b.g, n, CW - off); b.t.needsUpdate = true;
+            if (u < 1) requestAnimationFrame(step); else { b.i++; show(b); } };
+          requestAnimationFrame(step);
+        }), ms);
+      }
+    }
     else if (SP.mode === "four") {
       // every sponsor down at once: first half at the turn 1/2 end, the rest at turn 3/4, each box split into panels 6 m apart.
       // Portrait art is turned to fill the wide panels and reads from that turn end.
