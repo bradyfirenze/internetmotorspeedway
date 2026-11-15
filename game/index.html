@@ -112,6 +112,98 @@ input { flex: 1; min-width: 0; font: 700 18px var(--body); color: var(--fg); bac
 #fsSteps p { margin-bottom: 6px; }
 #load { height: 6px; border-radius: 3px; background: #2a2e37; overflow: hidden; margin: 0 0 7px; }
 #load i { display: block; height: 100%; width: 0; background: var(--yel); transition: width .2s; }
+/* ---- DRAFT money parts ---- */
+.three { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px; }
+button.prize { background: #2a2410; color: var(--yel); border: 1px solid rgba(255,204,24,.5); }
+button.crew { background: #062a30; color: #6ff3ff; border: 1px solid rgba(41,240,255,.5); }
+.banner { font: 700 12px var(--body); letter-spacing: .06em; padding: 7px 10px; margin: -3px 0 9px; border-radius: 9px; background: #062a30; color: #6ff3ff; border: 1px solid rgba(41,240,255,.4); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#demo { position: fixed; z-index: 7; top: max(6px, var(--st)); left: max(10px, var(--sl)); display: flex; gap: 5px; align-items: center; font: 700 10px var(--body); letter-spacing: .08em; color: #111; background: #ff7a1a; border-radius: 9px; padding: 4px 6px 4px 9px; pointer-events: auto; }
+#demo button { width: auto; font: 700 10px var(--body); letter-spacing: .04em; padding: 5px 7px; border-radius: 6px; background: #111; color: #fff; }
+.screen.side { justify-content: center; align-items: flex-end; }
+.screen.side .box { max-width: 410px; margin: 0; }
+.tabs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-bottom: 8px; }
+.tabs button { font-size: 15px; padding: 8px 4px; background: #0b0d11; color: var(--muted); border: 1px solid var(--line); }
+.tabs button.on { background: var(--yel); color: var(--ink); border-color: var(--yel); }
+.tabs button small { display: block; font: 700 9px var(--body); letter-spacing: .08em; opacity: .8; }
+.pips.p4 i:nth-child(4) { background: rgba(41,240,255,.22); } .pips.p4 i:nth-child(4).on { background: #29f0ff; }
+.cmp { display: grid; gap: 4px; margin: 8px 0; }
+.cmp div { display: flex; align-items: baseline; gap: 8px; background: #0b0d11; border: 1px solid var(--line); border-radius: 9px; padding: 6px 10px; font-size: 12px; color: var(--muted); }
+.cmp div span { flex: 1; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; font-size: 10px; }
+.cmp div b { font: 400 18px var(--display); color: var(--fg); letter-spacing: .02em; }
+.cmp div i { font-style: normal; color: var(--muted); }
+.cmp div em { font: 400 18px var(--display); font-style: normal; color: var(--grn); letter-spacing: .02em; }
+.cmp div.same em { color: var(--muted); }
+.chip { display: inline-block; font: 700 11px var(--body); letter-spacing: .06em; background: #0b0d11; border: 1px solid var(--line); border-radius: 999px; padding: 4px 9px; color: var(--yel); }
+.head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.packs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px; margin-bottom: 8px; }
+.packs button { padding: 10px 4px; } .packs button small { display: block; font: 700 11px var(--body); letter-spacing: .04em; opacity: .75; }
+.dots4 { display: flex; justify-content: center; gap: 12px; margin: 4px 0 10px; }
+.dots4 i { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--line); } .dots4 i.on { background: var(--yel); border-color: var(--yel); }
+.pad { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 8px; }
+.pad button { background: #0b0d11; color: var(--fg); border: 1px solid var(--line); font-size: 22px; padding: 9px 0; }
+.check { display: flex; align-items: center; gap: 9px; background: #0b0d11; color: var(--fg); border: 1px solid var(--line); font: 700 14px var(--body); text-transform: none; letter-spacing: 0; text-align: left; padding: 9px 11px; margin-bottom: 6px; }
+.check i { width: 20px; height: 20px; border-radius: 6px; border: 2px solid var(--muted); flex: none; display: grid; place-items: center; font-style: normal; color: var(--ink); }
+.check.on i { background: var(--grn); border-color: var(--grn); } .check.on i::after { content: "✓"; }
+.trk { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 8px; }
+.trk button { text-align: left; padding: 11px 12px; background: #0b0d11; color: var(--fg); border: 1px solid var(--line); }
+.trk button.on { border-color: var(--yel); box-shadow: inset 0 0 0 1px var(--yel); }
+.trk button small { display: block; font: 700 11px var(--body); letter-spacing: .04em; color: var(--muted); text-transform: none; margin-top: 3px; }
+#sGarage .two button, #sGarage .three button { font-size: 15px; padding: 9px 6px; white-space: nowrap; }
+#sGarage button.big { font-size: 22px; padding: 10px; }
+#sGarage h1 { font-size: 26px; }
+.screen.side .box { padding: 9px 12px; }
+.screen.side h2 { font-size: 20px; margin: 0 0 5px; }
+.tabs button { padding: 5px 4px; }
+.cmp { grid-template-columns: 1fr 1fr; gap: 5px; margin: 6px 0; }
+.cmp div { flex-wrap: wrap; gap: 0 6px; padding: 4px 9px 5px; }
+.cmp div span { flex: 0 0 100%; }
+.cmp div b, .cmp div em { font-size: 17px; }
+#sPit .two button { font-size: 14px; padding: 7px 4px; }
+#sPit #pBuyUp { padding: 10px; }
+.cars { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px; margin-bottom: 8px; }
+.carc { background: #0b0d11; border: 1px solid var(--line); border-radius: 12px; padding: 9px; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.carc.on { border-color: var(--yel); box-shadow: inset 0 0 0 1px var(--yel); }
+.carc.lock { border-style: dashed; border-color: rgba(41,240,255,.4); }
+.carc b { font: 400 19px var(--display); text-transform: uppercase; letter-spacing: .03em; }
+.carc div { font-size: 12px; color: var(--muted); min-height: 16px; }
+.carc button { font-size: 14px; padding: 8px 4px; }
+.carc .sw { width: 22px; height: 22px; border-radius: 6px; margin-right: 4px; }
+.sws { display: flex; gap: 6px; flex-wrap: wrap; margin: 2px 0 8px; }
+.sws button { width: 36px; height: 36px; padding: 0; border-radius: 9px; border: 2px solid var(--line); }
+.sws button.on { border-color: #fff; box-shadow: 0 0 0 2px var(--yel); }
+#sPrize .box { padding: 8px 14px; }
+#sPrize .stats { margin: 2px 0 6px; }
+#sPrize h2 { margin-bottom: 4px; }
+#sPrize .check { padding: 7px 11px; }
+/* ---- garage start screen ---- */
+#sGarage { display: block; padding: 0; }
+.gtop { position: absolute; top: max(8px, var(--st)); left: max(12px, var(--sl)); right: max(12px, var(--sr)); display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; pointer-events: auto; }
+.gbar { text-align: left; text-transform: none; letter-spacing: 0; background: var(--card); color: var(--fg); border: 1px solid var(--line); border-radius: 12px; padding: 7px 10px 8px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.gbar .r { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; }
+.gbar .r b { font: 400 19px var(--display); text-transform: uppercase; letter-spacing: .03em; }
+.gbar .r span { font: 400 19px var(--display); color: var(--yel); font-variant-numeric: tabular-nums; }
+.gbar .segs { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 4px; margin: 5px 0 4px; }
+.gbar .segs i { height: 11px; border-radius: 4px; background: rgba(255,255,255,.13); }
+.gbar .segs i.on { background: var(--yel); box-shadow: 0 0 10px rgba(255,204,24,.55); }
+.gbar .segs i.crew { background: rgba(41,240,255,.16); border: 1px dashed rgba(41,240,255,.6); }
+.gbar .segs i.crew.on { background: #29f0ff; border-style: solid; box-shadow: 0 0 10px rgba(41,240,255,.6); }
+.gbar small { display: block; font: 700 10px var(--body); letter-spacing: .07em; text-transform: uppercase; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gbar small em { font-style: normal; color: var(--grn); }
+.gside { position: absolute; right: max(12px, var(--sr)); top: calc(max(8px, var(--st)) + 76px); bottom: max(8px, var(--sb)); width: min(310px, 39%); display: flex; flex-direction: column; justify-content: center; gap: 6px; pointer-events: auto; }
+.gme { position: absolute; left: max(12px, var(--sl)); bottom: max(34px, calc(var(--sb) + 28px)); max-width: calc(100% - min(310px, 39%) - 40px); background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 7px 11px 8px; pointer-events: auto; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.gme .who { display: flex; align-items: center; gap: 10px; }
+.gme h1 { font-size: 23px; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 240px; }
+.gme .stat { padding: 3px 9px; } .gme .stat b { font-size: 18px; }
+.gside .banner { margin: 0; padding: 6px 8px; font-size: 10px; text-align: center; }
+.gside #load { margin: 0; }
+#sGarage .gside button { font-size: 15px; padding: 9px 6px; white-space: nowrap; }
+#sGarage .gside button.big { font-size: 24px; padding: 11px; box-shadow: 0 6px 22px rgba(255,204,24,.3); }
+#demo { top: auto; bottom: max(4px, var(--sb)); }
+#sGarage .gside button:disabled { opacity: 1; background: #1b1e25; color: #6f7682; border: 1px solid var(--line); box-shadow: none; }
+@media (max-height: 372px) { .gside .banner { display: none; } #sGarage .gside button { padding: 7px 6px; font-size: 14px; } #sGarage .gside button.big { padding: 8px; font-size: 21px; } .gside { gap: 5px; top: calc(max(8px, var(--st)) + 70px); } }
+#sNewCar .sws { gap: 5px; margin: 2px 0 6px; } #sNewCar .sws button { width: 30px; height: 30px; border-radius: 8px; }
+.numrow { display: flex; align-items: center; gap: 5px; margin: 0 0 7px; } .numrow span { flex: 1; } .numrow button { width: 46px; font-size: 14px; padding: 7px 0; }
+.numrow b { font: 400 24px var(--display); min-width: 54px; text-align: center; }
 </style>
 <script type="importmap">{ "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -137,29 +229,24 @@ input { flex: 1; min-width: 0; font: 700 18px var(--body); color: var(--fg); bac
 <div id="app">
 <canvas id="c" aria-label="The speedway. Left thumb steers, right thumb is gas and brake."></canvas>
 
-<!-- 2. garage -->
+<!-- 2. garage: you start here, in your own pit garage, with your car on the turntable -->
 <div class="screen" id="sGarage" hidden>
-  <div class="box">
-    <div class="cols">
-      <div>
-        <div class="k" id="gKind">Your car</div>
-        <h1 id="gName">@you</h1>
-        <div class="stats">
-          <div class="stat"><span class="k">Best lap</span><b id="gBest">--</b></div>
-          <div class="stat"><span class="k">Leaderboard</span><b id="gRank">--</b></div>
-        </div>
-        <p class="small">Not you? <button class="linkbtn" id="bSwitch">Switch username</button></p>
-        <button class="fsb" id="bFs" hidden>&#128242; Address bar in the way? Save it as an app</button>
-      </div>
-      <div>
-        <div id="load" aria-hidden="true"><i id="lbar"></i></div>
-        <div class="stack">
-          <button class="big" id="bRace" disabled>Loading the track</button>
-          <div class="two"><button class="alt" id="bPrac" disabled>Practice lap</button><button class="alt" id="bBoard">Leaderboard</button></div>
-          <div class="two"><button class="alt" id="bUpg">Upgrades</button><button class="alt" id="bPaint">Paint &middot; $1</button></div>
-        </div>
-      </div>
-    </div>
+  <div class="gtop" id="gBars"></div>
+  <div class="gme">
+    <div class="who"><div><div class="k" id="gKind">Your car</div><h1 id="gName">@you</h1></div>
+      <div class="stat"><span class="k">Best lap</span><b id="gBest">--</b></div>
+      <div class="stat"><span class="k">Rank</span><b id="gRank">--</b></div></div>
+    <p class="small" style="margin:5px 0 0"><button class="linkbtn" id="bTracks" style="color:var(--yel)">Track: Speedway Oval</button> &middot; <button class="linkbtn" id="bHelp" style="color:var(--yel)">Corner help: on</button> &middot; <button class="linkbtn" id="bSwitch">Switch username</button></p>
+    <button class="fsb" id="bFs" hidden>&#128242; Address bar in the way? Save it as an app</button>
+  </div>
+  <div class="gside">
+    <button class="banner" id="bWeek"></button>
+    <div id="load" aria-hidden="true"><i id="lbar"></i></div>
+    <button class="big" id="bRace" disabled>Loading the track</button>
+    <div class="two"><button class="alt" id="bDrivers" disabled>Race real drivers</button><button class="prize" id="bPrize" disabled>Prize race</button></div>
+    <div class="two"><button class="alt" id="bPrac" disabled>Practice lap</button><button class="alt" id="bBoard">Leaderboard</button></div>
+    <div class="two"><button class="alt" id="bCars">My cars</button><button class="alt" id="bUpg">Pit lane</button></div>
+    <div class="two"><button class="crew" id="bCrew">Pit Crew</button><button class="alt" id="bWallet">Wallet</button></div>
   </div>
 </div>
 
@@ -218,17 +305,6 @@ input { flex: 1; min-width: 0; font: 700 18px var(--body); color: var(--fg); bac
   </div>
 </div>
 
-<!-- 6. upgrades -->
-<div class="screen mid" id="sUpg" hidden>
-  <div class="box">
-    <div class="k">Make it faster</div>
-    <h2>Upgrades</h2>
-    <div class="ups" id="uList"></div>
-    <p class="small" style="margin:0 0 8px">Pay on Ko-fi and put <b id="uNote"></b> in the message. Upgrades are added by hand, usually the same day.</p>
-    <button class="alt" data-close>Back</button>
-  </div>
-</div>
-
 <!-- full screen how-to: shown by itself in a browser tab, with the steps for this phone -->
 <div class="screen mid" id="sFs" hidden>
   <div class="box">
@@ -252,6 +328,106 @@ input { flex: 1; min-width: 0; font: 700 18px var(--body); color: var(--fg); bac
     </div>
   </div>
 </div>
+<!-- DRAFT: demo controls (not in the real game) -->
+<div id="demo" hidden>DRAFT &middot; DEMO MONEY <button id="dCr">+1,000 credits</button><button id="dCrew">Pit Crew: off</button><button id="dReset">Reset</button></div>
+
+<!-- 8. pit lane: upgrades -->
+<div class="screen side" id="sPit" hidden>
+  <div class="box">
+    <div class="head"><h2>Pit lane</h2><button class="chip linkbtn" id="pWal" style="text-decoration:none"></button></div>
+    <div class="tabs" id="pTabs"></div>
+    <div class="head"><b id="pName" style="font:400 20px var(--display);text-transform:uppercase"></b><div class="pips p4" id="pPips" style="width:120px"></div></div>
+    <div class="cmp" id="pCmp"></div>
+    <p class="small" style="margin:0 0 6px"><button class="linkbtn" id="pEarn"></button></p>
+    <div class="stack">
+      <button id="pBuyUp"></button>
+      <div class="two"><button class="alt" id="pSee">See it on the car</button><button class="alt" data-close>Back</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- 9. wallet -->
+<div class="screen mid" id="sWallet" hidden>
+  <div class="box">
+    <div class="head"><div><div class="k">Your credits</div><h2 id="wBal">0 credits</h2></div><span class="chip" id="wPin"></span></div>
+    <div class="msg" id="wMsg" role="status"></div>
+    <div class="packs" id="wPacks"></div>
+    <p class="small" id="wNote" style="margin:0 0 8px"></p>
+    <div class="two"><button class="crew" id="wCrew">Or earn upgrades: Pit Crew</button><button class="alt" data-close>Back</button></div>
+  </div>
+</div>
+
+<!-- 10. PIN -->
+<div class="screen mid" id="sPin" hidden>
+  <div class="box" style="max-width:520px">
+    <div class="k" id="nK">Lock your account</div>
+    <h2 id="nH">Pick a 4 digit PIN</h2>
+    <div class="dots4" id="nDots"><i></i><i></i><i></i><i></i></div>
+    <div class="msg" id="nMsg" role="status" style="text-align:center"></div>
+    <div class="pad" id="nPad"></div>
+    <button class="alt" id="nCancel">Cancel</button>
+  </div>
+</div>
+
+<!-- 11. prize race -->
+<div class="screen mid" id="sPrize" hidden>
+  <div class="box">
+    <div class="k">Win this race, win the prize</div>
+    <h2 id="zName">Prize race</h2>
+    <div class="stats">
+      <div class="stat"><span class="k">Prize</span><b id="zPrize">--</b></div>
+      <div class="stat"><span class="k">Entry</span><b id="zEntry">--</b></div>
+      <div class="stat"><span class="k">Time to beat</span><b id="zBeat">--</b></div>
+    </div>
+    <p class="small" id="zField" style="margin:0 0 7px"></p>
+    <button class="check" id="zAge"><i></i>I am 18 or older</button>
+    <p class="small" id="zRules" style="margin:0 0 6px"></p>
+    <p class="small" style="margin:0 0 8px"><button class="linkbtn" id="zCrew" style="color:#6ff3ff"></button></p>
+    <div class="msg" id="zMsg" role="status" style="min-height:0"></div>
+    <div class="two"><button id="zGo" disabled>Enter</button><button class="alt" data-close>Back</button></div>
+  </div>
+</div>
+
+<!-- 12. tracks -->
+<div class="screen mid" id="sTracks" hidden>
+  <div class="box">
+    <div class="k">Pick a track</div>
+    <h2>Tracks</h2>
+    <div class="trk" id="tList"></div>
+    <button class="alt" data-close>Back</button>
+  </div>
+</div>
+
+<!-- 13. one question (Pit Crew and upgrade prompts) -->
+<div class="screen mid" id="sAsk" hidden>
+  <div class="box" style="max-width:520px">
+    <div class="k" id="aK"></div>
+    <h2 id="aH"></h2>
+    <p id="aP"></p>
+    <div class="two"><button id="aYes">Yes</button><button class="alt" id="aNo">Not now</button></div>
+  </div>
+</div>
+
+<!-- 14. my cars: 1 car free, 3 for the Pit Crew. Upgrades save per car. One car is picked for the daily video race. -->
+<div class="screen mid" id="sCars" hidden>
+  <div class="box">
+    <div class="head"><div><div class="k">Your garage</div><h2>My cars</h2></div><span class="chip" id="cCount"></span></div>
+    <div class="cars" id="cList"></div>
+    <p class="small" style="margin:0 0 8px">Only your <b>daily race car</b> runs in the daily video race. One car per driver, so every follower has the same shot.</p>
+    <div class="two"><button class="alt" id="bPaint">Paint &middot; $1</button><button class="alt" data-close>Back</button></div>
+  </div>
+</div>
+<div class="screen side" id="sNewCar" hidden>
+  <div class="box">
+    <div class="k">Pit Crew paint shop</div>
+    <h2 id="ncH">Add a car</h2>
+    <div class="k" style="color:var(--muted)">Body</div><div class="sws" id="ncBody"></div>
+    <div class="k" style="color:var(--muted)">Roof</div><div class="sws" id="ncRoof"></div>
+    <div class="numrow" id="ncStep"><span class="k" style="color:var(--muted)">Number</span><button class="alt" data-d="-10">-10</button><button class="alt" data-d="-1">-1</button><b id="ncNum">none</b><button class="alt" data-d="1">+1</button><button class="alt" data-d="10">+10</button></div>
+    <div class="msg" id="ncMsg" role="status" style="min-height:0;margin:0 0 5px"></div>
+    <div class="two"><button id="ncAdd">Add this car</button><button class="alt" id="ncCancel">Cancel</button></div>
+  </div>
+</div>
 </div>
 
 <script type="module">
@@ -269,9 +445,9 @@ const LIM = W / 2 - 2.2;        // how far from the centerline a car can get bef
 const STEP = 1 / 120;           // fixed physics step, so every phone gets the same lap for the same driving
 const RACE_LAPS = 3, NB = 19;    // race length and number of bot cars
 const UPG = [
-  { id: "e", name: "Engine", what: "Higher top speed", vals: [130, 135, 140, 145] },
-  { id: "t", name: "Tires", what: "More grip in the corners", vals: [22, 23, 24, 25] },
-  { id: "a", name: "Turbo", what: "Faster off the corners", vals: [22, 26, 30, 34] } ];
+  { id: "e", name: "Engine", what: "Higher top speed", vals: [130, 135, 140, 145, 150] },
+  { id: "t", name: "Tires", what: "More grip in the corners", vals: [22, 23, 24, 25, 26] },
+  { id: "a", name: "Turbo", what: "Faster off the corners", vals: [22, 26, 30, 34, 38] } ];
 const GOLD = "#ffa808", PAL = ["#f3932b", "#f987c2", "#41d187", "#4187ec", "#41d8e6", "#f3f3f3", "#ec4141", "#ca59df"];
 
 // ---------- small helpers
@@ -284,9 +460,9 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const mod = (a, n) => ((a % n) + n) % n;
 const lapDiff = a => mod(a + LEN / 2, LEN) - LEN / 2;          // shortest way around between two spots on the lap
 const V = (x, y, z) => new THREE.Vector3(x, z, -y);            // Blender (x, y, z) to three (x, z, -y)
-const screens = ["sGate", "sGarage", "sResult", "sBoard", "sUpg", "sPaint", "sFs"];
+const screens = ["sGate", "sGarage", "sResult", "sBoard", "sPaint", "sFs", "sPit", "sWallet", "sPin", "sPrize", "sTracks", "sAsk", "sCars", "sNewCar"];
 let under = "sGarage";
-function show(id) { for (const s of screens) $(s).hidden = s !== id; if (id === "sGarage" || id === "sResult") under = id; }
+function show(id) { cur = id; for (const s of screens) $(s).hidden = s !== id; if (id === "sGarage" || id === "sResult") under = id; }
 
 // ---------- always landscape: a phone held upright gets the whole game turned on its side
 let rot = false, LW = innerWidth, LH = innerHeight;
@@ -317,6 +493,7 @@ async function signIn(raw, quiet) {
   me = { name, body: "#" + fol.f[name], roof: null, num: "", kind: "Your car", up: { e: clamp(u.e | 0, 0, 3), t: clamp(u.t | 0, 0, 3), a: clamp(u.a | 0, 0, 3) } };
   if (c) { me.body = c.bodyHex; me.roof = c.roofHex; me.num = c.num || ""; me.kind = "Your custom car"; }
   if (won) { me.body = GOLD; me.roof = "#c98200"; me.kind = "Race winner"; }
+  await moneyIn({ fol, cus, gar, mus });
   store.set("user", name); msg.textContent = "";
   buildMyCar(); fillGarage(); show("sGarage");
   if (needApp) showFs();
@@ -327,6 +504,7 @@ const best = () => +store.get("best:" + me.name) || 0;
 function fillGarage() {
   $("gName").textContent = "@" + me.name; $("gKind").textContent = me.kind;
   $("gBest").textContent = fmt(best());
+  paintMoney();
   const rk = +store.get("rank:" + me.name) || 0;
   $("gRank").textContent = rk ? "P" + rk : "--";
 }
@@ -341,7 +519,7 @@ renderer.outputColorSpace = THREE.SRGBColorSpace;
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x86b9ea); scene.fog = new THREE.Fog(0x86b9ea, 900, 3200);
 const camera = new THREE.PerspectiveCamera(55, 1, .5, 3400);
-scene.add(new THREE.HemisphereLight(0xffffff, 0x5a7a4a, 1.6));
+const hemi = new THREE.HemisphereLight(0xffffff, 0x5a7a4a, 1.6); scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xffffff, 1.9); sun.position.set(-600, 900, 400); scene.add(sun);
 function resize() {
   rot = innerHeight > innerWidth; LW = rot ? innerHeight : innerWidth; LH = rot ? innerWidth : innerHeight;
@@ -355,8 +533,8 @@ const draco = new DRACOLoader(); draco.setDecoderPath("https://cdn.jsdelivr.net/
 const loader = new GLTFLoader(); loader.setDRACOLoader(draco);
 loader.load("../map/track.glb", g => {
   g.scene.traverse(o => { if (o.isMesh && o.material) o.material.side = THREE.FrontSide; });
-  scene.add(g.scene); $("load").hidden = true;
-  $("bRace").disabled = false; $("bRace").textContent = "Race"; $("bPrac").disabled = false;
+  scene.add(g.scene); trackScene = g.scene; trackScene.visible = garOn !== true; $("load").hidden = true;
+  $("bRace").disabled = false; $("bRace").textContent = "Race"; $("bPrac").disabled = false; $("bDrivers").disabled = false; $("bPrize").disabled = false;
 }, x => { if (x.total) $("lbar").style.width = Math.round(x.loaded / x.total * 100) + "%"; },
   () => { $("bRace").textContent = "Track didn't load. Refresh."; });
 
@@ -369,6 +547,12 @@ function numTex(txt, fg) {
   const cv = document.createElement("canvas"); cv.width = cv.height = 256; const x = cv.getContext("2d");
   x.fillStyle = fg; x.textAlign = "center"; x.textBaseline = "middle"; x.font = "400 200px Anton, Impact, sans-serif"; x.fillText(txt, 128, 118);
   const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+let _glow = null;
+function glowTex() {      // soft pool of light under a Pit Crew car
+  if (_glow) return _glow; const cv = document.createElement("canvas"); cv.width = 256; cv.height = 180; const x = cv.getContext("2d");
+  x.translate(128, 90); x.scale(1, 180 / 256); const gr = x.createRadialGradient(0, 0, 20, 0, 0, 128); gr.addColorStop(0, "rgba(255,255,255,1)"); gr.addColorStop(.45, "rgba(255,255,255,.55)"); gr.addColorStop(1, "rgba(255,255,255,0)");
+  x.fillStyle = gr; x.fillRect(-128, -128, 256, 256); return _glow = new THREE.CanvasTexture(cv);
 }
 function raceCar(c, ghost) {
   const g = new THREE.Group();
@@ -383,6 +567,19 @@ function raceCar(c, ghost) {
     const nm = new THREE.MeshBasicMaterial({ map: numTex(c.num, body.r + body.g + body.b > 1.5 ? "#111" : "#fff"), transparent: true });
     const hood = new THREE.Mesh(new THREE.PlaneGeometry(1.15, 1.15), nm); hood.rotation.set(-Math.PI / 2, 0, Math.PI / 2); hood.position.copy(V(1.6, 0, 1.105)); g.add(hood);
     for (const sd of [1, -1]) { const d = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 1.1), nm); d.position.copy(V(.25, sd * 1.106, .76)); d.rotation.y = sd > 0 ? Math.PI : 0; g.add(d); }
+  }
+  if (!ghost) {      // DRAFT: every upgrade level bolts something you can see onto the car
+    const up = c.up || {}, e = up.e | 0, t = up.t | 0, a = up.a | 0, basic = col => new THREE.MeshBasicMaterial({ color: col }), chrome = new THREE.MeshStandardMaterial({ color: 0xd8dde6, roughness: .15, metalness: .9 });
+    const box = (x, y, z, sx, sy, sz, m) => { const o = new THREE.Mesh(new THREE.BoxGeometry(sx, sz, sy), m); o.position.copy(V(x, y, z)); g.add(o); return o; };
+    if (e) { box(1.3, 0, 1.12 + .055 * e, .85 + .12 * e, .5 + .1 * e, .1 + .11 * e, M.k); box(1.3 + (.85 + .12 * e) / 2, 0, 1.13 + .055 * e, .04, .38 + .1 * e, .05 + .09 * e, e >= 4 ? basic(0xff3b2e) : chrome); }       // engine: hood scoop that grows
+    if (e >= 2) for (const sd of [1, -1]) box(-.15, sd * 1.14, .4, 1.3 + .15 * e, .1, .12, chrome);                                                                                                  // and side pipes
+    if (t) { const rim = basic([0, 0x9aa3ad, 0xf3f3f3, 0xffcc18, 0xff3b2e][t]);                                                                                                                         // tires: wider, with colored rims
+      for (const f of [1.5, -1.5]) for (const sd of [1, -1]) { box(f, sd * (1.1 + .04 * t), .45, .94, .4 + .08 * t, .94, M.k); box(f, sd * (1.31 + .08 * t), .45, .52, .03, .52, rim); } }
+    if (a) { const pl = a >= 3 ? basic(a >= 4 ? 0x29f0ff : 0xffcc18) : M.k;                                                                                                                             // turbo: rear wing that grows, hot exhaust tips
+      box(-2.15, 0, 1.6 + .14 * a, .6, 2.36, .07, M.k); for (const sd of [1, -1]) { box(-2.15, sd * 1.18, 1.42 + .07 * a, .7, .05, .4 + .14 * a, pl); box(-2.15, sd * .6, 1.5 + .07 * a, .08, .08, .2 + .14 * a, M.k); }
+      for (const sd of [.5, -.5]) box(-2.4, sd, .5, .14, .24, .24, basic(a >= 4 ? 0x4db8ff : a >= 2 ? 0xff8a1e : 0x777777)); }
+    if (c.glow) { const u = new THREE.Mesh(new THREE.PlaneGeometry(12, 8.4), new THREE.MeshBasicMaterial({ map: glowTex(), color: 0x29f0ff, transparent: true, opacity: .95, blending: THREE.AdditiveBlending, depthWrite: false })); u.rotation.x = -Math.PI / 2; u.position.copy(V(0, 0, .05)); g.add(u);
+      for (const sd of [1, -1]) box(0, sd * 1.02, .14, 4.2, .06, .06, basic(0x8ff8ff)); }   // Pit Crew underglow: a pool of light and two neon tubes
   }
   g.scale.setScalar(1.25); return g;
 }
@@ -423,25 +620,31 @@ let lapT = -1, lapDist = 0, lastS = 0, prog = 0, runBest = 0, lastLap = 0, laps 
 function gridSlot(i) { const row = Math.floor(i / 3), col = i % 3; return { s: -10 - row * 11 - col * 3, d: (col - 1) * 9 }; }
 function resetCar() {
   if (kind === "race") { const g = gridSlot(NB), q = spot(S0 + g.s, g.d); car.x = q.x; car.y = q.y; prog = g.s; }
-  else { car.x = -330; car.y = -(HY + R); prog = -330; }
+  else { const x0 = kind === "ghosts" ? -495 : -330; car.x = x0; car.y = -(HY + R); prog = x0; }
   car.h = 0; car.v = 0; car.wall = 0; car.g = 1; car.skid = 0; car.slip = 0; camH = 0; const p = proj(car.x, car.y); lastS = p.s; car.d = p.d; lapT = -1; lapDist = 0; rec = []; steer = 0; steerIn = 0; placeCar();
 }
-function placeCar() { if (!myCar) return; myCar.position.copy(V(car.x, car.y, .1)); myCar.rotation.y = car.h + car.slip; }
+function placeCar() { if (!myCar) return; if (mode === "menu") { myCar.position.copy(V(GAR.x, GAR.y, .14 + pitH)); myCar.rotation.y = menuA; return; } myCar.position.copy(V(car.x, car.y, .1)); myCar.rotation.y = car.h + car.slip; }
 function stats() { return { vmax: UPG[0].vals[me.up.e], grip: UPG[1].vals[me.up.t], accel: UPG[2].vals[me.up.a] }; }
 let ST = null;
 
 function step(dt) {
-  const s = steer, v = car.v;
+  let s = steer, aBrk = 0; const v = car.v;
+  if (HELP) {      // corner help: lift and slow before the corner if you are coming in too hot, and carry the car around it
+    const dc = toCorner(lastS), hold = Math.sqrt(ST.grip * (R + car.d)) * FEEL.hv;
+    if (!brkOn && ((dc > 0 && v * v > hold * hold + 2 * FEEL.hb * dc) || (dc === 0 && v > hold))) aBrk = 1;
+    if (dc === 0) s = clamp(s - FEEL.hs * (v / (R + car.d)) / (ST.grip * (brkOn ? 1.6 : gasOn && !aBrk ? 1 : 1.25) / Math.max(v, 30)), -1, 1);
+  }
+  autoB = aBrk; const gasE = gasOn && !aBrk;
   // The car always grips. Too fast for a corner means it can't turn tight enough and runs wide, so you lift or brake.
   // Braking throws the weight onto the front tires, so the car turns in much sharper. Lifting off the gas helps a little. Flat on the gas it pushes wide.
-  car.g += ((brkOn ? 1.6 : gasOn ? 1 : 1.25) - car.g) * Math.min(1, dt * 8);
+  car.g += ((brkOn ? 1.6 : gasE ? 1 : 1.25) - car.g) * Math.min(1, dt * 8);
   const grip = ST.grip * car.g;
   const want = -s * grip / Math.max(v, 30);      // yaw rate, + is left. Full steering is all the tires can hold, never more, so the car never slides.
   const aLat = Math.abs(want) * v; let yaw = want, drag = 2 * Math.pow(Math.min(aLat / grip, 1), 2);
   car.skid = 0;
   if (v < 3) yaw *= v / 3;
   car.h += yaw * dt;
-  const push = brkOn ? -46 : gasOn ? ST.accel * (1 - Math.pow(v / ST.vmax, 2)) : -(3 + .0006 * v * v);     // brake, gas or coasting
+  const push = brkOn ? -46 : aBrk ? -FEEL.hb : gasOn ? ST.accel * (1 - Math.pow(v / ST.vmax, 2)) : -(3 + .0006 * v * v);     // brake, gas or coasting
   car.v = Math.max(0, v + (push - drag) * dt);
   car.x += Math.cos(car.h) * car.v * dt; car.y += Math.sin(car.h) * car.v * dt;
   let p = proj(car.x, car.y);
@@ -449,7 +652,7 @@ function step(dt) {
   if (Math.abs(p.d) > LIM) {      // wall: push back on track, lose speed by how square the hit was, point the car along the wall
     const over = p.d - Math.sign(p.d) * LIM; car.x -= Math.sin(p.th) * over; car.y += Math.cos(p.th) * over;
     const rel = wrap(car.h - p.th), impact = Math.abs(Math.sin(rel));
-    if (!car.wall && car.v > 20) { car.v *= 1 - Math.min(.85, .35 + impact * 2.2); hitT = .45; }      // a crash costs a third of your speed or more
+    if (!car.wall && car.v > 20) { car.v *= 1 - Math.min(FEEL.wMax, FEEL.w0 + impact * FEEL.w1); hitT = .45; }      // a crash costs a third of your speed or more
     car.h = p.th + rel * .25; if (car.v > 22) car.v -= 40 * dt; car.wall = .3;                          // and the wall keeps dragging while you lean on it
     p = proj(car.x, car.y);
   }
@@ -476,10 +679,11 @@ function step(dt) {
   }
 }
 function lapDone(t) {
-  const ms = Math.round(t * 1000); laps++; lastLap = ms; $("hLast").textContent = fmt(ms);
+  const ms = Math.round(t * 1000); laps++; raceLaps.push({ t: ms, g: rec.slice() }); lastLap = ms; $("hLast").textContent = fmt(ms);
   const prev = best(), isBest = !prev || ms < prev;
   if (!runBest || ms < runBest) runBest = ms;
   if (isBest) { store.set("best:" + me.name, ms); store.set("ghost:" + me.name, JSON.stringify(rec)); if (kind === "practice") ghost = rec.slice(); $("hBest").textContent = fmt(ms); }
+  if (kind === "ghosts") { runTotal += ms; if (laps >= RACE_LAPS) { finished = true; place = 1 + G.filter(g => g.T * RACE_LAPS < runTotal).length; return; } }
   if (kind === "race" && laps >= RACE_LAPS) { finished = true; place = 1 + bots.filter(b => b.fin !== null).length; return; }
   flash(fmt(ms), isBest ? (prev ? "New best lap" : "First lap on the board") : "+" + ((ms - prev) / 1000).toFixed(2) + " off your best", isBest);
   if (isBest && navigator.vibrate) navigator.vibrate(60);
@@ -525,12 +729,13 @@ function botStep(dt) {
 }
 
 function startRun(k) {
-  kind = k; ST = stats(); runBest = 0; lastLap = 0; laps = 0; raceT = 0; acc = 0; finished = false; place = 0; gasOn = brkOn = 0; touchId = null;
+  kind = k; ST = stats(); runBest = 0; lastLap = 0; laps = 0; runTotal = 0; raceLaps = []; raceT = 0; acc = 0; finished = false; place = 0; gasOn = brkOn = 0; touchId = null;
   if (kind === "race") { makeBots(); resetBots(); ghost = null; }
-  else { for (const b of bots) b.mesh.visible = false; try { ghost = JSON.parse(store.get("ghost:" + me.name) || "null"); } catch (e) { ghost = null; } }
+  else { for (const b of bots) b.mesh.visible = false; try { ghost = kind === "ghosts" ? null : JSON.parse(store.get("ghost:" + me.name) || "null"); } catch (e) { ghost = null; } }
+  if (kind !== "ghosts") for (const g of G) g.mesh.visible = false;
   resetCar();
-  $("hBest").textContent = fmt(best()); $("hLast").textContent = "--"; $("lapnow").textContent = "0.00"; $("posBig").hidden = kind !== "race";
-  for (const s of screens) $(s).hidden = true; $("hud").hidden = false; $("tip").style.opacity = 1; tipT = 0;
+  $("hBest").textContent = fmt(best()); $("hLast").textContent = "--"; $("lapnow").textContent = "0.00"; $("posBig").hidden = kind === "practice"; if (kind === "race") $("posBig").lastChild.textContent = "/" + (NB + 1);
+  cur = "drive"; for (const s of screens) $(s).hidden = true; $("hud").hidden = false; $("tip").style.opacity = 1; tipT = 0;
   // Android can lock the screen sideways for real. iPhones can't, so they get the turned view.
   try { if (!standalone && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().then(() => screen.orientation && screen.orientation.lock && screen.orientation.lock("landscape")).catch(() => {}); } catch (e) {}
   const L = $("lights"), dots = [...L.children]; dots.forEach(d => d.className = ""); L.hidden = false; mode = "lights"; audioOn();
@@ -538,7 +743,7 @@ function startRun(k) {
   setTimeout(tick, 350);
 }
 function endRun() {
-  mode = "menu"; $("hud").hidden = true; $("lights").hidden = true; audioOff(); ghostCar.visible = false; gasOn = brkOn = 0; hitT = 0; $("hit").style.opacity = 0; $("gas").classList.remove("on"); $("brk").classList.remove("on");
+  mode = "menu"; $("hud").hidden = true; $("lights").hidden = true; audioOff(); ghostCar.visible = false; for (const g of G) g.mesh.visible = false; gasOn = brkOn = 0; hitT = 0; $("hit").style.opacity = 0; $("gas").classList.remove("on"); $("brk").classList.remove("on");
   try { if (document.fullscreenElement) document.exitFullscreen(); } catch (e) {}
   const b = best(), saved = +store.get("saved:" + me.name) || 0, race = kind === "race";
   $("rRun").textContent = fmt(runBest); $("rBest").textContent = fmt(b);
@@ -550,17 +755,17 @@ function endRun() {
   $("bSave").hidden = !can; $("bSave").disabled = false; $("bSave").textContent = "Save " + fmt(b) + " to leaderboard";
   const m = $("rMsg"); m.className = "msg";
   m.textContent = !runBest && !race ? "Cross the line, go all the way around and cross it again to set a time." : can ? "" : saved && runBest ? "Your best lap is already on the leaderboard." : "";
-  fillGarage(); show("sResult");
+  fillGarage(); show("sResult"); moneyResult();
   if (needApp && ++fsRuns % 2 === 0) showFs();
 }
-$("bRace").onclick = () => startRun("race"); $("bAgain").onclick = () => startRun("race");
+$("bRace").onclick = () => startRun("race"); $("bAgain").onclick = () => kind === "ghosts" ? (gKind === "prize" ? openPrize() : startGhosts("drivers")) : startRun("race");
 $("bPrac").onclick = () => startRun("practice"); $("bPrac2").onclick = () => startRun("practice");
 $("pit").onclick = endRun;
 $("bHome").onclick = () => { fillGarage(); show("sGarage"); };
 
 // ---------- controls: left thumb slides to steer, right thumb holds gas or brake
 canvas.addEventListener("pointerdown", e => { if (mode === "menu" || touchId !== null) return; touchId = e.pointerId; touchX0 = lx(e); steerIn = 0; try { canvas.setPointerCapture(e.pointerId); } catch (x) {} });
-canvas.addEventListener("pointermove", e => { if (e.pointerId === touchId) steerIn = clamp((lx(e) - touchX0) / Math.max(60, LW * .11), -1, 1); });
+canvas.addEventListener("pointermove", e => { if (e.pointerId === touchId) steerIn = clamp((lx(e) - touchX0) / Math.max(80, LW * .16), -1, 1); });
 const up = e => { if (e.pointerId === touchId) { touchId = null; steerIn = 0; } };
 canvas.addEventListener("pointerup", up); canvas.addEventListener("pointercancel", up);
 function pedal(id, set) {
@@ -652,13 +857,15 @@ function frame(now) {
     acc += dt; while (acc >= STEP) { steer += (target - steer) * Math.min(1, STEP * 14); if (!finished) step(STEP); if (kind === "race") botStep(STEP); acc -= STEP; }
     car.slip = 0;
     $("lapnow").textContent = lapT >= 0 ? (lapT >= 60 ? fmt(lapT * 1000) : lapT.toFixed(2)) : "0.00";
-    $("lapsub").textContent = kind === "race" ? "Lap " + Math.min(laps + 1, RACE_LAPS) + " of " + RACE_LAPS : lapT >= 0 ? "Lap " + (laps + 1) : "Warm up lap";
+    $("lapsub").textContent = kind === "ghosts" && lapT < 0 ? "Rolling start: the race starts at the line" : kind !== "practice" ? "Lap " + Math.min(laps + 1, RACE_LAPS) + " of " + RACE_LAPS : lapT >= 0 ? "Lap " + (laps + 1) : "Warm up lap";
     if (kind === "race") { const pl = 1 + bots.filter(b => b.fin !== null || b.s > prog).length; $("posBig").firstChild.nodeValue = "P" + pl; }
     $("spdN").textContent = Math.round(car.v * 2.237);
     $("knob").style.left = (50 + steerIn * 46) + "%";
     tipT += dt; if (tipT > 7) $("tip").style.opacity = 0;
     if (hitT > 0) { hitT -= dt; $("hit").style.opacity = hitT > 0 ? 1 : 0; if (hitT > .3 && navigator.vibrate) navigator.vibrate(30); }
     engineNote(dt);
+    if (kind === "ghosts") ghostsFrame();
+    $("brk").style.outline = autoB ? "3px solid #fff" : "";
     // practice: your best lap drives along as a ghost
     if (ghost && lapT >= 0 && ghost.length >= 6) {
       const f = lapT / .1, i = Math.floor(f), u = f - i, n = ghost.length / 3;
@@ -668,10 +875,15 @@ function frame(now) {
   }
   placeCar();
   if (mode === "menu") {            // slow circle around the car behind the menus
-    menuA += dt * .25; const cx = me ? car.x : -330, cy = me ? car.y : -(HY + R);
-    camera.fov = 38; camera.position.copy(V(cx + Math.cos(menuA) * 15, cy + Math.sin(menuA) * 15, 5)); camera.lookAt(V(cx, cy, 1.2));
-    camera.setViewOffset(LW, LH, 0, LH * .26, LW, LH);          // car sits above the menu card
+    const pit = cur === "sPit"; pitH += ((pit ? .95 : 0) - pitH) * Math.min(1, dt * 4); lift.visible = pitH > .03;
+    menuA += dt * (pit ? .2 : .28); garageLook(true);
+    if (lift.visible) { lift.position.copy(V(GAR.x, GAR.y, .12)); lift.rotation.y = menuA; for (const o of lift.children) { if (o.userData.arm) o.position.y = pitH + .02; if (o.userData.col) { o.scale.y = Math.max(.01, pitH); o.position.y = pitH / 2; } } }
+    $("demo").hidden = !me || cur === "sGate" || SHOT || LIVE || LITE; if (SHOT) menuA = SHOTA;
+    const wide = LW / LH > 1.5, dist = (pit ? 14 : 15.5) * (wide ? 1 : 1.5) * (SHOT ? 1.2 : 1);
+    camera.fov = pit ? 31 : 34; camera.position.copy(V(GAR.x, GAR.y - dist, pit ? 4.0 : 4.3)); camera.lookAt(V(GAR.x, GAR.y, (pit ? 1.9 : 2.0) + pitH * .5));
+    camera.setViewOffset(LW, LH, LW * (pit || cur === "sNewCar" ? .24 : cur === "sGarage" ? .19 : 0), LH * (cur === "sGarage" ? .09 : 0), LW, LH);          // car sits left of the menu
   } else {
+    $("demo").hidden = true; lift.visible = false; pitH = 0; garageLook(false);
     if (camera.view) camera.clearViewOffset();
     camH += wrap(car.h - camH) * Math.min(1, dt * 5.5);
     const sp = ST ? car.v / ST.vmax : 0, back = 11 + sp * 2.5, sh = hitT > 0 ? (Math.random() - .5) * .5 : 0;
@@ -686,7 +898,7 @@ requestAnimationFrame(frame);
 
 // ---------- leaderboard
 async function api(body) {
-  const r = await fetch(ENDPOINT, body ? { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(body) } : {});
+  const r = await fetch(API, body ? { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(body) } : {});
   return r.json();
 }
 function drawBoard(rows) {
@@ -696,7 +908,7 @@ function drawBoard(rows) {
   const mine = L.querySelector(".me"); if (mine) mine.scrollIntoView({ block: "center" });
 }
 async function openBoard() {
-  for (const s of screens) $(s).hidden = s !== "sBoard";
+  only("sBoard");
   const m = $("bMsg"); m.className = "msg"; $("bList").innerHTML = "";
   if (!ENDPOINT) { m.textContent = "The shared leaderboard isn't switched on yet. These are the times saved on this phone."; const b = me && +store.get("saved:" + me.name); drawBoard(b ? [{ n: me.name, t: b, up: upTotal() }] : []); return; }
   m.textContent = "Loading...";
@@ -709,7 +921,8 @@ $("bSave").onclick = async () => {
   if (!ENDPOINT) { store.set("saved:" + me.name, b); btn.hidden = true; m.className = "msg good"; m.textContent = "Saved on this phone. The shared leaderboard isn't switched on yet."; return; }
   m.textContent = "Saving...";
   try {
-    const d = await api({ n: me.name, t: b, v: 1 });
+    let d = await api({ n: me.name, t: b, v: 2, s: slot, g: (() => { try { return JSON.parse(store.get("ghost:" + me.name) || "null") || undefined; } catch (e) {} })() });
+    if (!d.ok && d.why === "check") d = await api({ n: me.name, t: b, v: 1 });      // if the lap check ever turns down a real lap, the time is still saved (as not checked)
     if (!d.ok) throw new Error(d.why);
     store.set("saved:" + me.name, b); store.set("rank:" + me.name, d.rank); btn.hidden = true; m.className = "msg good";
     m.textContent = "Saved. You're P" + d.rank + " of " + d.total + "."; fillGarage();
@@ -717,20 +930,14 @@ $("bSave").onclick = async () => {
 };
 
 // ---------- upgrades and paint (paid on Ko-fi, added by hand to garage.json and ../cars/cars.json)
-$("bUpg").onclick = () => {
-  $("uNote").textContent = "@" + me.name + " and the upgrade name";
-  $("uList").innerHTML = UPG.map(u => { const lv = me.up[u.id], max = lv >= 3;
-    return "<div class='up'><b>" + u.name + "</b><div>" + u.what + "</div><div class='pips'>" + [0, 1, 2].map(i => "<i" + (i < lv ? " class='on'" : "") + "></i>").join("") + "</div>" +
-      (max ? "<span class='k'>Maxed</span>" : "<a class='btn' target='_blank' rel='noopener' href='" + KOFI + "'>Level " + (lv + 1) + " &middot; $" + PRICE + "</a>") + "</div>"; }).join("");
-  for (const s of screens) $(s).hidden = s !== "sUpg";
-};
+$("bUpg").onclick = () => openPit();
 $("bPaint").onclick = () => {
   $("pNote").textContent = "@" + me.name;
   const h = $("pHave"); h.hidden = !me.roof;
   if (me.roof) h.innerHTML = "Your colors now: <span class='sw' style='background:" + esc(me.body) + "'></span>body <span class='sw' style='background:" + esc(me.roof) + ";margin-left:8px'></span>roof";
-  for (const s of screens) $(s).hidden = s !== "sPaint";
+  only("sPaint");
 };
-for (const b of document.querySelectorAll("[data-close]")) b.onclick = () => show(under);
+for (const b of document.querySelectorAll("[data-close]")) b.onclick = () => { if (pitPrev) { pitPrev = false; rebuildCar(); } show(under); };
 
 // A browser tab keeps its address bar on screen and it covers the track. Opened from the home screen the game runs full screen, like an app.
 // So in a browser tab on a phone the steps come up by themselves: when you get your car, after every second run, and as a button in the garage and on the results.
@@ -745,10 +952,430 @@ function showFs() {
   else st.push("Tap the <b>Share</b> button in Safari (the square with the arrow).", "Tap <b>Add to Home Screen</b>, then <b>Add</b>.");
   st.push("Open <b>Speedway</b> from your home screen. Full screen, no address bar, like a real app.");
   $("fsSteps").innerHTML = st.map((x, i) => "<p><b>" + (i + 1) + ".</b> " + x + "</p>").join("");
-  for (const s of screens) $(s).hidden = s !== "sFs";
+  only("sFs");
 }
 if (needApp) { $("bFs").hidden = false; $("bFs2").hidden = false; $("tip").textContent += " Tip: save the game as an app to lose the address bar."; }
 $("bFs").onclick = showFs; $("bFs2").onclick = showFs;
+
+// ====================== DRAFT: the money parts ======================
+// Demo mode: nothing is charged and nothing is sent anywhere. Credits, PIN, upgrades and Pit Crew are saved on this phone only.
+// The real version moves all of this to the server (game-backend/Code_DRAFT.gs).
+const MONEY = {
+  demo: true,
+  packs: [[5, 500], [10, 1100], [20, 2400]],        // [dollars, credits]. 100 credits = $1
+  upgCost: 100,                                      // credits for one upgrade level
+  start: 100,                                        // every new driver starts with this: one small upgrade, and then not enough left for the prize race
+  earnRaces: 5,                                      // Pit Crew: finish this many races to earn a free upgrade level
+  prizeOn: false, packsOn: false,                    // launch: Pit Crew only. The prize race and credit packs stay off until Brady turns them on.
+  prize: { name: "Daily Prize Race", amount: 25, cashOn: false, perk: "Free upgrade", entry: 100 },    // Brady sets the prize. cashOn stays false until he turns cash prizes on.
+  rules: "Official rules: 18+. Skill decides it. Fastest over 3 laps against the 10 quickest drivers wins. One prize per race, set before the start. Void where prohibited.",
+  crew: { url: "pitcrew.html", price: "$5.99 a month", track: "Night Oval" } };
+const GAIN = { e: [.35, .3, .3, .2], t: [.5, .35, .25, .2], a: [.4, .35, .25, .25] };     // seconds a lap each level is worth, measured with a test driver
+// LIVE (?live in the address, the default once this ships): credits, PIN, Pit Crew, cars and earned upgrades live on the server (game-backend/Code_DRAFT.gs).
+// Demo (the default in this draft): the same things are kept on this phone only, and nothing is real.
+const LITE = true;      // true = garage start screen and game feel only: no Pit Crew, no credits, upgrades are $1 on Ko-fi like before
+const QS = new URLSearchParams(location.search), LIVE = !LITE && QS.has("live") && !QS.has("shot"), API = QS.get("api") || ENDPOINT;
+let SV = { credits: 0, pin: false, crew: false, cars: [null, null, null], tok: 0, rc: 0, daily: 0 }, pinMem = "", svAt = 0, svDown = false, raceLaps = [];
+const cr = () => LIVE ? SV.credits : +store.get("cr:" + me.name) || 0, setCr = n => store.set("cr:" + me.name, Math.max(0, Math.round(n)));
+const member = () => LITE ? false : LIVE ? SV.crew : store.get("crew:" + me.name) === "1";
+const hasPin = () => LIVE ? SV.pin : !!store.get("pin:" + me.name);
+const earned = () => LIVE ? SV.tok : +store.get("tok:" + me.name) || 0, raced = () => LIVE ? SV.rc : +store.get("rc:" + me.name) || 0;      // Pit Crew: upgrade levels earned and not used yet, races toward the next one
+const freeEntry = () => member() && store.get("fe:" + me.name) !== weekId();                                   // Pit Crew: one free prize race entry a week
+async function srv(body) {       // one call to the server. Every answer carries the driver's fresh state.
+  const r = await fetch(API, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ n: me.name, ...body }) }), d = await r.json();
+  if (d.me) { SV = d.me; svAt = performance.now(); syncSV(); } return d;
+}
+async function loadSV() { try { const d = await (await fetch(API + "?a=me&n=" + encodeURIComponent(me.name))).json(); if (d.ok) { SV = d.me; svAt = performance.now(); svDown = false; return true; } } catch (e) {} svDown = true; return false; }
+function syncSV() {              // copy the server's cars and upgrades into the game, keeping the same objects so the car on screen follows
+  if (!CARS[0]) return;
+  for (let i = 0; i < 3; i++) { const c = SV.cars[i];
+    if (!c) { if (i) CARS[i] = null; continue; }
+    if (!CARS[i]) CARS[i] = { body: c.body, roof: c.roof, num: "", kind: "", up: { e: 0, t: 0, a: 0 } };
+    const look = i || (c.body && !ORIG.won) ? c : ORIG;      // your first car goes back to its normal look when it has no Pit Crew paint. Race winners stay gold.
+    CARS[i].body = look.body; CARS[i].roof = look.roof || null; CARS[i].num = look.num || ""; for (const k of "eta") CARS[i].up[k] = c.up[k]; }
+  if (CARS[slot] && me.body !== undefined) { const c = CARS[slot]; me.body = c.body; me.roof = c.roof; me.num = c.num || ""; }
+  if ((!member() && slot) || !CARS[slot]) { slot = 0; applyCar(); }
+  if (me.glow !== member()) { me.glow = member(); if (!me.glow && night) setNight(false); if (myCar) rebuildCar(); }
+}
+async function refreshSV() { if (!LIVE || !me || performance.now() - svAt < 15000) return; if (await loadSV()) { syncSV(); paintMoney(); if (cur === "sCars") openCars(); if (cur === "sPit") drawPit(); } }
+document.addEventListener("visibilitychange", () => { if (!document.hidden) { svAt = 0; refreshSV(); } });     // back from Ko-fi: check for Pit Crew right away
+async function countRace() {      // a finished race. Pit Crew: every few races is an earned upgrade.
+  if (LIVE) { const t0 = SV.tok; let d = {}; try { d = await srv({ a: "race", slot, laps: raceLaps.slice(0, RACE_LAPS) }); } catch (e) {} if (!d.ok || !member()) return "";
+    return SV.tok > t0 ? "Pit Crew: you earned a free upgrade. Pick it up in the pit lane." : "Pit Crew: " + SV.rc + " of " + MONEY.earnRaces + " races to your next free upgrade."; }
+  if (!member()) return ""; let r = raced() + 1, t = earned(); if (r >= MONEY.earnRaces) { r = 0; t++; } store.set("rc:" + me.name, r); store.set("tok:" + me.name, t);
+  return r === 0 ? "Pit Crew: you earned a free upgrade. Pick it up in the pit lane." : "Pit Crew: " + r + " of " + MONEY.earnRaces + " races to your next free upgrade."; }
+const crTxt = n => n.toLocaleString("en-US") + " credits";
+let cur = "sGate", pinOK = false, nudged = false, pitSel = 0, pitPrev = false, pitH = 0, night = false, gKind = "drivers", runTotal = 0, boardAt = 0, boardRows = null, DATA = null;
+const only = id => { cur = id; for (const s of screens) $(s).hidden = s !== id; };
+async function moneyIn(d) {      // called after sign in
+  DATA = d; pinOK = false; pinMem = "";
+  let sv = [];
+  if (LIVE) { await loadSV(); sv = SV.cars; if (sv[0]) for (const k of "eta") me.up[k] = clamp(sv[0].up[k] | 0, 0, 4); }
+  else if (!LITE) {
+    if (store.get("cr:" + me.name) === null) setCr(MONEY.start);
+    let du = {}; try { du = JSON.parse(store.get("up:" + me.name) || "{}"); } catch (e) {}
+    for (const k of "eta") me.up[k] = clamp(Math.max(me.up[k], du[k] | 0), 0, 4);
+    try { sv = JSON.parse(store.get("cars:" + me.name) || "[]"); } catch (e) {}
+    if (sv[0] && sv[0].up) for (const k of "eta") me.up[k] = clamp(Math.max(me.up[k], sv[0].up[k] | 0), 0, 4);
+  }
+  me.glow = member(); if (!me.glow && night) setNight(false);
+  // cars: slot 1 is the car every follower has. Slots 2 and 3 are Pit Crew only. Upgrades belong to the car, not the driver.
+  const extra = c => c ? { body: c.body, roof: c.roof, num: c.num || "", kind: "", up: { e: 0, t: 0, a: 0, ...c.up } } : null;
+  ORIG = { body: me.body, roof: me.roof, num: me.num, won: me.kind === "Race winner" };
+  CARS = [{ body: me.body, roof: me.roof, num: me.num, kind: me.kind, up: me.up }, extra(sv[1]), extra(sv[2])];
+  if (LIVE) syncSV(); else if (sv[0] && sv[0].body && !ORIG.won && member()) { CARS[0].body = sv[0].body; CARS[0].roof = sv[0].roof; CARS[0].num = sv[0].num || ""; }
+  slot = member() ? clamp(+store.get("slot:" + me.name) || 0, 0, 2) : 0; if (!CARS[slot]) slot = 0;
+  applyCar(); dressGarage();
+}
+let CARS = [], slot = 0, ORIG = { body: "", roof: null, num: "", won: false };      // ORIG = the look your first car has without Pit Crew paint
+const SLOTS = 3, saveCars = () => { if (!LIVE) store.set("cars:" + me.name, JSON.stringify(CARS)); store.set("slot:" + me.name, slot); };
+const dailySlot = () => { const d = LIVE ? SV.daily : +store.get("daily:" + me.name) || 0; return member() && CARS[d] ? d : 0; };
+function applyCar() { const c = CARS[slot]; me.body = c.body; me.roof = c.roof; me.num = c.num || ""; me.up = c.up; me.kind = slot ? "Car " + (slot + 1) + " of " + SLOTS : c.kind; saveCars(); }
+function openCars() {
+  const mem = member(), have = CARS.filter(Boolean).length, lv = c => UPG.map(u => u.name + " " + c.up[u.id]).join(" · ");
+  $("cCount").textContent = have + " of " + (mem ? SLOTS : 1) + (mem ? " · Pit Crew" : "");
+  $("cList").innerHTML = CARS.map((c, i) => {
+    if (i && !mem) return "<div class='carc lock'><b>Car " + (i + 1) + " 🔒</b><div>Pit Crew gets 3 cars</div><div></div><button class='crew' data-join='1'>Join Pit Crew</button></div>";
+    if (!c) return "<div class='carc lock'><b>Car " + (i + 1) + "</b><div>Empty slot</div><div></div><button data-new='" + i + "'>Add a car</button></div>";
+    const daily = dailySlot() === i;
+    return "<div class='carc" + (i === slot ? " on" : "") + "'><b><span class='sw' style='background:" + esc(c.body) + "'></span><span class='sw' style='background:" + esc(c.roof || c.body) + "'></span>Car " + (i + 1) + "</b><div>" + lv(c) + "</div>" +
+      "<div>" + (daily ? "<span style='color:var(--yel);font-weight:700'>DAILY CAR</span>" : mem ? "<button class='linkbtn' data-daily='" + i + "'>Make daily car</button>" : "") +
+        (mem && !(i === 0 && ORIG.won) ? " · <button class='linkbtn' data-paint='" + i + "' style='color:#6ff3ff'>Repaint</button>" : "") + "</div>" +
+      "<button" + (i === slot ? " disabled" : "") + " data-drive='" + i + "'>" + (i === slot ? "Driving" : "Drive this") + "</button></div>"; }).join("");
+  only("sCars");
+}
+$("cList").onclick = e => { const b = e.target.closest("button"); if (!b) return; const d = b.dataset;
+  if (d.join) return crewAsk("Want 3 cars?", "The Pit Crew gets 3 cars in the garage, each with its own colors and upgrades. Members also earn upgrades by racing and get new features every week. " + MONEY.crew.price + ".");
+  if (d.drive) { slot = +d.drive; applyCar(); rebuildCar(); fillGarage(); return openCars(); }
+  if (d.daily) { if (LIVE) return needPin(async () => { try { await srv({ a: "daily", pin: pinMem, slot: +d.daily }); } catch (e) {} openCars(); }); store.set("daily:" + me.name, d.daily); return openCars(); }
+  if (d.new) return openNewCar(+d.new); if (d.paint) return openNewCar(+d.paint); };
+// a new Pit Crew car: pick the colors. Any color but gold.
+// Pit Crew paint shop: pick the body color, roof color and number for any of your cars, as often as you like. Any color but gold.
+const NEWCOL = PAL.concat(["#16171b", "#8a8f99", "#1f3a8a", "#14532d", "#ffe14d", "#0f766e", "#7c4a21", "#a3e635"]);
+let nc = { i: 1, body: NEWCOL[0], roof: "#16171b", num: 0, edit: false };
+function drawNewCar() {
+  for (const [id, k] of [["ncBody", "body"], ["ncRoof", "roof"]]) { const list = NEWCOL.includes(nc[k]) ? NEWCOL : [nc[k]].concat(NEWCOL);
+    $(id).innerHTML = list.map(c => "<button data-c='" + c + "' aria-label='" + c + "' style='background:" + c + "'" + (nc[k] === c ? " class='on'" : "") + "></button>").join(""); }
+  $("ncH").textContent = (nc.edit ? "Repaint car " : "Add car ") + (nc.i + 1); $("ncAdd").textContent = nc.edit ? "Save this look" : "Add this car"; $("ncNum").textContent = nc.num ? nc.num : "none";
+  if (myCar) scene.remove(myCar); myCar = raceCar({ body: nc.body, roof: nc.roof, num: nc.num ? String(nc.num) : "", up: nc.edit ? CARS[nc.i].up : { e: 0, t: 0, a: 0 }, glow: true }); scene.add(myCar); placeCar(); dressGarage({ body: nc.body, roof: nc.roof, num: nc.num ? String(nc.num) : "" });
+}
+function openNewCar(i) { const c = CARS[i]; nc = { i, edit: !!c, body: c ? c.body : NEWCOL[3], roof: c ? c.roof || "#16171b" : "#16171b", num: c ? +c.num || 0 : 0 }; $("ncMsg").textContent = ""; only("sNewCar"); drawNewCar(); }
+$("ncBody").onclick = e => { const c = e.target.dataset.c; if (c) { nc.body = c; drawNewCar(); } };
+$("ncRoof").onclick = e => { const c = e.target.dataset.c; if (c) { nc.roof = c; drawNewCar(); } };
+$("ncStep").onclick = e => { const d = +e.target.dataset.d; if (!d) return; nc.num = clamp(nc.num + d, 0, 99); drawNewCar(); };
+$("ncAdd").onclick = () => {
+  const done = () => { if (!nc.edit) slot = nc.i; applyCar(); rebuildCar(); fillGarage(); openCars(); }, num = nc.num ? String(nc.num) : "";
+  if (LIVE) return needPin(async () => { let d = {}; try { d = await srv({ a: "car", pin: pinMem, slot: nc.i, body: nc.body, roof: nc.roof, num }); } catch (e) {}
+    if (d.ok) return done(); only("sNewCar"); const m = $("ncMsg"); m.className = "msg bad"; m.textContent = d.why === "gold" ? "Gold is for race winners. Pick another color." : d.why === "crew" ? "Painting is a Pit Crew perk." : "Couldn't save it. Check your signal and try again."; });
+  CARS[nc.i] = { kind: "", up: { e: 0, t: 0, a: 0 }, ...(CARS[nc.i] || {}), body: nc.body, roof: nc.roof, num }; done(); };
+$("ncCancel").onclick = () => { rebuildCar(); openCars(); };
+$("bCars").onclick = openCars;
+
+function paintMoney() {
+  if (!me) return; refreshSV();
+  paintBars(); $("bCrew").textContent = member() ? "Pit Crew ✓" : "Join Pit Crew";
+  $("bWallet").textContent = cr().toLocaleString("en-US") + " cr"; $("pWal").textContent = crTxt(cr());
+  $("dCrew").textContent = "Pit Crew: " + (member() ? "on" : "off");
+  const w = $("bWeek"); w.textContent = member() ? "Pit Crew · this week: " + MONEY.crew.track + " · race to earn upgrades" : "Pit Crew: earn upgrades by racing, 3 cars, " + MONEY.crew.track + ". Join?";
+  for (const [id, on] of [["bPrize", MONEY.prizeOn && !LITE], ["bWallet", MONEY.packsOn && !LITE], ["bCars", !LITE], ["bCrew", !LITE]]) { $(id).hidden = !on; if (!on) $(id).parentNode.style.gridTemplateColumns = "1fr"; }
+  if (LITE) { $("bCrew").parentNode.hidden = true; w.hidden = true; $("bTracks").hidden = true; $("bTracks").nextSibling.textContent = ""; $("pWal").hidden = true; $("pEarn").hidden = true; }
+  $("bTracks").textContent = "Track: " + (night ? MONEY.crew.track : "Speedway Oval");
+}
+function rebuildCar(upNow) { if (myCar) scene.remove(myCar); myCar = raceCar({ ...me, up: upNow || me.up }); scene.add(myCar); placeCar(); dressGarage(); }
+
+// ---------- your garage: the start screen. A small room built from a few boxes, so it shows at once, before the track has loaded.
+const GAR = { x: 0, y: 9000 };                     // far away from the track
+const garage = new THREE.Group(), garDecor = new THREE.Group(); garage.position.copy(V(GAR.x, GAR.y, 0)); garage.add(garDecor); scene.add(garage);
+{ const std = (c, r = .6, m = 0) => new THREE.MeshStandardMaterial({ color: c, roughness: r, metalness: m, fog: false }), lit = c => new THREE.MeshBasicMaterial({ color: c, fog: false });
+  const add = (geo, mat, x, y, z, rx = 0, ry = 0) => { const o = new THREE.Mesh(geo, mat); o.position.set(x, y, z); o.rotation.set(rx, ry, 0); garage.add(o); return o; };
+  const P = (w, h) => new THREE.PlaneGeometry(w, h), B = (w, h, d) => new THREE.BoxGeometry(w, h, d), H = Math.PI / 2;
+  const WZ = -20;                                                                           // the back wall is a long way behind the turntable
+  add(P(44, 60), std(0x2c2f37, .32, .25), 0, 0, -6, -H);                                    // polished floor
+  for (let z = -4; z > WZ; z -= 4) add(P(44, .07), lit(0x4a4e58), 0, .012, z, -H);          // floor seams running across the room: they shrink into the distance
+  for (const x of [-12, -6, 6, 12]) add(P(.07, 44), lit(0x3d4049), x, .011, -6, -H);
+  add(P(44, 12), std(0x15171c, .9), 0, 6, WZ);                                              // back wall, darker than the floor
+  add(B(44, .16, .12), lit(0xffcc18), 0, .1, WZ + .08);                                     // glowing line where the wall meets the floor
+  add(B(44, .22, .2), lit(0xffcc18), 0, 8.3, WZ + .12);                                     // yellow line along the top of the wall
+  for (const sx of [1, -1]) { add(P(60, 12), std(0x1b1d23, .85), sx * 19, 6, -6, 0, -sx * H); for (const z of [-4, -11, -18]) add(B(.25, 6.4, .9), lit(0xf4f6ff), sx * 18.8, 3.8, z); }   // side walls with light strips going back
+  add(P(44, 60), std(0x30333a, .9), 0, 9.6, -6, H);                                         // ceiling
+  for (const z of [-2, -12]) for (const x of [-11, 0, 11]) add(P(8, 5.6), lit(0xffffff), x, 9.55, z, H);     // light panels
+  for (const x of [-9, 0, 9]) { const g = add(P(9, 7), new THREE.MeshBasicMaterial({ map: glowTex(), color: 0xffffff, transparent: true, opacity: .22, depthWrite: false, fog: false }), x, .02, -9, -H); g.renderOrder = 1; }   // their shine on the floor
+  add(new THREE.CylinderGeometry(6.5, 6.6, .14, 64), std(0x0f1115, .35, .4), 0, .07, 0);    // turntable
+  add(new THREE.RingGeometry(6.5, 6.85, 96), lit(0xffcc18), 0, .15, 0, -H);                 // glowing ring
+  add(new THREE.RingGeometry(5.9, 8.6, 96), new THREE.MeshBasicMaterial({ color: 0xffcc18, transparent: true, opacity: .13, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }), 0, .03, 0, -H);
+  { const sh = add(P(9.5, 6.5), new THREE.MeshBasicMaterial({ map: glowTex(), color: 0x000000, transparent: true, opacity: .75, depthWrite: false, fog: false }), 0, .16, 0, -H); sh.renderOrder = 2; }   // soft shadow under the car
+  const pl = new THREE.PointLight(0xffffff, 40, 40, 1.4); pl.position.set(2, 7.5, 5); garage.add(pl); const p2 = new THREE.PointLight(0xdfe8ff, 30, 30, 1.4); p2.position.set(-7, 3, 9); garage.add(p2);
+}
+function wallText(txt, w, h, font, col) { const cv = document.createElement("canvas"); cv.width = 1024; cv.height = Math.round(1024 * h / w); const x = cv.getContext("2d");
+  x.fillStyle = col; x.textAlign = "center"; x.textBaseline = "middle"; x.font = font; x.fillText(txt, 512, cv.height / 2, 990);
+  const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; return new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: t, transparent: true, fog: false })); }
+function dressGarage(c) {      // your colors and number on the back wall
+  c = c || me; while (garDecor.children.length) garDecor.remove(garDecor.children[0]); if (!c) return;
+  const body = new THREE.Color(c.body), roof = c.roof ? new THREE.Color(c.roof) : body.clone().multiplyScalar(.6);
+  const stripe = (x0, w, col) => { const s = new THREE.Shape(); s.moveTo(x0, 0); s.lineTo(x0 + w, 0); s.lineTo(x0 + w + 5.4, 8.2); s.lineTo(x0 + 5.4, 8.2); s.closePath();
+    const o = new THREE.Mesh(new THREE.ShapeGeometry(s), new THREE.MeshBasicMaterial({ color: col, fog: false })); o.position.set(0, .2, -19.9); garDecor.add(o); };
+  stripe(-17, 4.2, body); stripe(-11.6, 2.2, roof); stripe(-8.2, 1.3, body);
+  if (c.num) { const n = wallText(c.num, 6, 4.2, "400 300px Anton, Impact, sans-serif", "#f2f3f6"); n.position.set(7.5, 4.6, -19.9); garDecor.add(n); }
+}
+let garOn = null, trackScene = null;
+function garageLook(on) {      // garage lighting in the menus, the real sky on the track
+  if (on === garOn) return; garOn = on; garage.visible = on; if (trackScene) trackScene.visible = !on;
+  const k = on ? [0x0b0c10, 1.7, 1.3] : SKY[night ? "night" : "day"]; scene.background.set(k[0]); scene.fog.color.set(k[0]); hemi.intensity = k[1]; sun.intensity = k[2];
+}
+// the three big bars across the top: where each upgrade stands, and a tap takes you to the pit lane
+function paintBars() {
+  $("gBars").innerHTML = UPG.map((u, i) => { const lv = Math.min(me.up[u.id], LITE ? 3 : 4), mem = member(), top = mem ? 4 : 3;
+    return "<button class='gbar' data-i='" + i + "'><div class='r'><b>" + u.name + "</b><span>" + lv + "/" + top + "</span></div><div class='segs'>" +
+      (LITE ? [0, 1, 2] : [0, 1, 2, 3]).map(k => "<i class='" + (k === 3 ? "crew " : "") + (k < lv ? "on" : "") + "'></i>").join("") + "</div><small>" +
+      (lv >= top ? (mem || LITE ? "Maxed out" : "Level 4: Pit Crew 🔒") : "<em>+" + GAIN[u.id][lv].toFixed(2) + " s a lap</em> · tap to upgrade") + "</small></button>"; }).join("");
+}
+$("gBars").onclick = e => { const b = e.target.closest("button"); if (b) openPit(+b.dataset.i); };
+$("bCrew").onclick = () => { location.href = MONEY.crew.url + "?u=" + encodeURIComponent(me.name); };
+
+// ---------- ?shot: a clean garage screen for marketing pictures. No demo bar, a placeholder name, Pit Crew car, sample lap and rank.
+const SHOT = /[?&]shot/.test(location.search), SHOTA = +(new URLSearchParams(location.search).get('a') || -2.2);
+if (SHOT) { const n = "m4rvin_s"; store.set("user", n); store.set("crew:" + n, "1"); store.set("mute", "1"); store.set("cr:" + n, "1200"); store.set("slot:" + n, "0");
+  store.set("cars:" + n, JSON.stringify([{ up: { e: 3, t: 2, a: 4 } }, { body: "#4187ec", roof: "#f3f3f3", num: "", kind: "", up: { e: 1, t: 1, a: 0 } }, null]));
+  setInterval(() => { if (!me) return; $("gName").textContent = "@YOURNAME"; $("gKind").textContent = "Pit Crew car"; $("gBest").textContent = "36.42"; $("gRank").textContent = "P14";
+    const r = $("bRace"); r.disabled = false; r.textContent = "Race"; for (const id of ["bPrac", "bDrivers", "bPrize"]) $(id).disabled = false; $("load").hidden = true;
+    for (const id of ["bPrize", "bWallet"]) { $(id).hidden = true; $(id).parentNode.style.gridTemplateColumns = "1fr"; } }, 200); }
+
+// ---------- one question at a time
+let askFn = null;
+function ask(k, h, p, yes, fn) { $("aK").textContent = k; $("aH").textContent = h; $("aP").textContent = p; $("aYes").textContent = yes; askFn = fn; const back = cur; $("aNo").onclick = () => only(back); only("sAsk"); }
+$("aYes").onclick = () => { const f = askFn; askFn = null; if (f) f(); };
+const crewAsk = (h, p) => ask("Pit Crew", h, p, "Show me", () => { location.href = MONEY.crew.url + "?u=" + encodeURIComponent(me.name); });
+
+// ---------- PIN: 4 digits per @, set the first time you buy or enter a paid race
+let pinBuf = "", pinFirst = null, pinMode = "set", pinThen = null, pinBack = "sGarage";
+function drawPin(msg, bad) { [...$("nDots").children].forEach((d, i) => d.className = i < pinBuf.length ? "on" : ""); const m = $("nMsg"); m.className = "msg" + (bad ? " bad" : ""); m.textContent = msg || ""; }
+function needPin(then) {
+  if (pinOK) return then();
+  pinMode = hasPin() ? "enter" : "set"; pinBuf = ""; pinFirst = null; pinThen = then; pinBack = cur;
+  $("nK").textContent = pinMode === "set" ? "Lock your account" : "@" + me.name; $("nH").textContent = pinMode === "set" ? "Pick a 4 digit PIN" : "Type your PIN";
+  drawPin(pinMode === "set" ? "Your credits and upgrades are locked to this PIN." : ""); only("sPin");
+}
+$("nPad").innerHTML = "12345<67890".split("").map(c => "<button data-k='" + c + "'>" + (c === "<" ? "⌫" : c) + "</button>").join("") + "<span></span>";
+$("nPad").onclick = e => {
+  const k = e.target.dataset && e.target.dataset.k; if (!k) return;
+  if (k === "<") { pinBuf = pinBuf.slice(0, -1); return drawPin(); }
+  if (pinBuf.length >= 4) return; pinBuf += k; drawPin();
+  if (pinBuf.length < 4) return;
+  const done = () => { pinOK = true; const t = pinThen; pinThen = null; only(pinBack); if (t) t(); };
+  const pin = pinBuf;
+  if (LIVE) {      // the server keeps the PIN (scrambled). It checks it here and again on every change.
+    if (pinMode === "set") { if (pinFirst === null) { pinFirst = pin; pinBuf = ""; $("nH").textContent = "Type it again"; return drawPin("One more time to be sure."); }
+      if (pinFirst !== pin) { pinFirst = null; pinBuf = ""; $("nH").textContent = "Pick a 4 digit PIN"; return drawPin("Those didn't match. Start again.", true); } }
+    drawPin("Checking..."); const back = pinBack, then = pinThen;
+    srv({ a: pinMode === "set" ? "pin" : "login", pin }).then(d => { if (cur !== "sPin") return;
+      if (d.ok) { pinMem = pin; pinOK = true; pinThen = null; only(back); if (then) then(); }
+      else { pinBuf = ""; pinFirst = null; drawPin(d.why === "pin" ? "Wrong PIN. Try again." : "Couldn't check the PIN. Try again.", true); } })
+      .catch(() => { pinBuf = ""; drawPin("Couldn't reach the garage. Check your signal.", true); });
+    return;
+  }
+  if (pinMode === "enter") { if (store.get("pin:" + me.name) === pinBuf) return done(); pinBuf = ""; return drawPin("Wrong PIN. Try again.", true); }
+  if (pinFirst === null) { pinFirst = pinBuf; pinBuf = ""; $("nH").textContent = "Type it again"; return drawPin("One more time to be sure."); }
+  if (pinFirst !== pinBuf) { pinFirst = null; pinBuf = ""; $("nH").textContent = "Pick a 4 digit PIN"; return drawPin("Those didn't match. Start again.", true); }
+  store.set("pin:" + me.name, pinBuf); done();
+};
+$("nCancel").onclick = () => { pinThen = null; only(pinBack); };
+
+// ---------- wallet: buy a pack once, race all day
+function openWallet(msg) {
+  $("wBal").textContent = crTxt(cr()); $("wPin").textContent = hasPin() ? "PIN locked" : "No PIN yet";
+  const m = $("wMsg"); m.className = "msg" + (msg ? " bad" : ""); m.textContent = msg || "";
+  $("wCrew").hidden = member(); $("wPacks").hidden = !MONEY.packsOn;
+  $("wNote").innerHTML = MONEY.packsOn ? "Credits save to <b>@" + esc(me.name) + "</b> and work on any phone. Buy once, race all day. Paid on Ko-fi, added in about a minute." : "Every driver starts with <b>" + MONEY.start + " credits</b>, enough for one upgrade. After that, Pit Crew members <b>earn</b> their upgrades by racing.";
+  $("wPacks").innerHTML = MONEY.packs.map(([d, c], i) => "<button data-i='" + i + "'>$" + d + "<small>" + crTxt(c) + (c > d * 100 ? " · +" + (c - d * 100) + " bonus" : "") + "</small></button>").join("");
+  only("sWallet");
+}
+$("wPacks").onclick = e => {
+  const b = e.target.closest("button"); if (!b) return; const [d, c] = MONEY.packs[+b.dataset.i];
+  if (!MONEY.demo) { window.open(KOFI, "_blank", "noopener"); return; }
+  needPin(() => { setCr(cr() + c); paintMoney(); openWallet(); const m = $("wMsg"); m.className = "msg good"; m.textContent = "Added " + crTxt(c) + ". DRAFT: nothing was charged. The real button opens Ko-fi for $" + d + "."; });
+};
+function spend(n, what, then) {
+  if (cr() < n) return openWallet("You need " + crTxt(n - cr()).replace(" credits", "") + " more credits for " + what + ".");
+  needPin(() => { setCr(cr() - n); paintMoney(); then(); });
+}
+$("wCrew").onclick = () => crewAsk("Race more, pay less?", "Pit Crew members earn their upgrades by racing, keep 3 cars in the garage and get new features every week. " + MONEY.crew.price + ".");
+$("bWallet").onclick = () => openWallet(); $("pWal").onclick = () => openWallet();
+
+// ---------- pit lane: every level shows what it changes, before and after, and bolts a new part on the car
+const z100 = (acc, vmax) => { let v = 0, t = 0; while (v < 44.7 && t < 20) { v += acc * (1 - Math.pow(v / vmax, 2)) * .002; t += .002; } return t; };
+function carStats(up) { const vm = UPG[0].vals[up.e], gr = UPG[1].vals[up.t], ac = UPG[2].vals[up.a]; return { top: Math.round(vm * 2.237), grip: gr / 9.81, z: z100(ac, vm) }; }
+function drawPit() {
+  const u = UPG[pitSel], lv = me.up[u.id], max = lv >= (LITE ? 3 : 4), nx = { ...me.up, [u.id]: Math.min(4, lv + 1) }, A = carStats(me.up), B = carStats(nx);
+  $("pTabs").innerHTML = UPG.map((x, i) => "<button data-i='" + i + "'" + (i === pitSel ? " class='on'" : "") + ">" + x.name + "<small>LEVEL " + me.up[x.id] + "</small></button>").join("");
+  $("pName").style.color = ""; $("pName").style.fontSize = ""; $("pName").textContent = u.name + (max ? " · maxed" : " level " + lv + " to " + (lv + 1));
+  $("pPips").className = LITE ? "pips" : "pips p4"; $("pPips").innerHTML = (LITE ? [0, 1, 2] : [0, 1, 2, 3]).map(i => "<i" + (i < lv ? " class='on'" : "") + "></i>").join("");
+  const row = (name, a, b, better) => "<div" + (a === b ? " class='same'" : "") + "><span>" + name + "</span><b>" + a + "</b>" + (max ? "" : "<i>to</i><em>" + (a === b ? "same" : b) + "</em>") + "</div>";
+  $("pCmp").innerHTML = row("Top speed", A.top + " mph", B.top + " mph") + row("Corner grip", A.grip.toFixed(2) + " g", B.grip.toFixed(2) + " g") + row("0 to 100 mph", A.z.toFixed(2) + " s", B.z.toFixed(2) + " s") +
+    (max ? "" : "<div><span>Lap time</span><i>about</i><em>" + GAIN[u.id][lv].toFixed(2) + " s faster</em></div>");
+  const b = $("pBuyUp"), free = member() && earned() > 0;
+  const e = $("pEarn"); e.hidden = max; e.className = "linkbtn"; e.style.color = "#6ff3ff";
+  e.textContent = member() ? (earned() ? "Pit Crew: " + earned() + " earned upgrade" + (earned() > 1 ? "s" : "") + " ready to install" : "Pit Crew: " + raced() + " of " + MONEY.earnRaces + " races to your next free upgrade") : "Pit Crew members earn upgrades by racing. See how";
+  b.className = ""; b.disabled = false;
+  if (max) { b.textContent = "Maxed out"; b.disabled = true; }
+  else if (lv === 3 && !member()) { b.className = "crew"; b.textContent = "Unlock level 4?"; }
+  else b.textContent = LITE ? "Level " + (lv + 1) + " · $" + PRICE + " on Ko-fi" : "Install level " + (lv + 1) + " · " + (free ? "earned, free" : MONEY.upgCost + " credits");
+  if (LITE) { e.hidden = max; e.className = "small"; e.style.color = ""; e.textContent = "Pay on Ko-fi and put @" + me.name + " and " + u.name + " in the message. Added by hand, usually the same day."; }
+  $("pSee").disabled = max; $("pSee").textContent = pitPrev ? "Show my car now" : "See it on the car";
+  rebuildCar(pitPrev && !max ? nx : null); paintMoney();
+}
+const weekId = () => { const d = new Date(); return d.getFullYear() + "w" + Math.floor((d - new Date(d.getFullYear(), 0, 1)) / 6048e5); };
+function openPit(i) { if (typeof i === "number") pitSel = i; pitPrev = false;  only("sPit"); drawPit(); }
+$("pTabs").onclick = e => { const b = e.target.closest("button"); if (!b) return; pitSel = +b.dataset.i; pitPrev = false;  drawPit(); };
+$("pSee").onclick = () => { pitPrev = !pitPrev; drawPit(); };
+$("pEarn").onclick = () => { if (!member() && !LITE) crewAsk("Earn your upgrades?", "Pit Crew members don't buy upgrades. They earn them: every " + MONEY.earnRaces + " races is a free upgrade level. " + MONEY.crew.price + "."); };
+$("pBuyUp").onclick = () => {
+  const u = UPG[pitSel], lv = me.up[u.id]; if (lv >= (LITE ? 3 : 4)) return;
+  if (LITE) { window.open(KOFI, "_blank", "noopener"); return; }
+  if (lv === 3 && !member()) return crewAsk("Unlock level 4?", "Level 4 is the Pit Crew tune, and members earn it by racing instead of buying it. It is the fastest your car can go, about " + GAIN[u.id][3].toFixed(2) + " s a lap on top of level 3.");
+  const free = member() && earned() > 0;
+  const A = carStats(me.up), shown = () => { const B = carStats(me.up); pitPrev = false; drawPit();
+    const m = $("pName"); m.style.color = "var(--grn)"; m.style.fontSize = "15px"; m.textContent = u.name + " level " + (lv + 1) + " is on the car. " + (u.id === "e" ? "+" + (B.top - A.top) + " mph top speed." : u.id === "t" ? "+" + (B.grip - A.grip).toFixed(2) + " g in the corners." : (A.z - B.z).toFixed(2) + " s quicker to 100 mph.");
+    if (navigator.vibrate) navigator.vibrate(60); };
+  if (LIVE) return needPin(async () => { only("sPit"); let d = {}; try { d = await srv({ a: "buy", pin: pinMem, slot, item: u.id }); } catch (e) {}
+    if (d.ok) shown(); else if (d.why === "credits" && member()) { drawPit(); const m = $("pName"); m.style.color = "#6ff3ff"; m.style.fontSize = "15px"; m.textContent = "Race " + (MONEY.earnRaces - raced()) + " more time" + (MONEY.earnRaces - raced() === 1 ? "" : "s") + " and this upgrade is free."; }
+    else if (d.why === "credits") openWallet("You need " + (MONEY.upgCost - cr()) + " more credits for " + u.name + " level " + (lv + 1) + ".");
+    else { drawPit(); const m = $("pName"); m.style.color = "#ffb0a8"; m.style.fontSize = "15px"; m.textContent = d.why === "max" ? "That level is Pit Crew only." : "Couldn't install it. Check your signal and try again."; } });
+  const fit = () => { me.up[u.id] = lv + 1; saveCars(); if (free) store.set("tok:" + me.name, earned() - 1); shown(); };
+  if (free) fit(); else spend(MONEY.upgCost, u.name + " level " + (lv + 1), () => { only("sPit"); fit(); });
+};
+// a simple lift under the car while it is in the pit box
+const lift = new THREE.Group(); { const ym = new THREE.MeshStandardMaterial({ color: 0xffcc18, roughness: .5 }), km = new THREE.MeshLambertMaterial({ color: 0x15171c });
+  for (const sy of [1.35, -1.35]) { const a = new THREE.Mesh(new THREE.BoxGeometry(5.6, .16, .7), ym); a.position.copy(V(0, sy, 0)); a.userData.arm = 1; lift.add(a); }     // two runways under the wheels, they rise with the car
+  const col = new THREE.Mesh(new THREE.BoxGeometry(1.1, 1, 1.1), km); col.userData.col = 1; lift.add(col);
+  const pad = new THREE.Mesh(new THREE.BoxGeometry(9.5, .04, 6.2), new THREE.MeshLambertMaterial({ color: 0x23262d })); pad.position.copy(V(0, 0, .03)); lift.add(pad); }
+lift.visible = false; scene.add(lift);
+
+// ---------- tracks: the member track of the week
+const SKY = { day: [0x86b9ea, 1.6, 1.9], night: [0x060a16, .5, .35] };
+function setNight(on) { night = !!on; const k = SKY[night ? "night" : "day"]; garOn = null; paintMoney(); }
+function openTracks() {
+  $("tList").innerHTML = "<button data-t='day'" + (night ? "" : " class='on'") + ">Speedway Oval<small>The real track. Free for every follower.</small></button>" +
+    "<button data-t='night'" + (night ? " class='on'" : "") + ">" + MONEY.crew.track + (member() ? "" : " 🔒") + "<small>" + (member() ? "This week's Pit Crew track." : "This week's Pit Crew track. Try the new track?") + "</small></button>";
+  only("sTracks");
+}
+$("tList").onclick = e => { const b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.t === "night" && !member()) return crewAsk("Try the new track?", "The " + MONEY.crew.track + " is a Pit Crew track. New features land every week. " + MONEY.crew.price + ".");
+  setNight(b.dataset.t === "night"); openTracks(); };
+$("bTracks").onclick = openTracks;
+$("bWeek").onclick = () => member() ? openTracks() : crewAsk("Join the Pit Crew?", "Earn your upgrades by racing, keep 3 cars in your garage, race the " + MONEY.crew.track + ", and get new features every week. " + MONEY.crew.price + ".");
+
+// ---------- racing real drivers: 10 best laps from the leaderboard drive as cars with their @ over the roof
+// DRAFT: the server only stores lap times today, so each car drives a clean racing line at that driver's real best lap time.
+// Once laps upload their trace (Code_DRAFT.gs), the cars replay the real driving.
+const G = [];
+const PROF = (() => {     // one flying lap: where a quick car is on the lap at each moment
+  const N = 800, ds = LEN / N, vm = 132, v = new Float32Array(N), lim = i => spot(S0 + i * ds, 0).arc ? Math.sqrt(30 * R) : vm;
+  for (let i = 0; i < N; i++) v[i] = lim(i);
+  for (let k = 0; k < 2 * N; k++) { const i = k % N, p = v[(i + N - 1) % N]; v[i] = Math.min(v[i], Math.sqrt(p * p + 2 * Math.max(.5, 24 * (1 - Math.pow(p / vm, 2))) * ds)); }
+  for (let k = 2 * N; k > 0; k--) { const i = k % N, n = v[(i + 1) % N]; v[i] = Math.min(v[i], Math.sqrt(n * n + 2 * 40 * ds)); }
+  const t = new Float32Array(N + 1); for (let i = 0; i < N; i++) t[i + 1] = t[i] + ds / ((v[i] + v[(i + 1) % N]) / 2);
+  return { at(u) { const x = clamp(u, 0, 1) * t[N]; let a = 0, b = N; while (b - a > 1) { const m = (a + b) >> 1; if (t[m] <= x) a = m; else b = m; } return (a + (x - t[a]) / (t[a + 1] - t[a])) * ds; } };
+})();
+function lineD(s) {       // racing line: wide on the straights, down to the inside in the middle of each corner
+  s = mod(S0 + s, LEN); const seg = [2 * HX, ARC, 2 * HY, ARC, 2 * HX, ARC, 2 * HY, ARC];
+  for (let i = 0; i < 8; i++) { if (s < seg[i]) return i % 2 ? 26 - 58 * Math.pow(Math.sin(Math.PI * s / ARC), 2) : 26; s -= seg[i]; }
+  return 26;
+}
+function tagSprite(name) {
+  const cv = document.createElement("canvas"); cv.width = 512; cv.height = 96; const x = cv.getContext("2d");
+  x.font = "700 52px Archivo, Arial, sans-serif"; x.textAlign = "center"; x.textBaseline = "middle"; const w = Math.min(500, x.measureText("@" + name).width + 44);
+  x.fillStyle = "rgba(10,12,16,.82)"; x.beginPath(); x.roundRect(256 - w / 2, 8, w, 80, 24); x.fill(); x.fillStyle = "#fff"; x.fillText("@" + name, 256, 50, 470);
+  const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace;
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, depthWrite: false })); sp.scale.set(7.5, 1.4, 1); sp.position.set(0, 3.6, 0); return sp;
+}
+async function board() {
+  if (boardRows && performance.now() - boardAt < 60000) return boardRows;
+  const d = await api(); boardRows = d.rows || []; boardAt = performance.now(); return boardRows;
+}
+function buildGhosts(rows) {
+  for (const g of G) scene.remove(g.mesh); G.length = 0;
+  rows.forEach((r, i) => {
+    const c = ((DATA.cus.cars || []).find(x => x.ig.toLowerCase() === r.n)) || {}, col = DATA.fol.f[r.n];
+    const mesh = raceCar({ body: c.bodyHex || (col ? "#" + col : PAL[i % PAL.length]), roof: c.roofHex || null, num: c.num || "" });
+    mesh.add(tagSprite(r.n)); mesh.visible = false; scene.add(mesh);
+    G.push({ n: r.n, T: r.t, mesh, off: (i % 2 ? 1 : -1) * (1.5 + i * .7), s: 0, done: false });
+  });
+}
+function ghostsFrame() {
+  const t = lapT >= 0 ? runTotal + lapT * 1000 : -1, mine = laps * LEN + lapDist; let pl = 1;
+  for (const g of G) {
+    if (t < 0) { g.mesh.visible = false; continue; }
+    const u = t / g.T, n = Math.floor(u); g.done = n >= RACE_LAPS; g.s = g.done ? 1e9 : n * LEN + PROF.at(u - n);
+    if (g.done || g.s > mine) pl++;
+    g.mesh.visible = !g.done; if (g.done) continue;
+    const sr = g.s - n * LEN, q = spot(S0 + sr, clamp(lineD(sr) + g.off, -44, 44)); g.mesh.position.copy(V(q.x, q.y, .1)); g.mesh.rotation.y = q.th;
+  }
+  $("posBig").firstChild.nodeValue = "P" + pl;
+}
+async function startGhosts(k) {
+  gKind = k; let rows;
+  try { rows = (await board()).filter(r => r.n !== me.name); } catch (e) { rows = []; }
+  if (rows.length < 3) { only("sGarage"); return ask("Race real drivers", "Couldn't load the drivers", "Check your signal and try again.", "OK", () => only("sGarage")); }
+  if (k === "prize") rows = rows.slice(0, 10);
+  else { const b = best() || 1e9; rows = rows.slice().sort((x, y) => Math.abs(x.t - b) - Math.abs(y.t - b)).slice(0, 10).sort((x, y) => x.t - y.t); }
+  buildGhosts(rows); $("posBig").lastChild.textContent = "/" + (G.length + 1); startRun("ghosts");
+}
+$("bDrivers").onclick = () => startGhosts("drivers");
+
+// ---------- prize race: win this race, win the prize. Fixed prize set by Brady, never a cut of the entry fees.
+let ageOK = false;
+async function openPrize() {
+  const P = MONEY.prize; ageOK = false; $("zAge").classList.remove("on");
+  $("zName").textContent = P.name; $("zPrize").textContent = P.cashOn ? "$" + P.amount : P.perk; $("zEntry").textContent = P.entry + " cr"; $("zBeat").textContent = "--";
+  $("zRules").textContent = MONEY.rules; $("zField").textContent = "Loading the drivers..."; $("zMsg").textContent = "";
+  $("zGo").disabled = true; $("zGo").textContent = freeEntry() ? "Enter · free this week" : "Enter · " + P.entry + " credits"; only("sPrize");
+  const zc = $("zCrew"); zc.textContent = member() ? (freeEntry() ? "Pit Crew: your free entry for this week is ready." : "Pit Crew: you used this week's free entry. A new one comes next week.") : "Pit Crew gets one free entry every week. See how";
+  try {
+    const rows = (await board()).filter(r => r.n !== me.name).slice(0, 10);
+    $("zBeat").textContent = fmt(rows[0].t) + " a lap";
+    $("zField").innerHTML = "You race the <b>10 fastest drivers</b> on the leaderboard: " + rows.slice(0, 3).map(r => "@" + esc(r.n)).join(", ") + " and 7 more. Finish <b>P1</b> over " + RACE_LAPS + " laps and you win." + (P.cashOn ? "" : " Cash prizes are switched off for now.");
+  } catch (e) { $("zField").textContent = "Couldn't load the drivers. Check your signal."; }
+}
+$("zAge").onclick = () => { ageOK = !ageOK; $("zAge").classList.toggle("on", ageOK); $("zGo").disabled = !ageOK || $("zBeat").textContent === "--"; };
+$("zGo").onclick = () => { if (freeEntry()) { store.set("fe:" + me.name, weekId()); return startGhosts("prize"); } spend(MONEY.prize.entry, "the prize race", () => startGhosts("prize")); };
+$("zCrew").onclick = () => { if (!member()) crewAsk("Race for the prize free?", "Pit Crew members get one free prize race entry every week, earn their upgrades by racing and keep 3 cars in the garage."); };
+$("bPrize").onclick = openPrize;
+
+// ---------- after a race: results for driver races, and one upgrade question a session
+function moneyResult() {
+  const gh = kind === "ghosts", n = G.length + 1;
+  if ((gh || kind === "race") && finished) { const prize = gh && gKind === "prize"; countRace().then(t => { if (t && !prize && cur === "sResult") { const m = $("rMsg"); m.className = "msg good"; m.textContent = t; } paintMoney(); }); }
+  if (gh) {
+    $("rPosBox").hidden = false; $("rPos").textContent = finished ? "P" + place : "--";
+    $("rKind").textContent = gKind === "prize" ? MONEY.prize.name : "Race real drivers";
+    $("rHead").textContent = !finished ? "Race stopped" : place === 1 ? (gKind === "prize" ? "You won the prize race" : "You beat all " + G.length) : "P" + place + " of " + n;
+    $("bAgain").textContent = gKind === "prize" ? "Enter again" : "Race them again";
+    const m = $("rMsg");
+    if (finished && gKind === "prize") { m.className = "msg" + (place === 1 ? " good" : ""); m.textContent = place === 1 ? "DRAFT: a real win is checked by the server before the prize goes out." : "No prize this time. P1 takes it."; }
+  }
+  if ((gh || kind === "race") && finished && place > 1 && !nudged) {
+    const u = UPG.slice().sort((a, b) => me.up[a.id] - me.up[b.id])[0], lv = me.up[u.id]; if (lv >= 3) return;
+    const gap = gh ? (runTotal - RACE_LAPS * Math.min(...G.map(g => g.T))) / 1000 : 0;
+    nudged = true; setTimeout(() => { if (cur !== "sResult" || mode !== "menu") return;
+      ask("Pit lane", gh ? "Lost by " + gap.toFixed(1) + " s" : "P" + place + " of " + (NB + 1), u.name + " +1 is worth about " + (GAIN[u.id][lv] * RACE_LAPS).toFixed(1) + " s over a " + RACE_LAPS + " lap race. Upgrade?", "Upgrade", () => openPit(UPG.indexOf(u))); }, 1200);
+  }
+}
+
+// ---------- game feel (DRAFT): corner help for everyone, on by default. It slows the car for the corners and helps it turn.
+// It is never faster than braking yourself, so the leaderboard stays fair: a test driver laps 40.2 s without it and 45.4 s with it.
+const FEEL = { hb: 30, hv: .95, hs: 1, wMax: .75, w0: .22, w1: 2.0 };
+let HELP = store.get("help") !== "0", autoB = 0;
+const CS = [2 * HX, 2 * HX + ARC + 2 * HY, 4 * HX + 2 * ARC + 2 * HY, 4 * HX + 3 * ARC + 4 * HY];      // where the 4 corners start
+function toCorner(s) { let near = 1e9; for (const c of CS) { if (mod(s - c, LEN) < ARC) return 0; near = Math.min(near, mod(c - s, LEN)); } return near; }
+function paintHelp() { $("bHelp").textContent = "Corner help: " + (HELP ? "on" : "off"); $("tip").textContent = (HELP ? "Corner help is on: the car slows for the corners and helps you turn. Hold the gas and steer with your left thumb." : "Left thumb: slide to steer. Right thumb: gas and brake. Brake into the corners: braking makes the car turn sharper.") + (needApp ? " Tip: save the game as an app to lose the address bar." : ""); }
+$("bHelp").onclick = () => { HELP = !HELP; store.set("help", HELP ? "1" : "0"); paintHelp(); };
+paintHelp();
+
+// ---------- DRAFT demo controls
+$("dCr").onclick = () => { setCr(cr() + 1000); paintMoney(); if (cur === "sWallet") openWallet(); if (cur === "sPit") drawPit(); };
+$("dCrew").onclick = () => { store.set("crew:" + me.name, member() ? "0" : "1"); me.glow = member(); if (!me.glow) { setNight(false); if (slot) { slot = 0; applyCar(); fillGarage(); } } rebuildCar(); paintMoney(); if (cur === "sPit") drawPit(); if (cur === "sTracks") openTracks(); if (cur === "sCars") openCars(); };
+$("dReset").onclick = () => { for (const k of ["cr:", "pin:", "up:", "crew:", "free:", "cars:", "slot:", "daily:", "tok:", "rc:", "fe:"]) store.del(k + me.name); location.reload(); };
+if (/[?&]debug/.test(location.search)) window.__money = { scene, camera, renderer, THREE, V, car, setNight, rebuildCar, get meObj() { return me; }, resize, setHelp(v) { HELP = v; paintHelp(); }, G, PROF, get s() { return { slot, cars: CARS, daily: me && dailySlot(), cur, cr: me && cr(), member: me && member(), up: me && me.up, runTotal, place, finished, gKind }; }, startGhosts, openPit, openPrize };
 
 // ---------- start: remember the last username
 const saved = store.get("user");
