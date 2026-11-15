@@ -2,6 +2,13 @@
   "frames": 36,
   "cover": 4,
   "cars": [
+    {"ig": "yeahthatracingfan", "num": "47", "body": "Red", "roof": "Yellow", "bodyHex": "#e83030", "roofHex": "#ffe100", "since": "2026-11-15"},
+    {"ig": "crazyk_50501", "num": "", "body": "Blue jeans metallic", "roof": "Silver", "bodyHex": "#3f6fad", "roofHex": "#c4c6ca", "since": "2026-11-15"},
+    {"ig": "tyler_cherry98", "num": "", "body": "Black", "roof": "Black", "bodyHex": "#202022", "roofHex": "#202022", "since": "2026-11-15"},
+    {"ig": "yyxfi.zz", "num": "10", "body": "Blue", "roof": "Black", "bodyHex": "#2768e8", "roofHex": "#202022", "since": "2026-11-15"},
+    {"ig": "_bubi_the_cat_", "num": "71", "body": "Red", "roof": "Black", "bodyHex": "#e83030", "roofHex": "#202022", "since": "2026-11-14"},
+    {"ig": "lord.wumbo", "num": "19", "body": "Black", "roof": "Purple", "bodyHex": "#202022", "roofHex": "#8a1bcc", "since": "2026-11-14"},
+    {"ig": "loaf.ofbrad", "num": "39", "body": "Burnt orange", "roof": "Burnt orange", "bodyHex": "#c45f00", "roofHex": "#c45f00", "since": "2026-11-14"},
     {"ig": "george_reeling", "num": "5", "body": "Green", "roof": "Black", "bodyHex": "#3cc246", "roofHex": "#202022", "since": "2026-11-14"},
     {"ig": "nathanmer24", "num": "3", "body": "Black", "roof": "Silver", "bodyHex": "#141416", "roofHex": "#9a9da2", "since": "2026-11-14"},
     {"ig": "6.4beto", "num": "38", "body": "Burgundy", "roof": "Burgundy", "bodyHex": "#89122f", "roofHex": "#89122f", "since": "2026-11-14"},
