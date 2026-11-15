@@ -1,50 +1,97 @@
 {
- "note": "Every paid sponsor, ever. Newest first. Read by /sponsors/ AND the map's Sponsors list (site refresh chat), so keep it current. Art copies in sponsors/img/.",
- "sponsors": [
-  {
-   "name": "Efii",
-   "spot": "Infield",
-   "since": "2026-11-12",
-   "about": "Mental health awareness from North Queensland, Australia. Efii is life spelled backwards.",
-   "img": "img/efii.jpg",
-   "tagline": "Live Life Backward",
-   "ig": "efii.co"
-  },
-  {
-   "name": "Wristify",
-   "ig": "wristify.me",
-   "spot": "Infield",
-   "since": "2026-11-12",
-   "img": "img/wristify.jpg"
-  },
-  {
-   "name": "Nobelle",
-   "url": "https://nobelle.com",
-   "spot": "Infield",
-   "since": "2026-11-12",
-   "img": null,
-   "ig": "nobelle"
-  },
-  {
-   "name": "TZO Designs",
-   "ig": "tzo.designs",
-   "spot": "Infield",
-   "since": "2026-11-11",
-   "img": "img/tzo.jpg"
-  },
-  {
-   "name": "Black Flag Motorsports",
-   "spot": "Infield",
-   "since": "2026-11-08",
-   "img": "img/blackflag.jpg",
-   "ig": "bfmclub0"
-  },
-  {
-   "name": "Stardubs",
-   "ig": "stardubs",
-   "spot": "Infield",
-   "since": "2026-11-08",
-   "img": "img/stardubs.jpg"
-  }
- ]
+  "note": "Every paid sponsor, ever. Newest first. Read by /sponsors/ AND the map's Sponsors list (site refresh chat), so keep it current. Art copies in sponsors/img/.",
+  "sponsors": [
+    {
+      "name": "Treasure Valley Cleanup Crew",
+      "ig": "tvcleanupcrew",
+      "spot": "Infield",
+      "since": "2026-11-15",
+      "img": "img/tvcc.jpg",
+      "tagline": "Call today for a free quote",
+      "about": "Junk removal in the Treasure Valley. Call (208) 805-0322."
+    },
+    {
+      "name": "Epoch",
+      "ig": "_epoch_us",
+      "url": "https://epoch-us.com",
+      "spot": "Infield",
+      "since": "2026-11-14",
+      "img": "img/epoch.jpg",
+      "tagline": "Wear History on Your Wrist",
+      "about": "NFC historical bracelets."
+    },
+    {
+      "name": "Broadcast Racing",
+      "ig": "broadcastracing",
+      "url": "https://www.broadcastracing.com",
+      "spot": "Infield",
+      "since": "2026-11-14",
+      "img": "img/broadcast.jpg",
+      "about": "Racing photography and videography."
+    },
+    {
+      "name": "ROLL TIDE",
+      "spot": "Billboard",
+      "since": "2026-11-13",
+      "tagline": "Roll Tide",
+      "ig": "lockett_dokett"
+    },
+    {
+      "name": "@jamesdixonii",
+      "spot": "Billboard",
+      "since": "2026-11-13",
+      "tagline": "Follow me guys!",
+      "ig": "jamesdixonii"
+    },
+    {
+      "name": "Efii",
+      "spot": "Infield",
+      "since": "2026-11-12",
+      "about": "Mental health awareness from North Queensland, Australia. Efii is life spelled backwards.",
+      "img": "img/efii.jpg",
+      "tagline": "Live Life Backward",
+      "ig": "efii_co"
+    },
+    {
+      "name": "Wristify",
+      "ig": "wristify.me",
+      "spot": "Infield",
+      "since": "2026-11-12",
+      "img": "img/wristify.jpg",
+      "url": "https://linktr.ee/Wristify"
+    },
+    {
+      "name": "Nobelle",
+      "url": "https://www.nobelle.com",
+      "spot": "Infield",
+      "since": "2026-11-12",
+      "img": "img/nobelle.jpg",
+      "ig": "nobelle",
+      "tagline": "Book your next luxury travel trip with Nobelle"
+    },
+    {
+      "name": "TZO Designs",
+      "ig": "tzo.designs",
+      "spot": "Infield",
+      "since": "2026-11-11",
+      "img": "img/tzo.jpg",
+      "url": "https://tzoprints.etsy.com"
+    },
+    {
+      "name": "Black Flag Motorsports",
+      "spot": "Infield",
+      "since": "2026-11-08",
+      "img": "img/blackflag.jpg",
+      "ig": "bfmclub0",
+      "url": "https://bfmclub.com"
+    },
+    {
+      "name": "Stardubs",
+      "ig": "stardubs",
+      "spot": "Infield",
+      "since": "2026-11-08",
+      "img": "img/stardubs.jpg",
+      "url": "https://stardubs.com"
+    }
+  ]
 }
