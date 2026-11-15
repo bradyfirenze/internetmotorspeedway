@@ -505,8 +505,8 @@ function addGarages() {
     const cars = cj.cars.slice().reverse(), n = cars.length + 1;         // oldest first, plus one empty bay
     // stacked decks so the row never runs past the GARAGES building (110 m) into the clubhouse or pagoda
     const W = 9.6, D = 9, H = 6.6, PER = 12, cols = Math.min(n, PER), FL = Math.ceil(n / PER), x0 = GX - (cols - 1) * W / 2; GCARS.length = 0; GFLOORS = FL;
-    const wall = new THREE.MeshLambertMaterial({ color: 0xe9ebee }), dark = new THREE.MeshLambertMaterial({ color: 0x1a1c22 }),
-      floor = new THREE.MeshStandardMaterial({ color: 0x3a3d44, roughness: .3, metalness: .1 }), lamp = new THREE.MeshBasicMaterial({ color: 0xffffff }),
+    const wall = new THREE.MeshLambertMaterial({ color: 0xe9ebee, emissive: 0x6a6c70 }), dark = new THREE.MeshLambertMaterial({ color: 0x1a1c22 }),
+      floor = new THREE.MeshLambertMaterial({ color: 0x3a3d44, emissive: 0x2a2c31 }), lamp = new THREE.MeshBasicMaterial({ color: 0xffffff }),
       yel = new THREE.MeshBasicMaterial({ color: 0xffcc18 });
     const B = (w, h, d, m, x, y, z) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); o.position.copy(V(x, y, z)); scene.add(o); return o; };
     // one long roof + header over all the bays, the building's wall behind
@@ -523,7 +523,7 @@ function addGarages() {
       B(.3, H, D, dark, x - W / 2, GY + D / 2, z + H / 2);                             // dividers
       if (k === n - 1 || k % PER === PER - 1) B(.3, H, D, dark, x + W / 2, GY + D / 2, z + H / 2);
       B(W * .7, .06, .5, lamp, x, GY + D * .3, z + H - .05); B(W * .7, .06, .5, lamp, x, GY + D * .65, z + H - .05);   // light strips
-      const light = new THREE.PointLight(0xffffff, 26, 14, 1.6); light.position.copy(V(x, GY + D * .55, z + H - .8)); scene.add(light);
+      // no per-bay PointLight: one light per bay made every pixel on the map pay for ~70 lights (the map ran at 2 fps). Bays read as lit through emissive walls/floor.
       if (!c) {        // the open garage: dashed outline and a big "?"
         const q = new THREE.Mesh(new THREE.PlaneGeometry(4.4, 4.4), new THREE.MeshBasicMaterial({ map: textTex("?", 256, 256, null, "#ffcc18", "400 220px Anton, Impact, sans-serif"), transparent: true }));
         q.position.copy(V(x, GY + .35, z + 3.2)); q.rotation.y = Math.PI; scene.add(q);
