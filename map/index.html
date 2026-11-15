@@ -415,7 +415,7 @@ document.getElementById("f").addEventListener("submit", e => {
   if (!q) return;
   let car = carsByName.get(q);
   if (!car) { const hit = DATA.cars.find(c => c.n && c.n.includes(q)); if (hit) car = hit; }
-  if (!car) { m.textContent = "No name on a car yet. New followers already have a car on the grid; names go on after the next race's follower pull."; setTag(null); return; }
+  if (!car) { m.textContent = "Not on the grid yet. Check the spelling (no @ needed). This race's list was locked at 10:30 am PT Nov 14. Followed later? You're in the next race."; setTag(null); return; }
   document.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", "false"));
   setTag(car);
   const fw = new THREE.Vector3(Math.cos(car.h), 0, -Math.sin(car.h));
@@ -604,7 +604,7 @@ controls.addEventListener("start", () => { fly = null; });
 // ---- Victory Museum: gold cars for every winner on the plinths (newest in the centre, past winners left, right, left, right)
 const MUS = { x: 5, y: -50, d: 62 }, WINS = [];
 const GLASS_M = new THREE.MeshLambertMaterial({ color: 0x6f8aa3 }), LIT_M = new THREE.MeshBasicMaterial({ color: 0xffffff });
-const SLOTS = [[MUS.x - 24, MUS.y - 4], [MUS.x + 24, MUS.y - 4], [MUS.x - 38, MUS.y - 4], [MUS.x + 38, MUS.y - 4], [MUS.x + 50, MUS.y - 4], [MUS.x - 50, MUS.y - 4]];   // 5th and 6th plinths (Day 7, Day 8), same as the videos
+const SLOTS = [[MUS.x - 24, MUS.y - 4], [MUS.x + 24, MUS.y - 4], [MUS.x - 38, MUS.y - 4], [MUS.x + 38, MUS.y - 4], [MUS.x + 50, MUS.y - 4], [MUS.x - 50, MUS.y - 4], [MUS.x + 62, MUS.y - 4]];   // 5th and 6th plinths (Day 7, Day 8), same as the videos
 function goldCar(x, y, k, mat, blk) {
   const g = new THREE.Group();
   const add = (geo, m, px, py, pz) => { const o = new THREE.Mesh(geo, m); o.position.copy(V(px, py, pz)); g.add(o); };

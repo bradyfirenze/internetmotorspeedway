@@ -1,6 +1,14 @@
 {
  "winners": [
   {
+   "day": 9,
+   "name": "rickydanks",
+   "track": "NoLook Outlook Motor Speedway",
+   "date": "Nov 14, 2026",
+   "cars": 21300,
+   "img": "museum/day9.jpg"
+  },
+  {
    "day": 8,
    "name": "keith200867",
    "track": "Epstein Island Motor Speedway",

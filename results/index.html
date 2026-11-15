@@ -112,7 +112,8 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--fg); outlin
   <p class="foot">Every follower gets a car in every race. Not in the list? You followed after that day's cutoff, so you're in the next race.<br>Follow <a href="https://instagram.com/internetmotorspeedway">@internetmotorspeedway</a></p>
 </main>
 <script>
-const DAYS = [{ id: 8, file: "day8.json" }, { id: 7, file: "day7.json" }, { id: 6, file: "day6.json" }, { id: 5, file: "day5.json" }, { id: 4, file: "day4.json" }, { id: 3, file: "day3.json" }, { id: 2, file: "day2.json" }];   // newest first; add each new race here
+const CUTOFF = { 9: "10:30 am PT Nov 14" };   // when each day's final follower list was pulled
+const DAYS = [{ id: 9, file: "day9.json" }, { id: 8, file: "day8.json" }, { id: 7, file: "day7.json" }, { id: 6, file: "day6.json" }, { id: 5, file: "day5.json" }, { id: 4, file: "day4.json" }, { id: 3, file: "day3.json" }, { id: 2, file: "day2.json" }];   // newest first; add each new race here
 const STEP = 100;
 let data = null, shown = STEP, me = null;
 const $ = id => document.getElementById(id);
@@ -153,7 +154,7 @@ function find() {
       near.forEach(r => ol.appendChild(row(r))); out.appendChild(ol);
     } else {
       const p = document.createElement("p"); p.className = "none";
-      p.textContent = "No car under that name in this race. Check the spelling, or you may have followed after the cutoff.";
+      p.textContent = "No car under that name in this race. Check the spelling (no @ needed). " + (CUTOFF[data.day] ? "This race's list was locked at " + CUTOFF[data.day] + ". Followed later? You're in the next race." : "This race's list was locked at 10 am PT the day before it posted. Followed later? You're in the next race.");
       out.appendChild(p);
     }
   }
