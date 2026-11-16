@@ -54,6 +54,10 @@ li .t { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spa
 li.p1 .p { color: var(--gold); } li.p2 .p { color: var(--silver); } li.p3 .p { color: var(--bronze); }
 li.p1 .t { color: var(--gold); }
 li.dnf .p, li.dnf .t { color: var(--red); }
+li .why { display: block; font-weight: 400; font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+.wreck { margin: 10px 0 0; font-size: 14px; color: var(--muted); line-height: 1.45; }
+.wreck b { color: var(--red); }
+.wreck button { margin-left: 6px; font: 700 13px var(--body); background: transparent; color: var(--yel); border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; cursor: pointer; }
 li.me { outline: 2px solid var(--yel); outline-offset: -2px; }
 .more { width: 100%; margin-top: 10px; font: 700 15px var(--body); background: transparent; color: var(--fg); border: 1px solid var(--line); border-radius: 10px; padding: 13px; cursor: pointer; }
 .foot { margin-top: 28px; color: var(--muted); font-size: 13px; line-height: 1.5; }
@@ -119,6 +123,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--fg); outlin
   <div class="search"><span aria-hidden="true">@</span><input id="q" type="search" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="your instagram"></div>
   <div id="out" aria-live="polite"></div>
   <h2 id="lh">Full results</h2>
+  <p class="wreck" id="wreck" hidden></p>
   <ol id="list"></ol>
   <button class="more" id="more" type="button">Show more</button>
   </section>
@@ -127,10 +132,10 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--fg); outlin
 <script>
 const NEXT = { race: "", names: new Set() };
 fetch("../map/next.json", { cache: "no-cache" }).then(r => r.json()).then(d => { NEXT.race = d.race; (d.names || []).forEach(n => NEXT.names.add(n)); }).catch(() => {});
-const CUTOFF = { 9: "10:30 am PT Nov 14" };   // when each day's final follower list was pulled
-const DAYS = [{ id: 9, file: "day9.json" }, { id: 8, file: "day8.json" }, { id: 7, file: "day7.json" }, { id: 6, file: "day6.json" }, { id: 5, file: "day5.json" }, { id: 4, file: "day4.json" }, { id: 3, file: "day3.json" }, { id: 2, file: "day2.json" }];   // newest first; add each new race here
+const CUTOFF = { 9: "10:30 am PT Nov 14", 10: "1:24 pm PT Nov 15" };   // when each day's final follower list was pulled
+const DAYS = [{ id: 10, file: "day10.json" }, { id: 9, file: "day9.json" }, { id: 8, file: "day8.json" }, { id: 7, file: "day7.json" }, { id: 6, file: "day6.json" }, { id: 5, file: "day5.json" }, { id: 4, file: "day4.json" }, { id: 3, file: "day3.json" }, { id: 2, file: "day2.json" }];   // newest first; add each new race here
 const STEP = 100;
-let data = null, shown = STEP, me = null;
+let data = null, shown = STEP, me = null, dnfOnly = false;   // DNF rows carry a "note": why they didn't finish (tools/results_dnf.py)
 const $ = id => document.getElementById(id);
 const clean = s => s.toLowerCase().replace(/^@+/, "").trim();
 function row(r) {
@@ -140,15 +145,17 @@ function row(r) {
   if (me && r.name === me) li.classList.add("me");
   const p = document.createElement("span"); p.className = "p"; p.textContent = dnf ? "DNF" : r.place;
   const n = document.createElement("span"); n.className = "n"; n.textContent = "@" + r.name;
+  if (dnf && r.note) { const w = document.createElement("span"); w.className = "why"; w.textContent = r.note; n.appendChild(w); }
   const t = document.createElement("span"); t.className = "t"; t.textContent = r.place === 1 ? "Winner" : dnf ? "Crashed" : "";
   li.append(p, n, t); return li;
 }
 function drawList() {
   const ol = $("list"); ol.textContent = "";
   const f = document.createDocumentFragment();
-  data.results.slice(0, shown).forEach(r => f.appendChild(row(r)));
+  const rs = dnfOnly ? data.results.filter(r => r.place === "DNF") : data.results;
+  rs.slice(0, shown).forEach(r => f.appendChild(row(r)));
   ol.appendChild(f);
-  $("more").hidden = shown >= data.results.length;
+  $("more").hidden = shown >= rs.length;
 }
 function find() {
   const q = clean($("q").value), out = $("out"); out.textContent = ""; me = null;
@@ -160,7 +167,7 @@ function find() {
     d.innerHTML = '<div class="pl"></div><div class="nm"></div><div class="of"></div>';
     d.querySelector(".pl").textContent = exact.place === "DNF" ? "DNF" : ordinal(exact.place);
     d.querySelector(".nm").textContent = "@" + exact.name;
-    d.querySelector(".of").textContent = exact.place === "DNF" ? "Caught in the crash. Better luck tomorrow." : "out of " + data.cars.toLocaleString() + " cars at " + data.track;
+    d.querySelector(".of").textContent = exact.place === "DNF" ? (exact.note || "Caught in the crash.") + " Better luck next race." : "out of " + data.cars.toLocaleString() + " cars at " + data.track;
     out.appendChild(d);
     if (window.IMS_SHARE && typeof exact.place === "number") window.IMS_SHARE(d, exact.name, exact.place, data.day, data.track);   // top 10 story card
   } else {
@@ -207,6 +214,10 @@ async function load(day) {
   });
   $("pres").hidden = !sp.length;
   drawCrew(data.day);
+  const nd = data.results.filter(r => r.place === "DNF"), wk = $("wreck"); dnfOnly = false; wk.hidden = !nd.length;
+  if (nd.length) { const why = nd[0].note || "Crashed."; wk.innerHTML = "<b>" + nd.length.toLocaleString() + " DNF.</b> "; wk.append(why + " ");
+    const b = document.createElement("button"); b.type = "button"; b.textContent = "See who crashed"; wk.appendChild(b);
+    b.addEventListener("click", () => { dnfOnly = !dnfOnly; b.textContent = dnfOnly ? "Show everyone" : "See who crashed"; shown = STEP; drawList(); }); }
   [...$("days").children].forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.id === day.id)));
   shown = STEP; find();
 }

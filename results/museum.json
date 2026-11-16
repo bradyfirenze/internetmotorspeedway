@@ -1,6 +1,14 @@
 {
  "winners": [
   {
+   "day": 10,
+   "name": "batman_13p",
+   "track": "Mental Health Awareness Motor Speedway",
+   "date": "Nov 15, 2026",
+   "cars": 24031,
+   "img": "museum/day10.jpg"
+  },
+  {
    "day": 9,
    "name": "rickydanks",
    "track": "NoLook Outlook Motor Speedway",
