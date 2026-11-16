@@ -504,8 +504,23 @@ function raceCar(c) {
 }
 // Custom car garages: open bays on the infield side of the GARAGES building, white inside, lit ceiling, owner's colors on the back wall
 const PICK = [];
+// Pit Crew paint shop (game server v3, GET ?a=paint -> {ok, cars:[{n, body, roof, num}]}): a member's repaint shows here with
+// no hand update. Fail safe: any error, timeout, old server or bad value = no change (cars.json colors as before).
+const paintP = new Promise(res => {
+  const t = setTimeout(() => res({}), 4000), hex = v => typeof v === "string" && /^#?[0-9a-f]{6}$/i.test(v) ? (v[0] === "#" ? v : "#" + v) : null;
+  fetch("https://script.google.com/macros/s/AKfycbwsMLdBQJagXvjV6hghdy0M1_dHmE7lLEi0lUAAvGOAkzO61HeWyTCYueeRo-jgBVQ2pQ/exec?a=paint", { cache: "no-store" })
+    .then(r => r.json()).then(d => {
+      const out = {};
+      if (d && d.ok && Array.isArray(d.cars)) for (const c of d.cars) {
+        const n = String(c.n || "").toLowerCase(), b = hex(c.body), r = hex(c.roof) || b, num = +c.num;
+        if (n && b) out[n] = { bodyHex: b, roofHex: r, num: num >= 1 && num <= 99 ? String(Math.round(num)) : "" };
+      }
+      clearTimeout(t); res(out);
+    }).catch(() => { clearTimeout(t); res({}); });
+});
 function addGarages() {
-  fetch("../cars/cars.json", { cache: "no-cache" }).then(r => r.json()).then(cj => {
+  Promise.all([fetch("../cars/cars.json", { cache: "no-cache" }).then(r => r.json()), paintP]).then(([cj, paint]) => {
+    for (const c of cj.cars) { const p = c.ig && paint[c.ig.toLowerCase()]; if (p) Object.assign(c, p); }   // Pit Crew self-serve repaints
     const cars = cj.cars.slice().reverse(), n = cars.length + 1;         // oldest first, plus one empty bay
     // stacked decks so the row never runs past the GARAGES building (110 m) into the clubhouse or pagoda
     const W = 9.6, D = 9, H = 6.6, PER = 12, cols = Math.min(n, PER), FL = Math.ceil(n / PER), x0 = GX - (cols - 1) * W / 2; GCARS.length = 0; GFLOORS = FL;
