@@ -522,7 +522,8 @@ async function signIn(raw, quiet) {
   const c = (cus.cars || []).find(x => x.ig.toLowerCase() === name), won = (mus.winners || []).some(w => w.name.toLowerCase() === name);
   const u = (gar.upgrades || {})[name] || {};
   me = { name, body: "#" + fol.f[name], roof: null, num: "", kind: "Your car", up: { e: clamp(u.e | 0, 0, 3), t: clamp(u.t | 0, 0, 3), a: clamp(u.a | 0, 0, 3) } };
-  if (c) { me.body = c.bodyHex; me.roof = c.roofHex; me.num = c.num || ""; me.kind = "Your custom car"; }
+  if (c) { me.body = c.bodyHex; me.roof = c.roofHex; me.num = c.num || ""; me.kind = "Your custom car"; me.shape = c.kind || null; me.pro = c.tier === "car_pro"; }
+  { const q = new URLSearchParams(location.search), pv = q.get("body"); if (pv && q.has("debug")) me.shape = pv; if (q.has("pro") && q.has("debug")) me.pro = true; }
   if (won) { me.body = GOLD; me.roof = "#c98200"; me.kind = "Race winner"; }
   await moneyIn({ fol, cus, gar, mus });
   store.set("user", name); msg.textContent = "";
@@ -586,6 +587,7 @@ function glowTex() {      // soft pool of light under a Pit Crew car
   x.fillStyle = gr; x.fillRect(-128, -128, 256, 256); return _glow = new THREE.CanvasTexture(cv);
 }
 function raceCar(c, ghost) {
+  if (!ghost && c.shape && BODY_SCALE[c.shape]) return bodyCar(c);
   const g = new THREE.Group();
   const gm = ghost && new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .28, depthWrite: false });
   const body = new THREE.Color(c.body), roof = c.roof ? new THREE.Color(c.roof) : body.clone().multiplyScalar(.82);
@@ -609,8 +611,9 @@ function raceCar(c, ghost) {
     if (a) { const pl = a >= 3 ? basic(a >= 4 ? 0x29f0ff : 0xffcc18) : M.k;                                                                                                                             // turbo: rear wing that grows, hot exhaust tips
       box(-2.15, 0, 1.6 + .14 * a, .6, 2.36, .07, M.k); for (const sd of [1, -1]) { box(-2.15, sd * 1.18, 1.42 + .07 * a, .7, .05, .4 + .14 * a, pl); box(-2.15, sd * .6, 1.5 + .07 * a, .08, .08, .2 + .14 * a, M.k); }
       for (const sd of [.5, -.5]) box(-2.4, sd, .5, .14, .24, .24, basic(a >= 4 ? 0x4db8ff : a >= 2 ? 0xff8a1e : 0x777777)); }
-    if (c.glow) { const u = new THREE.Mesh(new THREE.PlaneGeometry(12, 8.4), new THREE.MeshBasicMaterial({ map: glowTex(), color: 0x29f0ff, transparent: true, opacity: .95, blending: THREE.AdditiveBlending, depthWrite: false })); u.rotation.x = -Math.PI / 2; u.position.copy(V(0, 0, .05)); g.add(u);
-      for (const sd of [1, -1]) box(0, sd * 1.02, .14, 4.2, .06, .06, basic(0x8ff8ff)); }   // Pit Crew underglow: a pool of light and two neon tubes
+    if (c.pro) proLook(g, c);
+    if (c.glow || c.pro) { const neonC = c.pro ? proNeon(c) : new THREE.Color(0x29f0ff), tubeC = c.pro ? neonC.clone().lerp(new THREE.Color(0xffffff), .45) : new THREE.Color(0x8ff8ff); const u = new THREE.Mesh(new THREE.PlaneGeometry(12, 8.4), new THREE.MeshBasicMaterial({ map: glowTex(), color: neonC, transparent: true, opacity: .95, blending: THREE.AdditiveBlending, depthWrite: false })); u.rotation.x = -Math.PI / 2; u.position.copy(V(0, 0, .05)); g.add(u);
+      for (const sd of [1, -1]) box(0, sd * 1.02, .14, 4.2, .06, .06, basic(tubeC)); }   // Pit Crew underglow: a pool of light and two neon tubes
   }
   g.scale.setScalar(1.25); return g;
 }
@@ -904,7 +907,7 @@ function frame(now) {
     } else ghostCar.visible = false;
     if (finished) endRun();
   }
-  placeCar();
+  placeCar(); trailTick();
   if (mode === "menu") {            // slow circle around the car behind the menus
     const pit = cur === "sPit"; pitH += ((pit ? .95 : 0) - pitH) * Math.min(1, dt * 4); lift.visible = pitH > .03;
     menuA += dt * (pit ? .2 : .28); garageLook(true);
@@ -1053,7 +1056,7 @@ async function moneyIn(d) {      // called after sign in
   me.glow = member(); if (!me.glow && night) setNight(false);
   // cars: slot 1 is the car every follower has. Slots 2 and 3 are Pit Crew only. Upgrades belong to the car, not the driver.
   const extra = c => c ? { body: c.body, roof: c.roof, num: c.num || "", kind: "", up: { e: 0, t: 0, a: 0, ...c.up } } : null;
-  ORIG = { body: me.body, roof: me.roof, num: me.num, won: me.kind === "Race winner" };
+  ORIG = { body: me.body, roof: me.roof, num: me.num, won: me.kind === "Race winner", shape: me.shape || null, pro: !!me.pro };
   CARS = [{ body: me.body, roof: me.roof, num: me.num, kind: me.kind, up: me.up }, extra(sv[1]), extra(sv[2])];
   if (LIVE) syncSV(); else if (sv[0] && sv[0].body && !ORIG.won && member()) { CARS[0].body = sv[0].body; CARS[0].roof = sv[0].roof; CARS[0].num = sv[0].num || ""; }
   slot = member() ? clamp(+store.get("slot:" + me.name) || 0, 0, 2) : 0; if (!CARS[slot]) slot = 0;
@@ -1062,7 +1065,7 @@ async function moneyIn(d) {      // called after sign in
 let CARS = [], slot = 0, ORIG = { body: "", roof: null, num: "", won: false };      // ORIG = the look your first car has without Pit Crew paint
 const SLOTS = 3, saveCars = () => { if (!LIVE) store.set("cars:" + me.name, JSON.stringify(CARS)); store.set("slot:" + me.name, slot); };
 const dailySlot = () => { const d = LIVE ? SV.daily : +store.get("daily:" + me.name) || 0; return member() && CARS[d] ? d : 0; };
-function applyCar() { const c = CARS[slot]; me.body = c.body; me.roof = c.roof; me.num = c.num || ""; me.up = c.up; me.kind = slot ? "Car " + (slot + 1) + " of " + SLOTS : c.kind; saveCars(); }
+function applyCar() { const c = CARS[slot]; me.body = c.body; me.roof = c.roof; me.num = c.num || ""; me.up = c.up; me.shape = slot === 0 ? ORIG.shape : null; me.pro = slot === 0 && ORIG.pro; me.kind = slot ? "Car " + (slot + 1) + " of " + SLOTS : c.kind; saveCars(); }
 function openCars() {
   const mem = member(), have = CARS.filter(Boolean).length, lv = c => UPG.map(u => u.name + " " + c.up[u.id]).join(" · ");
   $("cCount").textContent = have + " of " + (mem ? SLOTS : 1) + (mem ? " · Pit Crew" : "");
@@ -1182,6 +1185,136 @@ $("claimForm").addEventListener("submit", async e => { e.preventDefault(); $("cl
   if (d.ok && member()) { $("clEmail").value = ""; rebuildCar(); fillGarage(); show("sGarage"); return ask("Pit Crew", "You're in the Pit Crew", "Your car has its glow, level 4 is open, you have 3 car slots, and every " + MONEY.earnRaces + " races earns a free upgrade.", "Let's go", () => show("sGarage")); }
   m.className = "msg bad";
   m.textContent = d.why === "none" ? "No Pit Crew payment found for that email yet. It can take a minute after you pay. Check the spelling, then try again." : d.why === "taken" ? "That payment is already linked to another driver. DM @internetmotorspeedway and we'll sort it out." : d.why === "wait" ? "Too many tries. Wait an hour, or DM @internetmotorspeedway." : d.why === "pin" ? "Wrong PIN. Go back and try again." : "Couldn't check. Check your signal and try again."; });
+
+// ---------- Car PRO ($5 tier, cars.json tier "car_pro"): the buyer's normal car with neon underglow, flame paint, neon wheels and a glow trail.
+// Looks only, the car drives the same. The neon takes the car's own roof color, pushed bright (gray cars get cyan).
+function proNeon(c) { const k = new THREE.Color(c.roof || c.body), h = {}; k.getHSL(h); return h.s < .25 ? new THREE.Color(0x29f0ff) : new THREE.Color().setHSL(h.h, 1, .6); }
+const _flame = {};
+function flameTex(cold) {      // five licks of fire, root on the right (the front of the car), tips trailing left
+  if (_flame[cold]) return _flame[cold]; const cv = document.createElement("canvas"); cv.width = 512; cv.height = 256; const x = cv.getContext("2d");
+  const lick = (sc, cols) => { const gr = x.createLinearGradient(512, 0, 512 - 500 * sc, 0); cols.forEach((k, i) => gr.addColorStop(i / (cols.length - 1), k)); x.fillStyle = gr;
+    x.beginPath(); x.moveTo(512, 0); const tips = [150, 30, 190, 70, 230], n = tips.length, bh = 256 / n;
+    for (let i = 0; i < n; i++) { const yt = i * bh, yb = yt + bh, tx = 512 - (512 - tips[i]) * sc, ty = yt + bh * (.25 + .12 * (i % 3)), rx = 512 - 70 * sc;
+      x.lineTo(rx, yt); x.bezierCurveTo(rx - 90 * sc, yt - 6, tx + 120 * sc, ty - 14, tx, ty); x.bezierCurveTo(tx + 110 * sc, ty + 12, rx - 60 * sc, yb - 4, rx, yb); }
+    x.lineTo(512, 256); x.closePath(); x.fill(); };
+  if (cold) { lick(1, ["#eaffff", "#29f0ff", "#1a6bff", "#1230c8"]); lick(.62, ["#ffffff", "#c8fbff", "#5fe6ff"]); }
+  else { lick(1, ["#fff3a0", "#ffb81e", "#ff5a14", "#d10a08"]); lick(.62, ["#ffffff", "#fff3a0", "#ffcc18"]); }
+  const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; return _flame[cold] = t;
+}
+function proLook(g, c) {
+  const neon = proNeon(c), t = (c.up || {}).t | 0, bh = {}; new THREE.Color(c.body).getHSL(bh);
+  const cold = bh.s > .35 && bh.l > .2 && (bh.h < .14 || bh.h > .9);       // red, orange and yellow cars get blue fire so it shows
+  const fm = new THREE.MeshBasicMaterial({ map: flameTex(cold ? 1 : 0), transparent: true, side: THREE.DoubleSide, depthWrite: false });
+  for (const sd of [1, -1]) { const f = new THREE.Mesh(new THREE.PlaneGeometry(2.5, .66), fm); f.position.copy(V(-.2, sd * 1.104, .75)); f.renderOrder = -1; g.add(f); }      // flames down both doors, behind the number
+  const hf = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 2.0), fm); hf.rotation.set(-Math.PI / 2, 0, 0); hf.position.copy(V(1.75, 0, 1.103)); hf.renderOrder = -1; if (!c.num) g.add(hf);      // and on the hood when there is no number there
+  const nm = new THREE.MeshBasicMaterial({ color: neon, side: THREE.DoubleSide });
+  for (const f of [1.5, -1.5]) for (const sd of [1, -1]) { const r = new THREE.Mesh(new THREE.RingGeometry(.25, .37, 28), nm); r.position.copy(V(f, sd * (1.345 + .08 * t), .45)); g.add(r); }      // neon wheels
+}
+const TR = { n: 34, pts: [], mesh: null };
+function trailTick() {      // glow trail: a ribbon of light behind a Car PRO while it drives. One small mesh, updated in place.
+  const on = mode === "drive" && me && me.pro && !me.shape;
+  if (!on) { if (TR.mesh) TR.mesh.visible = false; TR.pts.length = 0; return; }
+  if (!TR.mesh) { const geo = new THREE.BufferGeometry(), n = TR.n + 1, ix = [];
+    geo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(n * 6), 3)); geo.setAttribute("color", new THREE.BufferAttribute(new Float32Array(n * 6), 3));
+    for (let i = 0; i < n - 1; i++) { const a = i * 2; ix.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); } geo.setIndex(ix);
+    TR.mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, fog: false })); TR.mesh.frustumCulled = false; scene.add(TR.mesh); }
+  const h = car.h, now = { x: car.x - Math.cos(h) * 2.7, y: car.y - Math.sin(h) * 2.7, nx: -Math.sin(h), ny: Math.cos(h) }, last = TR.pts[0];
+  if (last && Math.hypot(now.x - last.x, now.y - last.y) > 40) TR.pts.length = 0;      // the car was moved (new run), start a fresh trail
+  if (!TR.pts[0] || Math.hypot(now.x - TR.pts[0].x, now.y - TR.pts[0].y) > 1.4) { TR.pts.unshift(now); if (TR.pts.length > TR.n) TR.pts.pop(); }
+  const P = TR.mesh.geometry.attributes.position, C = TR.mesh.geometry.attributes.color, all = [now, ...TR.pts], neon = proNeon(me), pw = clamp(car.v / 25, 0, 1);
+  for (let i = 0; i <= TR.n; i++) { const q = all[Math.min(i, all.length - 1)], k = i < all.length ? Math.pow(1 - i / TR.n, 1.6) * pw * .85 : 0, w = .62 - .4 * i / TR.n;
+    P.setXYZ(i * 2, q.x + q.nx * w, .22, -(q.y + q.ny * w)); P.setXYZ(i * 2 + 1, q.x - q.nx * w, .22, -(q.y - q.ny * w));
+    C.setXYZ(i * 2, neon.r * k, neon.g * k, neon.b * k); C.setXYZ(i * 2 + 1, neon.r * k, neon.g * k, neon.b * k); }
+  P.needsUpdate = C.needsUpdate = true; TR.mesh.visible = all.length > 2;
+}
+
+// ---------- car bodies: monster truck, school bus, F1 car, fighter jet, dragon. Same shapes as the daily videos (blender/tier_models.py),
+// built from a few boxes so they are light. Looks only: every body drives exactly the same and takes up the same room on the track.
+const BODY_SCALE = { monster: 1.15, bus: 1.0, f1: 1.25, jet: .42, dragon: .78, balloon: 1.3 };      // balloon is kept for old entries, but it is not sold: Brady swapped it for the fighter jet (Nov 15)
+function bodyCar(c) {
+  const g = new THREE.Group(), kind = c.shape, c1 = new THREE.Color(c.body), c2 = c.roof ? new THREE.Color(c.roof) : c1.clone().multiplyScalar(.7);
+  const std = (col, r = .4, m = .1) => new THREE.MeshStandardMaterial({ color: col, roughness: r, metalness: m }), lit = col => new THREE.MeshBasicMaterial({ color: col });
+  const P = std(c1, .3, .15), Rf = std(c2, .3, .15), K = new THREE.MeshLambertMaterial({ color: 0x0c0c0e }), RIM = std(0x8c9199, .25, .9), GL = std(0x1d2a38, .1, .4), LIT = lit(0xfff0b0), RED = lit(0xff2a2a), WHT = std(0xebebe6, .4);
+  const box = (x, y, z, sx, sy, sz, m, par) => { const o = new THREE.Mesh(new THREE.BoxGeometry(sx, sz, sy), m); o.position.copy(V(x, y, z)); (par || g).add(o); return o; };
+  const wheel = (x, y, r, w) => { const o = new THREE.Mesh(new THREE.CylinderGeometry(r, r, w, 14), K); o.rotation.x = Math.PI / 2; o.position.copy(V(x, y, r)); g.add(o);
+    const h = new THREE.Mesh(new THREE.CylinderGeometry(r * .55, r * .55, .05, 12), RIM); h.rotation.x = Math.PI / 2; h.position.copy(V(x, y + (w / 2 + .02) * Math.sign(y), r)); g.add(h); };
+  const dark = c1.r + c1.g + c1.b < 1.5, numSides = (x, y, z, size) => { if (!c.num) return; const nm = new THREE.MeshBasicMaterial({ map: numTex(c.num, dark ? "#fff" : "#111"), transparent: true });
+    for (const sd of [1, -1]) { const d = new THREE.Mesh(new THREE.PlaneGeometry(size, size), nm); d.position.copy(V(x, sd * y, z)); d.rotation.y = sd > 0 ? Math.PI : 0; g.add(d); } };
+  if (kind === "monster") {
+    for (const x of [1.65, -1.65]) for (const y of [1.25, -1.25]) wheel(x, y, .95, .85);
+    box(0, 0, 1.25, 3.6, .5, .25, RIM); for (const x of [1.65, -1.65]) box(x, 0, 1.25, .3, 2.4, .2, RIM);
+    box(.2, 0, 1.95, 4.4, 2.05, .75, P); box(-.35, 0, 2.75, 1.9, 1.85, .85, Rf);
+    box(.62, 0, 2.75, .06, 1.7, .62, GL); for (const sy of [1, -1]) { box(-.35, sy * .935, 2.8, 1.4, .04, .5, GL); box(2.42, sy * .65, 2.1, .04, .35, .2, LIT); for (const x of [1.65, -1.65]) box(x, sy * 1.07, 2.0, 1.5, .25, .18, K); }
+    box(-.35, 0, 3.27, 1.2, 1.6, .14, K); for (const y of [-.55, -.18, .18, .55]) box(.1, y, 3.27, .12, .25, .1, LIT);
+    box(-2.02, .65, 2.05, .04, .4, .2, RED); box(-2.02, -.65, 2.05, .04, .4, .2, RED); numSides(.55, 1.04, 2.0, .7);
+  } else if (kind === "bus") {
+    for (const [x, y] of [[1.6, 1.0], [1.6, -1.0], [-1.6, 1.0], [-1.6, -1.0]]) wheel(x, y, .5, .42);
+    box(-.2, 0, 1.55, 6.0, 2.2, 1.9, P); box(2.95, 0, 1.0, .5, 2.1, .8, P); box(-.2, 0, 2.55, 5.9, 2.1, .12, Rf);
+    for (const sy of [1, -1]) { for (let i = 0; i < 6; i++) box(1.8 - i * .82, sy * 1.11, 1.95, .66, .04, .6, GL); box(-.2, sy * 1.11, 1.38, 6.0, .03, .12, K); box(-.2, sy * 1.11, 1.12, 6.0, .03, .08, K);
+      box(3.21, sy * .7, 1.15, .04, .3, .2, LIT); box(-3.21, sy * .8, 1.4, .04, .2, .3, RED); }
+    box(2.71, 0, 1.95, .04, 1.9, .65, GL); box(3.21, 0, .75, .06, 2.2, .18, K); box(-3.21, 0, .75, .06, 2.2, .18, K);
+    box(1.9, -1.2, 1.6, .5, .05, .5, lit(0xcc0808)); numSides(-2.3, 1.13, 1.6, .6);
+  } else if (kind === "f1") {
+    for (const [x, r, w] of [[1.75, .36, .38], [-1.6, .42, .5]]) for (const y of [.95, -.95]) wheel(x, y, r, w);
+    box(.3, 0, .48, 3.8, .62, .4, P); box(2.55, 0, .38, 1.3, .34, .22, P); box(3.2, 0, .18, .55, 2.0, .06, Rf);
+    for (const sy of [1, -1]) { box(3.2, sy * .98, .26, .5, .05, .22, Rf); box(-.35, sy * .62, .45, 1.8, .5, .34, P); box(-2.05, sy * .76, .78, .5, .05, .62, P); }
+    box(-.7, 0, .82, 1.4, .5, .42, P); box(.35, 0, .72, .7, .45, .12, K); box(.35, 0, .95, .08, .08, .35, K); box(.6, 0, 1.08, .6, .08, .06, K);
+    box(.25, 0, .9, .28, .28, .28, Rf); box(-2.05, 0, 1.08, .45, 1.5, .08, Rf); box(-2.05, 0, .98, .42, 1.45, .05, Rf); box(-2.2, 0, .45, .06, .2, .12, RED); numSides(-.7, .26, .85, .36);
+  } else if (kind === "jet") {      // F-22 style stealth fighter, the same shape as the flyover jets (blender/jets_fx.py): faceted body with a sharp chine,
+    // diamond wings with clipped tips, diamond tailplanes, twin canted fins, gold canopy, two flat nozzles. Gray paint, red nose. It flies low over the track.
+    const air = new THREE.Group(); air.position.y = 4.8; air.rotation.z = .05; g.add(air);
+    const GRAY = new THREE.MeshStandardMaterial({ color: 0x8f8a83, roughness: .42, metalness: .25, flatShading: true, side: THREE.DoubleSide }), DARK = new THREE.MeshStandardMaterial({ color: 0x6f6b65, roughness: .45, metalness: .25, flatShading: true, side: THREE.DoubleSide }),
+      NOSE = new THREE.MeshStandardMaterial({ color: 0xd10a08, roughness: .3, flatShading: true, side: THREE.DoubleSide }), NOZ = new THREE.MeshStandardMaterial({ color: 0x242220, roughness: .45, metalness: .9 }),
+      GOLD = new THREE.MeshStandardMaterial({ color: 0xffa23a, roughness: .14, metalness: 1, emissive: 0x7a3200, emissiveIntensity: .5 });
+    const mesh = (arr, m) => { const geo = new THREE.BufferGeometry(); geo.setAttribute("position", new THREE.Float32BufferAttribute(arr, 3)); geo.computeVertexNormals(); air.add(new THREE.Mesh(geo, m)); };
+    const put = (arr, p) => { const v = V(p[0], p[1], p[2]); arr.push(v.x, v.y, v.z); }, quad = (arr, a, b, c, d) => { put(arr, a); put(arr, b); put(arr, c); put(arr, a); put(arr, c); put(arr, d); };
+    // body: hexagon sections from tail to nose (x, half width, top height, bottom depth, z centre)
+    const secs = [[-8.0, 1.35, .55, .45, .05], [-6.5, 1.55, .62, .5, .05], [-3.5, 1.75, .7, .55, .05], [-.5, 1.85, .72, .58, .05], [2.0, 1.7, .78, .55, .08], [4.0, 1.25, .78, .5, .1], [5.6, .8, .6, .42, .06], [7.0, .5, .42, .32, .02], [8.3, .26, .24, .2, -.02], [9.4, .04, .04, .04, -.05]];
+    const ring = ([x, w, ht, hb, zc]) => [[w, 0], [.55 * w, ht], [-.55 * w, ht], [-w, 0], [-.62 * w, -hb], [.62 * w, -hb]].map(([y, zz]) => [x, y, zc + zz]);
+    const bodyA = [], noseA = [];
+    for (let i = 0; i < secs.length - 1; i++) { const ra = ring(secs[i]), rb = ring(secs[i + 1]), arr = (secs[i][0] + secs[i + 1][0]) / 2 > 7 ? noseA : bodyA; for (let k = 0; k < 6; k++) quad(arr, ra[k], ra[(k + 1) % 6], rb[(k + 1) % 6], rb[k]); }
+    { const r0 = ring(secs[0]); for (let k = 1; k < 5; k++) { put(bodyA, r0[0]); put(bodyA, r0[k]); put(bodyA, r0[k + 1]); } }
+    // flat plates: wings, tailplanes and the two canted fins
+    const plate = (arr, pts, t, upright, off, cant) => { const P = (u, v, s) => { let p = upright ? [u, s, v] : [u, v, s]; if (upright) { const c = Math.cos(cant), sn = Math.sin(cant); p = [p[0], p[1] * c - p[2] * sn, p[1] * sn + p[2] * c]; } return [p[0] + off[0], p[1] + off[1], p[2] + off[2]]; };
+      const top = pts.map(([u, v]) => P(u, v, t / 2)), bot = pts.map(([u, v]) => P(u, v, -t / 2)), n = pts.length; quad(arr, top[0], top[1], top[2], top[3]); quad(arr, bot[3], bot[2], bot[1], bot[0]); for (let i = 0; i < n; i++) quad(arr, top[i], bot[i], bot[(i + 1) % n], top[(i + 1) % n]); };
+    const wingA = [];
+    for (const s of [1, -1]) {
+      plate(wingA, [[2.6, s * 1.6], [-4.6, s * 7.4], [-6.0, s * 7.4], [-7.0, s * 1.6]], .2, false, [0, 0, 0], 0);
+      plate(wingA, [[-6.6, s * 1.3], [-9.0, s * 4.4], [-10.0, s * 4.4], [-10.3, s * 1.3]], .14, false, [0, 0, .05], 0);
+      plate(wingA, [[-3.9, .55], [-6.9, 4.1], [-8.2, 4.1], [-8.6, .55]], .16, true, [0, s * 1.15, .3], s * .48);
+      box(1.4, s * 1.55, -.32, 3.2, .7, .7, DARK, air); box(-8.35, s * .55, .05, .8, .9, .55, NOZ, air);
+      const bn = new THREE.Mesh(new THREE.ConeGeometry(.36, 1.8, 10), lit(0xff7a1a)); bn.rotation.z = Math.PI / 2; bn.position.copy(V(-9.6, s * .55, .05)); air.add(bn);      // afterburner
+      const hot = new THREE.Mesh(new THREE.ConeGeometry(.2, 1.0, 8), lit(0xfff0c0)); hot.rotation.z = Math.PI / 2; hot.position.copy(V(-9.2, s * .55, .05)); air.add(hot);
+    }
+    mesh(bodyA, GRAY); mesh(noseA, NOSE); mesh(wingA, DARK);
+    const can = new THREE.Mesh(new THREE.SphereGeometry(1, 12, 6), GOLD); can.scale.set(2.1, .42, .55); can.position.copy(V(4.7, 0, .88)); air.add(can);      // gold canopy
+    if (c.num) { const nm = new THREE.MeshBasicMaterial({ map: numTex(c.num, "#fff"), transparent: true }); for (const sd of [1, -1]) { const d = new THREE.Mesh(new THREE.PlaneGeometry(2.0, 2.0), nm); d.position.copy(V(1.4, sd * 1.92, -.3)); d.rotation.y = sd > 0 ? Math.PI : 0; air.add(d); } }
+    const sh = new THREE.Mesh(new THREE.PlaneGeometry(22, 17), new THREE.MeshBasicMaterial({ map: glowTex(), color: 0x000000, transparent: true, opacity: .5, depthWrite: false })); sh.rotation.x = -Math.PI / 2; sh.position.y = .12; g.add(sh);      // its shadow on the ground
+  } else if (kind === "balloon") {
+    const geo = new THREE.SphereGeometry(1, 12, 8).toNonIndexed(), pos = geo.attributes.position, col = new Float32Array(pos.count * 3);
+    for (let i = 0; i < pos.count; i += 3) { const a = Math.atan2((pos.getZ(i) + pos.getZ(i + 1) + pos.getZ(i + 2)) / 3, (pos.getX(i) + pos.getX(i + 1) + pos.getX(i + 2)) / 3), cc = Math.floor((a + Math.PI) / (2 * Math.PI) * 12 + .0001) % 2 ? c2 : c1;
+      for (let k = 0; k < 3; k++) { col[(i + k) * 3] = cc.r; col[(i + k) * 3 + 1] = cc.g; col[(i + k) * 3 + 2] = cc.b; } }
+    for (let i = 0; i < pos.count; i++) { const y = pos.getY(i); if (y < 0) { const s = 1 + y * .55; pos.setX(i, pos.getX(i) * s); pos.setZ(i, pos.getZ(i) * s); } }     // pinch the bottom into a teardrop
+    geo.setAttribute("color", new THREE.BufferAttribute(col, 3)); geo.computeVertexNormals();
+    const env = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: .5 })); env.scale.set(1.35, 1.55, 1.35); env.position.copy(V(0, 0, 2.55)); g.add(env);
+    box(0, 0, .3, .75, .75, .6, std(0x73451a, .8)); box(0, 0, .62, .8, .8, .06, std(0x47290f, .7)); for (const sx of [1, -1]) for (const sy of [1, -1]) box(sx * .36, sy * .36, 1.0, .03, .03, .8, K);
+    box(0, 0, 1.25, .4, .4, .18, RIM); box(0, 0, 1.5, .18, .18, .4, lit(0xff8c1a)); numSides(0, .39, .3, .34);
+  } else {      // dragon
+    const B = std(c2, .45), H = std(0xebe0bf, .4), EYE = lit(0xffbf0d);
+    box(0, 0, 1.55, 2.4, 1.3, 1.1, P); box(0, 0, 1.08, 2.0, 1.0, .2, B);
+    for (const [x, z, w] of [[1.55, 2.0, .8], [2.15, 2.45, .65], [2.6, 2.8, .55]]) box(x, 0, z, .75, w, w, P);
+    box(3.15, 0, 3.0, 1.0, .8, .7, P); box(3.75, 0, 2.88, .6, .6, .38, P); box(3.7, 0, 2.66, .65, .55, .12, B);
+    for (const sy of [1, -1]) { box(3.3, sy * .41, 3.15, .16, .04, .12, EYE); const h = box(2.85, sy * .28, 3.55, .14, .14, .6, H); h.rotation.x = sy * -.3; h.rotation.z = .7; box(4.05, sy * .16, 2.98, .08, .08, .06, K); }
+    for (let i = 0; i < 6; i++) { const x = -1.45 - i * .62, z = 1.45 + .03 * i * i, w = .85 - i * .12; box(x, 0, z, .68, w, w, P); box(x, 0, z + w / 2 + .1, .2, .1, .25, B); }
+    const tb = box(-5.3, 0, 2.05, .5, .7, .1, B); tb.rotation.z = -.5; for (const x of [.8, .2, -.4]) box(x, 0, 2.2, .25, .12, .35, B);
+    for (const [x, sy] of [[.75, 1], [.75, -1], [-.8, 1], [-.8, -1]]) { box(x, sy * .55, .65, .38, .38, 1.1, P); box(x + .15, sy * .55, .08, .6, .45, .16, H); }
+    for (const sy of [1, -1]) { const piv = new THREE.Group(); piv.position.copy(V(.2, sy * .6, 2.05)); piv.rotation.x = sy * .55; piv.scale.set(1.25, 1.25, 1.35); piv.userData.wing = sy; g.add(piv);
+      for (const [x, y, z, sx, sy_, sz, m] of [[0, 1.0, .25, .25, 2.0, .2, P], [-.2, 2.6, .55, .22, 1.4, .18, P], [-.55, 1.2, .1, 1.4, 2.2, .06, B], [-.9, 2.75, .35, 1.6, 1.3, .06, B], [-1.2, 3.4, .45, .9, .4, .06, B]]) box(x, sy * y, z, sx, sy_, sz, m, piv); }
+    numSides(-.2, .66, 1.6, .5);
+  }
+  if (c.glow) { const gs = 1 / (BODY_SCALE[kind] || 1), u = new THREE.Mesh(new THREE.PlaneGeometry(11 * gs, 8 * gs), new THREE.MeshBasicMaterial({ map: glowTex(), color: 0x29f0ff, transparent: true, opacity: .95, blending: THREE.AdditiveBlending, depthWrite: false })); u.rotation.x = -Math.PI / 2; u.position.copy(V(0, 0, .05)); g.add(u); }
+  g.scale.setScalar(BODY_SCALE[kind] || 1); return g;
+}
 
 // ---------- one question at a time
 let askFn = null;
@@ -1341,8 +1474,8 @@ function buildGhosts(rows) {
   for (const g of G) scene.remove(g.mesh); G.length = 0;
   rows.forEach((r, i) => {      // fastest on the front row, you start at the back, like the race against the bots
     const c = ((DATA.cus.cars || []).find(x => x.ig.toLowerCase() === r.n)) || {}, col = DATA.fol.f[r.n], gs = gridSlot(i);
-    const mesh = raceCar({ body: c.bodyHex || (col ? "#" + col : PAL[i % PAL.length]), roof: c.roofHex || null, num: c.num || "" });
-    mesh.add(tagSprite(r.n)); mesh.visible = false; scene.add(mesh);
+    const mesh = raceCar({ body: c.bodyHex || (col ? "#" + col : PAL[i % PAL.length]), roof: c.roofHex || null, num: c.num || "", shape: c.kind, pro: c.tier === "car_pro" });
+    { const tg = tagSprite(r.n); if (BODY_SCALE[c.kind]) { tg.position.y = { monster: 4.6, bus: 3.9, f1: 2.6, jet: 13, balloon: 5.6, dragon: 5.4 }[c.kind]; tg.scale.multiplyScalar(1.25 / BODY_SCALE[c.kind]); } mesh.add(tg); } mesh.visible = false; scene.add(mesh);
     G.push({ n: r.n, T: Math.round(r.t * (.992 + Math.random() * .026)), mesh, off: (i % 2 ? 1 : -1) * (1.5 + i * .7), s0: gs.s, d0: gs.d, s: gs.s, done: false });
   });
 }
