@@ -34,7 +34,7 @@
     }
   ],
   "prices": {
-    "car": "Custom car $1",
+    "car": "Custom cars from $1",
     "wall": "Wall ad $10",
     "board": "Billboard $15",
     "infield": "Infield ad $30",

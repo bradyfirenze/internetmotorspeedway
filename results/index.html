@@ -31,6 +31,14 @@ label { display: block; font-size: 13px; font-weight: 600; color: var(--muted); 
 .search span { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); font-weight: 700; font-size: 18px; }
 input { width: 100%; font: 600 18px var(--body); color: var(--fg); background: var(--card); border: 2px solid var(--line); border-radius: 12px; padding: 14px 14px 14px 34px; outline: none; }
 input:focus { border-color: var(--yel); }
+.share { margin-top: 14px; }
+.share .sbtn { width: 100%; font: 400 20px var(--display); text-transform: uppercase; letter-spacing: .03em; color: #111; background: var(--yel); border: 0; border-radius: 12px; padding: 13px; cursor: pointer; }
+.share .sf { margin-top: 10px; text-align: left; }
+.share .row { display: flex; gap: 8px; }
+.share input { flex: 1; min-width: 0; padding: 12px; font-size: 18px; }
+.share .row button { font: 700 14px var(--body); background: var(--red, #ef3b2d); color: #fff; border: 0; border-radius: 10px; padding: 0 14px; cursor: pointer; }
+.share .sm { font-size: 13px; color: var(--muted); margin: 8px 0 0; }
+.share .sm a { color: var(--yel); }
 .hit { margin-top: 14px; background: var(--card); border: 2px solid var(--yel); border-radius: 14px; padding: 18px; text-align: center; }
 .hit .pl { font-family: var(--display); font-size: 64px; line-height: 1; color: var(--yel); }
 .hit .nm { font-weight: 700; font-size: 18px; margin-top: 6px; overflow-wrap: anywhere; }
@@ -65,6 +73,11 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--fg); outlin
 .pres .v a { color: var(--fg); text-decoration: none; border-bottom: 2px solid var(--yel); }
 .pres .v span { color: var(--muted); }
 .crew { margin: -6px 0 18px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); }
+.crew summary { cursor: pointer; list-style: none; display: flex; gap: 6px; align-items: center; }
+.crew summary::-webkit-details-marker { display: none; }
+.crew summary::after { content: "\25B8"; margin-left: auto; font-size: 14px; color: var(--muted); transition: transform .2s; }
+.crew[open] summary::after { transform: rotate(90deg); }
+.crew:not([open]) { padding-top: 10px; padding-bottom: 10px; }
 .crew .k { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 .crew h3 { font: 400 17px var(--display); text-transform: uppercase; margin: 10px 0 6px; letter-spacing: .02em; }
 .crew .ppl { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -100,7 +113,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--fg); outlin
   <h1>Race <span>Results</span></h1>
   <p class="meta" id="meta">Loading…</p>
   <div class="pres" id="pres" hidden><div class="k">Presented by</div><div class="v" id="presv"></div></div>
-  <section class="crew" id="crew" hidden aria-label="Staff and crew"><div class="k">Staff &amp; Crew</div><div id="crewv"></div></section>
+  <details class="crew" id="crew" hidden><summary class="k">Staff &amp; Crew <span id="crewn"></span></summary><div id="crewv"></div></details>
   <div class="days" id="days" role="group" aria-label="Race day"></div>
   <label for="q">Find your car</label>
   <div class="search"><span aria-hidden="true">@</span><input id="q" type="search" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="your instagram"></div>
@@ -149,6 +162,7 @@ function find() {
     d.querySelector(".nm").textContent = "@" + exact.name;
     d.querySelector(".of").textContent = exact.place === "DNF" ? "Caught in the crash. Better luck tomorrow." : "out of " + data.cars.toLocaleString() + " cars at " + data.track;
     out.appendChild(d);
+    if (window.IMS_SHARE && typeof exact.place === "number") window.IMS_SHARE(d, exact.name, exact.place, data.day, data.track);   // top 10 story card
   } else {
     const near = data.results.filter(r => r.name.includes(q)).slice(0, 8);
     if (near.length) {
@@ -175,6 +189,7 @@ async function drawCrew(day) {
     box.appendChild(d);
   });
   $("crew").hidden = !roles.length;
+  const cn = roles.reduce((t, r) => t + r.names.length, 0); $("crewn").textContent = cn ? "(" + cn + ")" : ""; $("crew").open = false;
 }
 function ordinal(n) { const s = ["th","st","nd","rd"], v = n % 100; return n.toLocaleString() + (s[(v - 20) % 10] || s[v] || s[0]); }
 async function load(day) {
@@ -234,5 +249,6 @@ $("t-mus").addEventListener("click", () => { location.href = "../map/#museum"; }
 if (location.hash === "#museum") location.replace("../map/#museum");
 </script>
 <script src="../a2hs.js"></script>
+<script src="sharecard.js"></script>
 </body>
 </html>
