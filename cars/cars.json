@@ -2,6 +2,7 @@
   "frames": 36,
   "cover": 4,
   "cars": [
+    {"ig": "No_Sir", "num": "00", "body": "Dark grey and pink checker", "roof": "Pink", "bodyHex": "#2a2a2e", "roofHex": "#ff40a0", "since": "2026-11-15", "noig": true},
     {"ig": "yeahthatracingfan", "num": "47", "body": "Red", "roof": "Yellow", "bodyHex": "#e83030", "roofHex": "#ffe100", "since": "2026-11-15"},
     {"ig": "crazyk_50501", "num": "", "body": "Blue jeans metallic", "roof": "Silver", "bodyHex": "#3f6fad", "roofHex": "#c4c6ca", "since": "2026-11-15"},
     {"ig": "tyler_cherry98", "num": "", "body": "Black", "roof": "Black", "bodyHex": "#202022", "roofHex": "#202022", "since": "2026-11-15"},
