@@ -503,8 +503,8 @@ const ENDPOINT = "https://script.google.com/macros/s/AKfycbwsMLdBQJagXvjV6hghdy0
 const KOFI = "https://ko-fi.com/internetmotorspeedway";
 const IG = "https://instagram.com/internetmotorspeedway";
 // Track, same numbers as blender/world.py (Blender x, y in meters). Cars drive counterclockwise.
-const HX = 500, HY = 100, R = 250, W = 100, ARC = Math.PI * R / 2, LEN = 4 * HX + 4 * HY + 4 * ARC, S0 = HX;   // finish line at x = 0
-const LIM = W / 2 - 2.2;        // how far from the centerline a car can get before the wall
+const HX = 500, HY = 100, R = 250, W = 100, ARC = Math.PI * R / 2, LEN_OVAL = 4 * HX + 4 * HY + 4 * ARC; let LEN = LEN_OVAL, S0 = HX, TRK = "oval";   // finish line at x = 0
+let LIM = W / 2 - 2.2;        // how far from the centerline a car can get before the wall
 const STEP = 1 / 120;           // fixed physics step, so every phone gets the same lap for the same driving
 const RACE_LAPS = 3, NB = 19;    // race length and number of bot cars
 const UPG = [
@@ -564,12 +564,12 @@ async function signIn(raw, quiet) {
   return true;
 }
 const upTotal = () => me.up.e + me.up.t + me.up.a;
-const best = () => +store.get("best:" + me.name) || 0;
+const best = () => +store.get("best:" + TK() + me.name) || 0;
 function fillGarage() {
   $("gName").textContent = "@" + me.name; $("gKind").textContent = me.kind;
   $("gBest").textContent = fmt(best());
   paintMoney();
-  const rk = +store.get("rank:" + me.name) || 0;
+  const rk = +store.get("rank:" + TK() + me.name) || 0;
   $("gRank").textContent = rk ? "P" + rk : "--";
 }
 $("gateForm").addEventListener("submit", e => { e.preventDefault(); $("uname").blur(); signIn($("uname").value); });
@@ -654,7 +654,8 @@ function buildMyCar() { if (myCar) scene.remove(myCar); myCar = raceCar(me); sce
 
 // ---------- the track as math
 // proj: where am I along the lap (s), how far from the centerline (d, + is toward the outside wall), which way the track points (th)
-function proj(x, y) {
+function proj(x, y) { return TRK === "desert" ? desProj(x, y) : projOval(x, y); }
+function projOval(x, y) {
   if (Math.abs(x) <= HX) return y < 0 ? { s: x + HX, d: -y - (HY + R), th: 0 } : { s: 2 * HX + 2 * ARC + 2 * HY + (HX - x), d: y - (HY + R), th: Math.PI };
   if (Math.abs(y) <= HY) return x > 0 ? { s: 2 * HX + ARC + (y + HY), d: x - (HX + R), th: Math.PI / 2 } : { s: 4 * HX + 3 * ARC + 2 * HY + (HY - y), d: -x - (HX + R), th: -Math.PI / 2 };
   const cx = x > 0 ? HX : -HX, cy = y > 0 ? HY : -HY; let a = Math.atan2(y - cy, x - cx); const d = Math.hypot(x - cx, y - cy) - R;
@@ -665,7 +666,8 @@ function proj(x, y) {
   return { s: 4 * HX + 3 * ARC + 4 * HY + R * (a + Math.PI), d, th: a + Math.PI / 2 };
 }
 // the other way: a spot on the lap and an offset give x, y, heading and whether it is in a corner
-function spot(s, d) {
+function spot(s, d) { return TRK === "desert" ? desSpot(s, d) : spotOval(s, d); }
+function spotOval(s, d) {
   s = mod(s, LEN); let a;
   if (s < 2 * HX) return { x: s - HX, y: -(HY + R) - d, th: 0, arc: false }; s -= 2 * HX;
   if (s < ARC) { a = -Math.PI / 2 + s / R; return { x: HX + (R + d) * Math.cos(a), y: -HY + (R + d) * Math.sin(a), th: a + Math.PI / 2, arc: true }; } s -= ARC;
@@ -686,19 +688,19 @@ let lapT = -1, lapDist = 0, lastS = 0, prog = 0, runBest = 0, lastLap = 0, laps 
 function gridSlot(i) { const row = Math.floor(i / 3), col = i % 3; return { s: -10 - row * 11 - col * 3, d: (col - 1) * 9 }; }
 function resetCar() {
   if (kind !== "practice") { const g = gridSlot(kind === "race" ? NB : G.length), q = spot(S0 + g.s, g.d); car.x = q.x; car.y = q.y; prog = g.s; }
-  else { car.x = -330; car.y = -(HY + R); prog = -330; }
-  car.h = 0; car.v = 0; car.wall = 0; car.g = 1; car.skid = 0; car.slip = 0; camH = 0; const p = proj(car.x, car.y); lastS = p.s; car.d = p.d; lapT = -1; lapDist = 0; rec = []; steer = 0; steerIn = 0; placeCar();
+  else { const q0 = spot(S0 - 330, 0); car.x = q0.x; car.y = q0.y; prog = -330; }
+  car.h = spot(S0 + prog, 0).th; car.v = 0; car.wall = 0; car.g = 1; car.skid = 0; car.slip = 0; camH = 0; const p = proj(car.x, car.y); lastS = p.s; car.d = p.d; car.z = p.z || 0; car.pit = 0; car.gs = 0; lapT = -1; lapDist = 0; rec = []; steer = 0; steerIn = 0; placeCar();
 }
-function placeCar() { if (!myCar) return; if (mode === "menu") { myCar.position.copy(V(GAR.x, GAR.y, .14 + pitH)); myCar.rotation.y = menuA; return; } myCar.position.copy(V(car.x, car.y, .1)); myCar.rotation.y = car.h + car.slip; }
+function placeCar() { if (!myCar) return; if (mode === "menu") { myCar.position.copy(V(GAR.x, GAR.y, .14 + pitH)); myCar.rotation.y = menuA; return; } myCar.position.copy(V(car.x, car.y, .1 + (car.z || 0))); myCar.rotation.y = car.h + car.slip; myCar.rotation.z = car.pit || 0; }
 function stats() { return { vmax: UPG[0].vals[me.up.e], grip: UPG[1].vals[me.up.t], accel: UPG[2].vals[me.up.a] }; }
 let ST = null;
 
 function step(dt) {
   let s = steer, aBrk = 0; const v = car.v;
   if (HELP) {      // corner help: lift and slow before the corner if you are coming in too hot, and carry the car around it
-    const dc = toCorner(lastS), hold = Math.sqrt(ST.grip * (R + car.d)) * FEEL.hv;
+    const ci = TRK === "desert" ? desCorner(lastS, car.d) : null, dc = ci ? ci.dc : toCorner(lastS), kk = ci ? ci.k : 1 / (R + car.d), hold = Math.sqrt(ST.grip * (ci ? ci.r : R + car.d)) * FEEL.hv;
     if (!brkOn && ((dc > 0 && v * v > hold * hold + 2 * FEEL.hb * dc) || (dc === 0 && v > hold))) aBrk = 1;
-    if (dc === 0) s = clamp(s - FEEL.hs * (v / (R + car.d)) / (ST.grip * (brkOn ? 1.6 : gasOn && !aBrk ? 1 : 1.25) / Math.max(v, 30)), -1, 1);
+    if (dc === 0 || ci) s = clamp(s - FEEL.hs * (v * kk) / (ST.grip * (brkOn ? 1.6 : gasOn && !aBrk ? 1 : 1.25) / Math.max(v, 30)) + (ci ? .5 * wrap(car.h - ci.th) - .006 * car.d : 0), -1, 1);
   }
   autoB = aBrk; const gasE = gasOn && !aBrk;
   // The car always grips. Too fast for a corner means it can't turn tight enough and runs wide, so you lift or brake.
@@ -711,7 +713,7 @@ function step(dt) {
   if (v < 3) yaw *= v / 3;
   car.h += yaw * dt;
   const push = brkOn ? -46 : aBrk ? -FEEL.hb : gasOn ? ST.accel * (1 - Math.pow(v / ST.vmax, 2)) : -(3 + .0006 * v * v);     // brake, gas or coasting
-  car.v = Math.max(0, v + (push - drag) * dt);
+  car.v = Math.max(0, v + (push - drag - (car.gs || 0)) * dt);
   car.x += Math.cos(car.h) * car.v * dt; car.y += Math.sin(car.h) * car.v * dt;
   let p = proj(car.x, car.y);
   car.wall = Math.max(0, car.wall - dt);
@@ -732,7 +734,7 @@ function step(dt) {
       p = proj(car.x, car.y);
     }
   }
-  car.d = p.d;
+  car.d = p.d; car.z = p.z || 0; { const up = (p.sl || 0) * Math.cos(car.h - p.th); car.pit = Math.atan(up); car.gs = 20 * up; }
   // lap timing: count distance forward along the track, a lap only counts with a full trip around
   let ds = p.s - lastS; if (ds > LEN / 2) ds -= LEN; if (ds < -LEN / 2) ds += LEN;
   const before = mod(lastS - S0, LEN), after = mod(p.s - S0, LEN);
@@ -748,7 +750,7 @@ function lapDone(t) {
   const ms = Math.round(t * 1000); laps++; raceLaps.push({ t: ms, g: rec.slice() }); lastLap = ms; $("hLast").textContent = fmt(ms);
   const prev = best(), isBest = !prev || ms < prev;
   if (!runBest || ms < runBest) runBest = ms;
-  if (isBest) { store.set("best:" + me.name, ms); store.set("ghost:" + me.name, JSON.stringify(rec)); if (kind === "practice") ghost = rec.slice(); $("hBest").textContent = fmt(ms); }
+  if (isBest) { store.set("best:" + TK() + me.name, ms); store.set("ghost:" + TK() + me.name, JSON.stringify(rec)); if (kind === "practice") ghost = rec.slice(); $("hBest").textContent = fmt(ms); }
   if (kind === "ghosts") { runTotal += ms; if (laps >= RACE_LAPS) { finished = true; place = 1 + G.filter(g => rivalEnd(g) < raceT).length; return; } }
   if (kind === "race" && laps >= RACE_LAPS) { finished = true; place = 1 + bots.filter(b => b.fin !== null).length; return; }
   flash(fmt(ms), isBest ? (prev ? "New best lap" : "First lap on the board") : "+" + ((ms - prev) / 1000).toFixed(2) + " off your best", isBest);
@@ -771,8 +773,8 @@ function makeBots() {
   }
 }
 function resetBots() { for (const b of bots) { const g = gridSlot(b.i); b.s = g.s; b.d = g.d; b.dOff = 0; b.v = 0; b.fin = null; b.wait = .1 + (b.i % 5) * .04; b.mesh.visible = true; placeBot(b, 0); } }
-function placeBot(b, drift) { const q = spot(S0 + b.s, b.d); b.mesh.position.copy(V(q.x, q.y, .1)); b.mesh.rotation.y = q.th - drift; }
-function botLimit(b, s) { const q = spot(S0 + s, b.d); return q.arc ? Math.sqrt(b.grip * (R + b.d)) : b.vmax; }
+function placeBot(b, drift) { const q = spot(S0 + b.s, b.d); b.mesh.position.copy(V(q.x, q.y, .1 + (q.z || 0))); b.mesh.rotation.y = q.th - drift; b.mesh.rotation.z = Math.atan(q.sl || 0); }
+function botLimit(b, s) { const q = spot(S0 + s, b.d); return q.arc ? Math.min(b.vmax, Math.sqrt(b.grip * (q.r || R + b.d))) : b.vmax; }
 function botStep(dt) {
   for (const b of bots) {
     if (b.wait > 0) { b.wait -= dt; continue; }
@@ -782,13 +784,13 @@ function botStep(dt) {
     { const ds = lapDiff(prog - b.s); if (ds > 0 && ds < 26 && Math.abs(car.d - b.d) < 3.4 && ds < near) { near = ds; block = car; } }
     if (block && b.s < 220 && near >= 9) block = null;       // off the grid: hold your line, no darting around
     if (block && near >= 9 && b.v < block.v + .5) block = null;   // not catching it, so leave it alone
-    if (block) { let side = b.d <= block.d ? -1 : 1; if (Math.abs(b.d + side * 5) > 43) side = -side; b.dOff += side * 8 * dt; } else b.dOff -= Math.sign(b.dOff) * Math.min(Math.abs(b.dOff), 1.2 * dt);
+    if (block) { let side = b.d <= block.d ? -1 : 1; if (Math.abs(b.d + side * 5) > LIM - 4.8) side = -side; b.dOff += side * 8 * dt; } else b.dOff -= Math.sign(b.dOff) * Math.min(Math.abs(b.dOff), 1.2 * dt);
     const rate = b.s < 40 ? 0 : Math.min(6, b.v * .028) * dt;     // sideways moves start after the launch and stay gentle
-    const want = clamp(b.base + b.dOff, -44, 44), move = clamp(want - b.d, -rate, rate); b.d += move;
-    const lim = Math.min(botLimit(b, b.s), botLimit(b, b.s + b.v * 1.3));
+    const want = clamp(b.base * (LIM / 47.8) + b.dOff, -LIM + 3.8, LIM - 3.8), move = clamp(want - b.d, -rate, rate); b.d += move;
+    const lim = Math.min(botLimit(b, b.s), botLimit(b, b.s + b.v * 1.3), TRK === "desert" ? Math.min(botLimit(b, b.s + b.v * .6), botLimit(b, b.s + b.v * 2.1)) : 1e9);
     b.v = b.v > lim ? Math.max(lim, b.v - 30 * dt) : Math.min(lim, b.v + b.acc * (1 - Math.pow(b.v / b.vmax, 2)) * dt);
     if (block && near < 9) b.v = Math.min(b.v, Math.max(block.v, 8));
-    const q = spot(S0 + b.s, b.d), adv = b.v * dt * (q.arc ? R / (R + b.d) : 1);
+    const q = spot(S0 + b.s, b.d), adv = b.v * dt * (q.arc ? (q.r ? (q.r - b.d * Math.sign(q.k)) / q.r : R / (R + b.d)) : 1);
     if (b.fin === null && b.s + adv >= RACE_LAPS * LEN) b.fin = raceT;
     b.s += adv; placeBot(b, move / dt / Math.max(b.v, 10));
   }
@@ -797,7 +799,7 @@ function botStep(dt) {
 function startRun(k) {
   kind = k; ST = stats(); runBest = 0; lastLap = 0; laps = 0; runTotal = 0; raceLaps = []; raceT = 0; acc = 0; finished = false; place = 0; gasOn = brkOn = 0; touchId = null;
   if (kind === "race") { makeBots(); resetBots(); ghost = null; }
-  else { for (const b of bots) b.mesh.visible = false; try { ghost = kind === "ghosts" ? null : JSON.parse(store.get("ghost:" + me.name) || "null"); } catch (e) { ghost = null; } }
+  else { for (const b of bots) b.mesh.visible = false; try { ghost = kind === "ghosts" ? null : JSON.parse(store.get("ghost:" + TK() + me.name) || "null"); } catch (e) { ghost = null; } }
   if (kind !== "ghosts") for (const g of G) g.mesh.visible = false;
   resetCar();
   $("hBest").textContent = fmt(best()); $("hLast").textContent = "--"; $("lapnow").textContent = "0.00"; $("posBig").hidden = kind === "practice"; if (kind === "race") $("posBig").lastChild.textContent = "/" + (NB + 1);
@@ -811,7 +813,7 @@ function startRun(k) {
 function endRun() {
   mode = "menu"; $("hud").hidden = true; $("lights").hidden = true; audioOff(); ghostCar.visible = false; for (const g of G) g.mesh.visible = false; gasOn = brkOn = 0; hitT = 0; $("hit").style.opacity = 0; $("gas").classList.remove("on"); $("brk").classList.remove("on");
   try { if (document.fullscreenElement) document.exitFullscreen(); } catch (e) {}
-  const b = best(), saved = +store.get("saved:" + me.name) || 0, race = kind === "race";
+  const b = best(), saved = +store.get("saved:" + TK() + me.name) || 0, race = kind === "race";
   $("rRun").textContent = fmt(runBest); $("rBest").textContent = fmt(b);
   $("rPosBox").hidden = !race; $("rPos").textContent = finished ? "P" + place : "--";
   $("rKind").textContent = race ? (finished ? "Race finished" : "Race stopped") : "Practice";
@@ -830,10 +832,14 @@ $("pit").onclick = endRun;
 $("bHome").onclick = () => { fillGarage(); show("sGarage"); };
 
 // ---------- controls: left thumb slides to steer, right thumb holds gas or brake
-canvas.addEventListener("pointerdown", e => { if (mode === "menu" || touchId !== null) return; touchId = e.pointerId; touchX0 = lx(e); steerIn = 0; try { canvas.setPointerCapture(e.pointerId); } catch (x) {} });
+canvas.addEventListener("pointerdown", e => { if (mode === "menu") return; if (touchId !== null) { try { canvas.releasePointerCapture(touchId); } catch (x) {} } touchId = e.pointerId; touchX0 = lx(e); steerIn = 0; try { canvas.setPointerCapture(e.pointerId); } catch (x) {} });
 canvas.addEventListener("pointermove", e => { if (e.pointerId === touchId) steerIn = clamp((lx(e) - touchX0) / Math.max(80, LW * .16), -1, 1); });
 const up = e => { if (e.pointerId === touchId) { touchId = null; steerIn = 0; } };
-canvas.addEventListener("pointerup", up); canvas.addEventListener("pointercancel", up);
+canvas.addEventListener("pointerup", up); canvas.addEventListener("pointercancel", up); canvas.addEventListener("lostpointercapture", up);
+window.addEventListener("pointerup", up); window.addEventListener("pointercancel", up);
+const steerFree = () => { touchId = null; steerIn = 0; };
+for (const ev of ["touchend", "touchcancel"]) window.addEventListener(ev, e => { if (!e.touches.length && touchId !== null) steerFree(); }, { passive: true });      // no fingers left on the glass: nobody is steering
+window.addEventListener("blur", steerFree); document.addEventListener("visibilitychange", () => { if (document.hidden) steerFree(); });
 function pedal(id, set) {
   const el = $(id), on = e => { e.preventDefault(); set(1); el.classList.add("on"); try { el.setPointerCapture(e.pointerId); } catch (x) {} }, off = () => { set(0); el.classList.remove("on"); };
   el.addEventListener("pointerdown", on); el.addEventListener("pointerup", off); el.addEventListener("pointercancel", off); el.addEventListener("lostpointercapture", off);
@@ -935,7 +941,7 @@ function frame(now) {
     // practice: your best lap drives along as a ghost
     if (ghost && lapT >= 0 && ghost.length >= 6) {
       const f = lapT / .1, i = Math.floor(f), u = f - i, n = ghost.length / 3;
-      if (i + 1 < n) { const a = i * 3, b = a + 3; ghostCar.position.copy(V(ghost[a] + (ghost[b] - ghost[a]) * u, ghost[a + 1] + (ghost[b + 1] - ghost[a + 1]) * u, .1)); ghostCar.rotation.y = ghost[a + 2] + wrap(ghost[b + 2] - ghost[a + 2]) * u; ghostCar.visible = true; } else ghostCar.visible = false;
+      if (i + 1 < n) { const a = i * 3, b = a + 3; { const gx = ghost[a] + (ghost[b] - ghost[a]) * u, gy = ghost[a + 1] + (ghost[b + 1] - ghost[a + 1]) * u; ghostCar.position.copy(V(gx, gy, .1 + (TRK === "desert" ? desSpot(desNear(gx, gy, desHint) * DES.ds, 0).z : 0))); } ghostCar.rotation.y = ghost[a + 2] + wrap(ghost[b + 2] - ghost[a + 2]) * u; ghostCar.visible = true; } else ghostCar.visible = false;
     } else ghostCar.visible = false;
     if (finished) endRun();
   }
@@ -954,8 +960,8 @@ function frame(now) {
     camH += wrap(car.h - camH) * Math.min(1, dt * 5.5);
     const sp = ST ? car.v / ST.vmax : 0, back = 11 + sp * 2.5, sh = hitT > 0 ? (Math.random() - .5) * .5 : 0;
     camera.fov = 52 + sp * 13;
-    camera.position.copy(V(car.x - Math.cos(camH) * back, car.y - Math.sin(camH) * back + sh, 4.4));
-    camera.lookAt(V(car.x + Math.cos(camH) * 14, car.y + Math.sin(camH) * 14, 1.5));
+    camera.position.copy(V(car.x - Math.cos(camH) * back, car.y - Math.sin(camH) * back + sh, 4.4 + (car.z || 0) - Math.tan(car.pit || 0) * back * .5));
+    camera.lookAt(V(car.x + Math.cos(camH) * 14, car.y + Math.sin(camH) * 14, 1.5 + (car.z || 0) + Math.tan(car.pit || 0) * 9));
   }
   camera.updateProjectionMatrix();
   renderer.render(scene, camera);
@@ -976,21 +982,21 @@ function drawBoard(rows) {
 async function openBoard() {
   only("sBoard");
   const m = $("bMsg"); m.className = "msg"; $("bList").innerHTML = "";
-  if (!ENDPOINT) { m.textContent = "The shared leaderboard isn't switched on yet. These are the times saved on this phone."; const b = me && +store.get("saved:" + me.name); drawBoard(b ? [{ n: me.name, t: b, up: upTotal() }] : []); return; }
+  if (!ENDPOINT) { m.textContent = "The shared leaderboard isn't switched on yet. These are the times saved on this phone."; const b = me && +store.get("saved:" + TK() + me.name); drawBoard(b ? [{ n: me.name, t: b, up: upTotal() }] : []); return; }
   m.textContent = "Loading...";
-  try { const d = await api(); m.textContent = d.total > d.rows.length ? "Top " + d.rows.length + " of " + d.total + " drivers" : d.total + (d.total === 1 ? " driver" : " drivers") + " so far"; drawBoard(d.rows); const i = me ? d.rows.findIndex(r => r.n === me.name) : -1; if (i >= 0) store.set("rank:" + me.name, i + 1); }
+  try { const d = await api(); m.textContent = d.total > d.rows.length ? "Top " + d.rows.length + " of " + d.total + " drivers" : d.total + (d.total === 1 ? " driver" : " drivers") + " so far"; drawBoard(d.rows); const i = me ? d.rows.findIndex(r => r.n === me.name) : -1; if (i >= 0) store.set("rank:" + TK() + me.name, i + 1); }
   catch (e) { m.className = "msg bad"; m.textContent = "Couldn't load the leaderboard. Try again in a bit."; }
 }
 $("bBoard").onclick = openBoard; $("bBoard2").onclick = openBoard;
 $("bSave").onclick = async () => {
   const b = best(), m = $("rMsg"), btn = $("bSave"); btn.disabled = true; m.className = "msg";
-  if (!ENDPOINT) { store.set("saved:" + me.name, b); btn.hidden = true; m.className = "msg good"; m.textContent = "Saved on this phone. The shared leaderboard isn't switched on yet."; return; }
+  if (!ENDPOINT) { store.set("saved:" + TK() + me.name, b); btn.hidden = true; m.className = "msg good"; m.textContent = "Saved on this phone. The shared leaderboard isn't switched on yet."; return; }
   m.textContent = "Saving...";
   try {
-    let d = await api({ n: me.name, t: b, v: 2, s: slot, g: (() => { try { return JSON.parse(store.get("ghost:" + me.name) || "null") || undefined; } catch (e) {} })() });
+    let d = await api({ n: me.name, t: b, v: 2, s: slot, g: (() => { try { return JSON.parse(store.get("ghost:" + TK() + me.name) || "null") || undefined; } catch (e) {} })() });
     if (!d.ok && d.why === "check") d = await api({ n: me.name, t: b, v: 1 });      // if the lap check ever turns down a real lap, the time is still saved (as not checked)
     if (!d.ok) throw new Error(d.why);
-    store.set("saved:" + me.name, b); store.set("rank:" + me.name, d.rank); btn.hidden = true; m.className = "msg good";
+    store.set("saved:" + TK() + me.name, b); store.set("rank:" + TK() + me.name, d.rank); btn.hidden = true; m.className = "msg good";
     m.textContent = "Saved. You're P" + d.rank + " of " + d.total + "."; fillGarage();
   } catch (e) { btn.disabled = false; m.className = "msg bad"; m.textContent = e.message === "follow" ? "You have to be on the follower list to save a time." : "Couldn't save. Check your signal and try again."; }
 };
@@ -1035,11 +1041,13 @@ const MONEY = {
   prizeOn: false, packsOn: false,                    // launch: Pit Crew only. The prize race and credit packs stay off until Brady turns them on.
   prize: { name: "Daily Prize Race", amount: 25, cashOn: false, perk: "Free upgrade", entry: 100 },    // Brady sets the prize. cashOn stays false until he turns cash prizes on.
   rules: "Official rules: 18+. Skill decides it. Fastest over 3 laps against the 10 quickest drivers wins. One prize per race, set before the start. Void where prohibited.",
-  crew: { url: "pitcrew.html", price: "$5.99 a month", track: "Night Oval" } };
+  crew: { url: "pitcrew.html", price: "$5.99 a month", track: "Desert Track" } };
 const GAIN = { e: [.35, .3, .3, .2], t: [.5, .35, .25, .2], a: [.4, .35, .25, .25] };     // seconds a lap each level is worth, measured with a test driver
 // LIVE (?live in the address, the default once this ships): credits, PIN, Pit Crew, cars and earned upgrades live on the server (game-backend/Code_DRAFT.gs).
 // Demo (the default in this draft): the same things are kept on this phone only, and nothing is real.
 const FULL = true;      // true = the real Pit Crew game: talks to the server by default (the draft only does with ?live)
+const DESERT_LIVE = false;      // the desert track shows in the DRAFT only. Flip to true (with Brady's OK) to ship it in the push build.
+if (FULL && !DESERT_LIVE) MONEY.crew.track = "Night Oval";
 const LITE = false;      // true = garage start screen and game feel only: no Pit Crew, no credits, upgrades are $1 on Ko-fi like before
 const QS = new URLSearchParams(location.search), LIVE = !LITE && (FULL || QS.has("live")) && !QS.has("shot") && !QS.has("demo"), API = QS.get("api") || ENDPOINT;
 let SV = { credits: 0, pin: false, crew: false, cars: [null, null, null], tok: 0, rc: 0, daily: 0 }, pinMem = "", svAt = 0, svDown = false, raceLaps = [];
@@ -1064,7 +1072,7 @@ function syncSV() {              // copy the server's cars and upgrades into the
     CARS[i].body = look.body; CARS[i].roof = look.roof || null; CARS[i].num = look.num || ""; for (const k of "eta") CARS[i].up[k] = c.up[k]; }
   if (CARS[slot] && me.body !== undefined) { const c = CARS[slot]; me.body = c.body; me.roof = c.roof; me.num = c.num || ""; }
   if ((!member() && slot) || !CARS[slot]) { slot = 0; applyCar(); }
-  if (me.glow !== member()) { me.glow = member(); if (!me.glow && night) setNight(false); if (myCar) rebuildCar(); }
+  if (me.glow !== member()) { me.glow = member(); if (!me.glow) { if (night) setNight(false); if (TRK === "desert") setTrack("oval"); } if (myCar) rebuildCar(); }
 }
 async function refreshSV() { if (!LIVE || !me || performance.now() - svAt < 15000) return; if (await loadSV()) { syncSV(); paintMoney(); if (cur === "sCars") openCars(); if (cur === "sPit") drawPit(); } }
 document.addEventListener("visibilitychange", () => { if (!document.hidden) { svAt = 0; refreshSV(); } });     // back from Ko-fi: check for Pit Crew right away
@@ -1087,7 +1095,7 @@ async function moneyIn(d) {      // called after sign in
     try { sv = JSON.parse(store.get("cars:" + me.name) || "[]"); } catch (e) {}
     if (sv[0] && sv[0].up) for (const k of "eta") me.up[k] = clamp(Math.max(me.up[k], sv[0].up[k] | 0), 0, 4);
   }
-  me.glow = member(); if (!me.glow && night) setNight(false);
+  me.glow = member(); if (!me.glow) { if (night) setNight(false); if (TRK === "desert") setTrack("oval"); }
   // cars: slot 1 is the car every follower has. Slots 2 and 3 are Pit Crew only. Upgrades belong to the car, not the driver.
   const extra = c => c ? { body: c.body, roof: c.roof, num: c.num || "", kind: "", up: { e: 0, t: 0, a: 0, ...c.up } } : null;
   ORIG = { body: me.body, roof: me.roof, num: me.num, won: me.kind === "Race winner", shape: me.shape || null, pro: !!me.pro };
@@ -1153,7 +1161,7 @@ function paintMoney() {
   const w = $("bWeek"); w.textContent = member() ? "Pit Crew · this week: " + MONEY.crew.track + " · race to earn upgrades" : ""; w.hidden = !member();      // the banner is for members only now: the Join Pit Crew button is the one ask in the garage
   for (const [id, on] of [["bPrize", MONEY.prizeOn && !LITE], ["bWallet", MONEY.packsOn && !LITE], ["bCars", !LITE], ["bCrew", !LITE]]) { $(id).hidden = !on; if (!on) $(id).parentNode.style.gridTemplateColumns = "1fr"; }
   if (LITE) { $("bCrew").parentNode.hidden = true; w.hidden = true; $("bTracks").hidden = true; $("bTracks").nextSibling.textContent = ""; $("pWal").hidden = true; $("pEarn").hidden = true; }
-  $("bTracks").textContent = "Track: " + (night ? MONEY.crew.track : "Speedway Oval");
+  $("bTracks").textContent = "Track: " + (TRK === "desert" ? MONEY.crew.track : night ? "Night Oval" : "Speedway Oval");
 }
 function rebuildCar(upNow) { if (myCar) scene.remove(myCar); myCar = raceCar({ ...me, up: upNow || me.up }); scene.add(myCar); placeCar(); dressGarage(); }
 
@@ -1193,8 +1201,8 @@ function dressGarage(c) {      // your colors and number on the back wall
 }
 let garOn = null, trackScene = null;
 function garageLook(on) {      // garage lighting in the menus, the real sky on the track
-  if (on === garOn) return; garOn = on; garage.visible = on; if (trackScene) trackScene.visible = !on;
-  const k = on ? [0x0b0c10, 1.7, 1.3] : SKY[night ? "night" : "day"]; scene.background.set(k[0]); scene.fog.color.set(k[0]); hemi.intensity = k[1]; sun.intensity = k[2];
+  if (on === garOn) return; garOn = on; garage.visible = on; if (trackScene) trackScene.visible = !on && TRK !== "desert"; if (desG) desG.visible = !on && TRK === "desert"; scene.fog.near = !on && TRK === "desert" ? 420 : 900; scene.fog.far = !on && TRK === "desert" ? 2500 : 3200;
+  const k = on ? [0x0b0c10, 1.7, 1.3] : SKY[TRK === "desert" ? "desert" : night ? "night" : "day"]; scene.background.set(k[0]); scene.fog.color.set(k[0]); hemi.intensity = k[1]; sun.intensity = k[2];
 }
 // the three big bars across the top: where each upgrade stands, and a tap takes you to the pit lane
 const UICON = {      // simple bold icons for the upgrade bars: an engine, a tire, a turbo
@@ -1598,16 +1606,17 @@ const lift = new THREE.Group(); { const ym = new THREE.MeshStandardMaterial({ co
 lift.visible = false; scene.add(lift);
 
 // ---------- tracks: the member track of the week
-const SKY = { day: [0x86b9ea, 1.6, 1.9], night: [0x060a16, .5, .35] };
-function setNight(on) { night = !!on; const k = SKY[night ? "night" : "day"]; garOn = null; paintMoney(); }
+const SKY = { day: [0x86b9ea, 1.6, 1.9], night: [0x060a16, .5, .35], desert: [0xdcc7a2, 1.75, 2.0] };
+function setNight(on) { night = !!on; const k = SKY[TRK === "desert" ? "desert" : night ? "night" : "day"]; garOn = null; paintMoney(); }
 function openTracks() {
-  $("tList").innerHTML = "<button data-t='day'" + (night ? "" : " class='on'") + ">Speedway Oval<small>The real track. Free for every follower.</small></button>" +
-    "<button data-t='night'" + (night ? " class='on'" : "") + ">" + MONEY.crew.track + (member() ? "" : " 🔒") + "<small>" + (member() ? "This week's Pit Crew track." : "This week's Pit Crew track. Try the new track?") + "</small></button>";
+  $("tList").innerHTML = "<button data-t='day'" + (night || TRK === "desert" ? "" : " class='on'") + ">Speedway Oval<small>The real track. Free for every follower.</small></button>" +
+    "<button data-t='night'" + (night ? " class='on'" : "") + ">Night Oval" + (member() ? "" : " 🔒") + "<small>" + (FULL && !DESERT_LIVE ? "This week's Pit Crew track." : "Pit Crew track. The oval under the lights.") + "</small></button>" +
+    (FULL && !DESERT_LIVE ? "" : "<button data-t='desert'" + (TRK === "desert" ? " class='on'" : "") + ">" + MONEY.crew.track + (member() ? "" : " 🔒") + "<small>" + (member() ? "This week's Pit Crew track. Dirt, hills and sharp turns." : "This week's Pit Crew track. Try the new track?") + "</small></button>");
   only("sTracks");
 }
 $("tList").onclick = e => { const b = e.target.closest("button"); if (!b) return;
-  if (b.dataset.t === "night" && !member()) return crewAsk("Try the new track?", "The " + MONEY.crew.track + " is a Pit Crew track. New features land every week. " + MONEY.crew.price + ".");
-  setNight(b.dataset.t === "night"); openTracks(); };
+  if (b.dataset.t !== "day" && !member()) return crewAsk("Try the new track?", "The " + MONEY.crew.track + " is a Pit Crew track. New features land every week. " + MONEY.crew.price + ".");
+  setTrack(b.dataset.t === "desert" ? "desert" : "oval"); setNight(b.dataset.t === "night"); openTracks(); };
 $("bTracks").onclick = openTracks;
 $("bWeek").onclick = () => member() ? openTracks() : crewAsk("Join the Pit Crew?", "Earn your upgrades by racing, keep 3 cars in your garage, race the " + MONEY.crew.track + ", and get new features every week. " + MONEY.crew.price + ".");
 
@@ -1745,10 +1754,126 @@ paintHelp();
 
 // ---------- DRAFT demo controls
 $("dCr").onclick = () => { setCr(cr() + 1000); paintMoney(); if (cur === "sWallet") openWallet(); if (cur === "sPit") drawPit(); };
-$("dCrew").onclick = () => { store.set("crew:" + me.name, member() ? "0" : "1"); me.glow = member(); if (!me.glow) { setNight(false); if (slot) { slot = 0; applyCar(); fillGarage(); } } rebuildCar(); paintMoney(); if (cur === "sPit") drawPit(); if (cur === "sTracks") openTracks(); if (cur === "sCars") openCars(); };
+$("dCrew").onclick = () => { store.set("crew:" + me.name, member() ? "0" : "1"); me.glow = member(); if (!me.glow) { setNight(false); setTrack("oval"); if (slot) { slot = 0; applyCar(); fillGarage(); } } rebuildCar(); paintMoney(); if (cur === "sPit") drawPit(); if (cur === "sTracks") openTracks(); if (cur === "sCars") openCars(); };
 $("dReset").onclick = () => { for (const k of ["cr:", "pin:", "up:", "crew:", "free:", "cars:", "slot:", "daily:", "tok:", "rc:", "fe:"]) store.del(k + me.name); location.reload(); };
 if (/[?&]debug/.test(location.search)) window.__money = { scene, camera, renderer, THREE, V, car, setNight, rebuildCar, get meObj() { return me; }, resize, setHelp(v) { setHelpTo(v); }, G, PROF, get s() { return { slot, cars: CARS, daily: me && dailySlot(), cur, cr: me && cr(), member: me && member(), up: me && me.up, runTotal, place, finished, gKind }; }, startGhosts, openPit, openPrize };
 
+
+// ---------- DESERT TRACK (Pit Crew weekly track 1, DRAFT Nov 16): an off-road course in brown dirt with hills, dips and sharp turns.
+// The oval is math (proj / spot above). The desert is a line of points 2 units apart: DES.X/Y = where, TH = which way, K = how sharp (+ is left), Z = how high.
+// Everything is built in code the first time the track is picked: no model file to download.
+const DES = (() => {
+  const P = [[-500, -420], [0, -420], [420, -420], [640, -300], [600, -80], [380, -20], [300, 160], [520, 300], [540, 480], [300, 560], [60, 440], [-60, 220], [-260, 160], [-360, 340], [-600, 400], [-720, 200], [-560, 20], [-640, -180], [-700, -360]].map(p => [p[0] * .74, p[1] * .74]);
+  const n = P.length, fine = [], cr = (a, b, c, d, t) => .5 * (2 * b + (-a + c) * t + (2 * a - 5 * b + 4 * c - d) * t * t + (-a + 3 * b - 3 * c + d) * t * t * t);
+  for (let i = 0; i < n; i++) for (let j = 0; j < 40; j++) { const a = P[(i + n - 1) % n], b = P[i], c = P[(i + 1) % n], d = P[(i + 2) % n], t = j / 40; fine.push([cr(a[0], b[0], c[0], d[0], t), cr(a[1], b[1], c[1], d[1], t)]); }
+  const L = [0]; for (let i = 0; i < fine.length; i++) { const a = fine[i], b = fine[(i + 1) % fine.length]; L.push(L[i] + Math.hypot(b[0] - a[0], b[1] - a[1])); }
+  const N = Math.round(L[fine.length] / 2); let px = new Float64Array(N), py = new Float64Array(N);
+  for (let i = 0, j = 0; i < N; i++) { const s = i * L[fine.length] / N; while (L[j + 1] < s) j++; const u = (s - L[j]) / (L[j + 1] - L[j]), a = fine[j], b = fine[(j + 1) % fine.length]; px[i] = a[0] + (b[0] - a[0]) * u; py[i] = a[1] + (b[1] - a[1]) * u; }
+  for (let pass = 0; pass < 3; pass++) {      // round off the corners a little
+    const qx = new Float64Array(N), qy = new Float64Array(N);
+    for (let i = 0; i < N; i++) { let sx = 0, sy = 0; for (let j = -14; j <= 14; j++) { const k = (i + j + N) % N; sx += px[k]; sy += py[k]; } qx[i] = sx / 29; qy[i] = sy / 29; }
+    px = qx; py = qy;
+  }
+  let len = 0; for (let i = 0; i < N; i++) len += Math.hypot(px[(i + 1) % N] - px[i], py[(i + 1) % N] - py[i]);
+  const ds = len / N, TH = new Float64Array(N), K0 = new Float64Array(N), K = new Float64Array(N), Z = new Float64Array(N), SL = new Float64Array(N);
+  for (let i = 0; i < N; i++) TH[i] = Math.atan2(py[(i + 1) % N] - py[(i + N - 1) % N], px[(i + 1) % N] - px[(i + N - 1) % N]);
+  for (let i = 0; i < N; i++) K0[i] = wrap(TH[(i + 1) % N] - TH[(i + N - 1) % N]) / (2 * ds);
+  for (let i = 0; i < N; i++) { let k = 0; for (let j = -6; j <= 6; j++) k += K0[(i + j + N) % N]; K[i] = k / 13; }
+  let i0 = 0, bx = 1e9; for (let i = 0; i < N; i++) if (py[i] < -220 && Math.abs(px[i]) < bx) { bx = Math.abs(px[i]); i0 = i; }      // start and finish line: middle of the long bottom straight
+  const TAU = Math.PI * 2;
+  for (let i = 0; i < N; i++) { const u = ((i - i0 + N) % N) / N, flat = Math.min(1, Math.min(u, 1 - u) * N * ds / 260);      // flat at the start line, then the hills build
+    Z[i] = flat * (8 * Math.sin(TAU * 5 * u + .6) + 4.5 * Math.sin(TAU * 16 * u + 2) + 1.5 * Math.sin(TAU * 31 * u)); }
+  for (let i = 0; i < N; i++) SL[i] = (Z[(i + 1) % N] - Z[(i + N - 1) % N]) / (2 * ds);
+  return { N, ds, LEN: len, X: px, Y: py, TH, K, Z, SL, s0: i0 * ds, W: 56 };
+})();
+const DES_LIM = DES.W / 2 - 2.2, TK = () => TRK === "desert" ? "desert:" : "";      // TK: desert best laps and ghosts are saved under their own names
+let desHint = 0, desG = null;
+function desNear(x, y, hint) {
+  const { N, X, Y } = DES; let bi = hint, bd = 1e18;
+  for (let j = -50; j <= 50; j++) { const i = (hint + j + N) % N, d = (x - X[i]) * (x - X[i]) + (y - Y[i]) * (y - Y[i]); if (d < bd) { bd = d; bi = i; } }
+  if (bd > 3600) { for (let i = 0; i < N; i += 3) { const d = (x - X[i]) * (x - X[i]) + (y - Y[i]) * (y - Y[i]); if (d < bd) { bd = d; bi = i; } }
+    for (let j = -3; j <= 3; j++) { const i = (bi + j + N) % N, d = (x - X[i]) * (x - X[i]) + (y - Y[i]) * (y - Y[i]); if (d < bd) { bd = d; bi = i; } } }
+  return bi;
+}
+function desProj(x, y) {
+  const i = desHint = desNear(x, y, desHint), th = DES.TH[i], c = Math.cos(th), sn = Math.sin(th), dx = x - DES.X[i], dy = y - DES.Y[i], t = dx * c + dy * sn;
+  return { s: mod(i * DES.ds + t, DES.LEN), d: dx * sn - dy * c, th: th + DES.K[i] * t, z: DES.Z[i] + DES.SL[i] * t, sl: DES.SL[i], k: DES.K[i] };
+}
+function desSpot(s, d) {
+  const { N, ds, X, Y, TH, K, Z, SL } = DES, f = mod(s, DES.LEN) / ds, i = Math.floor(f) % N, j = (i + 1) % N, u = f - Math.floor(f), th = TH[i] + wrap(TH[j] - TH[i]) * u, k = K[i];
+  return { x: X[i] + (X[j] - X[i]) * u + d * Math.sin(th), y: Y[i] + (Y[j] - Y[i]) * u - d * Math.cos(th), th, arc: Math.abs(k) > .004, k, r: Math.max(18, 1 / Math.max(Math.abs(k), 1e-4) + d * Math.sign(k)), z: Z[i] + (Z[j] - Z[i]) * u, sl: SL[i] };
+}
+function desCorner(s, d) {      // for steering assist: how far to the next corner, how tight it is, and how the track bends right here
+  const { N, ds, K, TH } = DES, i0 = Math.floor(mod(s, DES.LEN) / ds) % N; let dc = -1, r = 1e9;
+  for (let j = 0; j < 220; j++) { const k = K[(i0 + j) % N]; if (Math.abs(k) > .0045) { if (dc < 0) dc = j * ds; if (j * ds - dc < 110) r = Math.min(r, 1 / Math.abs(k) + d * Math.sign(k) * .5); } else if (dc >= 0 && j * ds - dc > 30) break; }
+  return { dc: dc < 0 ? 1e9 : dc, r: Math.max(18, r), k: K[i0], th: TH[i0] };
+}
+const desZ = (x, y) => TRK === "desert" ? desProj(x, y).z : 0;
+
+// the look: dirt road, sand, rocks along the edges, cactuses, a few trees, mesas on the horizon. About 12 draw calls in all.
+function desBuild() {
+  if (desG) return; desG = new THREE.Group(); scene.add(desG);
+  const { N, X, Y, Z, TH } = DES, LIMD = DES_LIM; let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const near = (x, y) => { let bd = 1e18, bi = 0; for (let i = 0; i < N; i += 3) { const d = (x - X[i]) * (x - X[i]) + (y - Y[i]) * (y - Y[i]); if (d < bd) { bd = d; bi = i; } } return [Math.sqrt(bd), Z[bi]]; };
+  const dune = (x, y) => 10 + 16 * Math.sin(x * .0061 + 1) * Math.cos(y * .0053) + 7 * Math.sin(x * .017 + y * .011);
+  const hz = (x, y) => { const [dist, zt] = near(x, y), t = clamp((dist - (LIMD + 50)) / 170, 0, 1), w = t * t * (3 - 2 * t); return (zt - .7) * (1 - w) + (dune(x, y) + zt * .3) * w; };
+  const lam = o => new THREE.MeshLambertMaterial(o), col = new THREE.Color();
+  { // sand
+    const x0 = -1400, x1 = 1400, y0 = -1200, y1 = 1300, st = 26, nx = Math.round((x1 - x0) / st), ny = Math.round((y1 - y0) / st), pos = [], cols = [], idx = [];
+    for (let j = 0; j <= ny; j++) for (let i = 0; i <= nx; i++) { const x = x0 + i * st, y = y0 + j * st, v = V(x, y, hz(x, y)); pos.push(v.x, v.y, v.z); const t = .5 + .5 * Math.sin(x * .013) * Math.cos(y * .017) + (rnd() - .5) * .25; col.setHex(0xa9774a).lerp(new THREE.Color(0xc39766), clamp(t, 0, 1)); cols.push(col.r, col.g, col.b); }
+    for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) { const a = j * (nx + 1) + i, b = a + 1, c = a + nx + 1, d = c + 1; idx.push(a, b, c, b, d, c); }
+    const ge = new THREE.BufferGeometry(); ge.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3)); ge.setAttribute("color", new THREE.Float32BufferAttribute(cols, 3)); ge.setIndex(idx); ge.computeVertexNormals();
+    desG.add(new THREE.Mesh(ge, lam({ vertexColors: true, side: THREE.DoubleSide })));
+  }
+  { // the dirt road: darker in the middle where the cars run
+    const offs = [-LIMD - 9, -LIMD * .5, LIMD * .5, LIMD + 9], cc = [0x9a6c43, 0x744a2b, 0x744a2b, 0x9a6c43], pos = [], cols = [], idx = [], M = Math.floor(N / 2);
+    for (let m = 0; m <= M; m++) { const i = (m * 2) % N, sn = Math.sin(TH[i]), cs = Math.cos(TH[i]); for (let q = 0; q < 4; q++) { const v = V(X[i] + offs[q] * sn, Y[i] - offs[q] * cs, Z[i] + (q === 0 || q === 3 ? -.45 : .14)); pos.push(v.x, v.y, v.z); col.setHex(cc[q]).multiplyScalar(.93 + .14 * rnd()); cols.push(col.r, col.g, col.b); } }
+    for (let m = 0; m < M; m++) for (let q = 0; q < 3; q++) { const a = m * 4 + q, b = a + 1, c = a + 4, d = c + 1; idx.push(a, c, b, b, c, d); }
+    const ge = new THREE.BufferGeometry(); ge.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3)); ge.setAttribute("color", new THREE.Float32BufferAttribute(cols, 3)); ge.setIndex(idx); ge.computeVertexNormals();
+    desG.add(new THREE.Mesh(ge, lam({ vertexColors: true, side: THREE.DoubleSide })));
+  }
+  const merge = gs => { const pos = [], nor = []; for (const g0 of gs) { const g1 = g0.index ? g0.toNonIndexed() : g0; pos.push(...g1.attributes.position.array); nor.push(...g1.attributes.normal.array); } const ge = new THREE.BufferGeometry(); ge.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3)); ge.setAttribute("normal", new THREE.Float32BufferAttribute(nor, 3)); return ge; };
+  const inst = (ge, mat, list) => { const im = new THREE.InstancedMesh(ge, mat, list.length), o = new THREE.Object3D(); list.forEach((p, i) => { o.position.copy(V(p[0], p[1], p[2])); o.rotation.set(0, p[3], 0); o.scale.setScalar(p[4]); o.updateMatrix(); im.setMatrixAt(i, o.matrix); }); im.frustumCulled = false; desG.add(im); return im; };
+  { // rocks mark both edges of the road
+    const list = []; for (let i = 0; i < N; i += 13) for (const sd of [1, -1]) { const d = sd * (LIMD + 3.5 + rnd() * 2), x = X[i] + d * Math.sin(TH[i]), y = Y[i] - d * Math.cos(TH[i]); list.push([x, y, Z[i] - .2, rnd() * 6, .8 + rnd() * .9]); }
+    inst(new THREE.DodecahedronGeometry(1.5, 0), lam({ color: 0x8d7a66, flatShading: true }), list);
+  }
+  const scatter = (count, dMin, dMax) => { const out = []; let guard = 0; while (out.length < count && guard++ < count * 30) { const i = Math.floor(rnd() * N), d = (rnd() < .5 ? -1 : 1) * (dMin + rnd() * (dMax - dMin)), x = X[i] + d * Math.sin(TH[i]), y = Y[i] - d * Math.cos(TH[i]); if (near(x, y)[0] < LIMD + 14) continue; out.push([x, y, hz(x, y) - .3, rnd() * 6, .8 + rnd() * .9]); } return out; };
+  { // cactuses: a trunk and two arms, one shape drawn many times
+    const cy = (r0, r1, h, x, y, z, rz) => { const g0 = new THREE.CylinderGeometry(r0, r1, h, 6); if (rz) g0.rotateZ(rz); g0.translate(x, y, z); return g0; };
+    const ge = merge([cy(.85, 1.05, 9.5, 0, 4.75, 0), cy(.5, .5, 2.4, 1.6, 4.2, 0, Math.PI / 2), cy(.5, .55, 3.4, 2.6, 5.7, 0), cy(.5, .5, 2.2, -1.5, 5.6, 0, Math.PI / 2), cy(.5, .55, 2.6, -2.4, 6.7, 0)]);
+    inst(ge, lam({ color: 0x3f7d3a, flatShading: true }), scatter(110, LIMD + 16, LIMD + 240));
+  }
+  { // a few trees
+    const spots = scatter(14, LIMD + 22, LIMD + 200).map(p => [p[0], p[1], p[2], p[3], 1 + rnd() * .5]);
+    inst(new THREE.CylinderGeometry(.45, .8, 7, 5).translate(0, 3.5, 0), lam({ color: 0x5c4028, flatShading: true }), spots);
+    inst(merge([new THREE.IcosahedronGeometry(3.6, 0).scale(1, .55, 1).translate(0, 7.6, 0), new THREE.IcosahedronGeometry(2.4, 0).scale(1, .6, 1).translate(2.2, 8.8, .8)]), lam({ color: 0x6f8d3c, flatShading: true }), spots);
+  }
+  { // mesas on the horizon
+    const list = []; for (let i = 0; i < 10; i++) { const a = i / 10 * 6.283 + rnd() * .4, r = 1150 + rnd() * 320; list.push([Math.cos(a) * r * 1.15, 60 + Math.sin(a) * r, -8, rnd() * 6, .8 + rnd() * .9]); }
+    inst(new THREE.CylinderGeometry(70, 100, 90, 7).translate(0, 45, 0), lam({ color: 0xa5603a, flatShading: true }), list);
+  }
+  { // start and finish: a checkered line and a gate
+    const q = desSpot(DES.s0, 0), cv = document.createElement("canvas"); cv.width = 256; cv.height = 32; const cx = cv.getContext("2d");
+    for (let i = 0; i < 16; i++) for (let j = 0; j < 2; j++) { cx.fillStyle = (i + j) % 2 ? "#111" : "#f4f4f4"; cx.fillRect(i * 16, j * 16, 16, 16); }
+    const line = new THREE.Mesh(new THREE.BoxGeometry(4, .12, DES.W), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(cv) })); line.position.copy(V(q.x, q.y, q.z + .22)); line.rotation.y = q.th; desG.add(line);
+    const wood = lam({ color: 0x5c4028 }), post = sd => { const m = new THREE.Mesh(new THREE.BoxGeometry(1.4, 16, 1.4), wood); m.position.copy(V(q.x + sd * (DES.W / 2 + 3) * Math.sin(q.th), q.y - sd * (DES.W / 2 + 3) * Math.cos(q.th), q.z + 8)); desG.add(m); };
+    post(1); post(-1);
+    const bv = document.createElement("canvas"); bv.width = 1024; bv.height = 96; const bx = bv.getContext("2d"); bx.fillStyle = "#161619"; bx.fillRect(0, 0, 1024, 96); bx.fillStyle = "#ffea59"; bx.font = "italic 900 60px Anton, Impact, sans-serif"; bx.textAlign = "center"; bx.textBaseline = "middle"; bx.fillText("INTERNET MOTOR SPEEDWAY  ·  DESERT", 512, 50);
+    const ban = new THREE.Mesh(new THREE.PlaneGeometry(DES.W + 9, 5.4), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(bv), side: THREE.DoubleSide })); ban.position.copy(V(q.x, q.y, q.z + 14.5)); ban.rotation.y = q.th - Math.PI / 2; desG.add(ban);
+  }
+}
+const OVAL = { LEN: LEN, S0: S0, LIM: LIM };
+function setTrack(t) {
+  t = t === "desert" ? "desert" : "oval"; if (t === TRK) return; TRK = t;
+  if (t === "desert") { desBuild(); LEN = DES.LEN; S0 = DES.s0; LIM = DES_LIM; desHint = Math.round(DES.s0 / DES.ds); if (night) night = false; }
+  else { LEN = OVAL.LEN; S0 = OVAL.S0; LIM = OVAL.LIM; }
+  garOn = null; if (me && myCar) { kind = "practice"; ghost = null; resetCar(); } paintMoney();
+}
+// what the desert can't do yet: it needs its own leaderboard on the server first (times stay on this phone until then)
+document.addEventListener("click", e => { if (TRK !== "desert") return; const b = e.target.closest && e.target.closest("#bDrivers,#bPrize,#bSave,#bBoard,#bBoard2"); if (!b) return; e.stopPropagation(); e.preventDefault();
+  note(b.id === "bSave" ? "Desert laps save on this phone for now. The desert leaderboard is coming." : "That is on the Speedway Oval for now. The desert gets its own leaderboard soon."); }, true);
+if (QS.has("debug") && QS.get("trk") === "desert" && !FULL) { const iv = setInterval(() => { if (me && myCar) { clearInterval(iv); setTrack("desert"); } }, 300); }
 // ---------- start: remember the last username
 const saved = store.get("user");
 if (saved) { $("uname").value = saved; signIn(saved, true); }
