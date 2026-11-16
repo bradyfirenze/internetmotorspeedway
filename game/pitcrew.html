@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Join the Pit Crew | Internet Motor Speedway</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#111318">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;600;700&display=swap">
+<style>
+:root { --bg: #0d0f14; --card: #171a21; --line: #2a2f3a; --fg: #f3f4f6; --muted: #9aa1ad; --yel: #ffcc18; --neon: #29f0ff;
+  --display: "Anton", Impact, "Arial Narrow", sans-serif; --body: "Archivo", -apple-system, "Helvetica Neue", Arial, sans-serif; color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--body); }
+.wrap { max-width: 560px; margin: 0 auto; padding: calc(14px + env(safe-area-inset-top)) 16px calc(110px + env(safe-area-inset-bottom)); }
+.draft { display: inline-block; font: 700 11px var(--body); letter-spacing: .08em; background: #ff7a1a; color: #111; border-radius: 8px; padding: 4px 9px; }
+a.back { display: inline-block; color: var(--muted); font: 600 14px var(--body); text-decoration: none; margin-bottom: 14px; }
+.k { font: 700 12px var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--neon); margin-top: 14px; }
+h1 { font: 400 54px/.95 var(--display); text-transform: uppercase; margin: 6px 0 10px; letter-spacing: .01em; }
+h1 span { color: var(--neon); text-shadow: 0 0 22px rgba(41,240,255,.55); }
+.lead { font-size: 17px; line-height: 1.45; color: var(--muted); margin: 0 0 18px; }
+.lead b { color: var(--fg); }
+.hero { position: relative; margin: 0 -16px 18px; aspect-ratio: 16 / 10; overflow: hidden; background: #05070f; }
+.hero img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 55% 60%; }
+.hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(rgba(13,15,20,0) 62%, var(--bg)); pointer-events: none; }
+@media (min-width: 592px) { .hero { margin: 0 0 18px; border-radius: 18px; } }
+.top3 { display: grid; gap: 8px; margin-bottom: 18px; }
+.big { border: 1px solid rgba(41,240,255,.45); background: linear-gradient(135deg, #073038, #0a1d24); border-radius: 16px; padding: 15px 16px; }
+.big em { display: block; font: 700 11px var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--neon); font-style: normal; }
+.big b { display: block; font: 400 29px/1.02 var(--display); text-transform: uppercase; letter-spacing: .01em; margin: 4px 0 5px; }
+.big span { display: block; font-size: 15px; line-height: 1.4; color: #c5cad3; }
+h2 { font: 400 22px var(--display); text-transform: uppercase; letter-spacing: .03em; color: var(--muted); margin: 0 0 8px; }
+.perk { display: flex; gap: 12px; align-items: flex-start; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 13px 14px; margin-bottom: 8px; }
+.perk i { flex: none; width: 34px; height: 34px; border-radius: 10px; background: #062a30; color: var(--neon); font: 400 20px/34px var(--display); text-align: center; font-style: normal; }
+.perk b { display: block; font: 400 21px/1.1 var(--display); text-transform: uppercase; letter-spacing: .02em; }
+.perk span { display: block; font-size: 14px; line-height: 1.4; color: var(--muted); margin-top: 3px; }
+.week { border: 1px solid rgba(41,240,255,.4); background: #062a30; border-radius: 14px; padding: 13px 14px; margin: 16px 0; }
+.week b { font: 400 21px var(--display); text-transform: uppercase; color: var(--neon); }
+.week ul { margin: 6px 0 0; padding-left: 18px; font-size: 15px; line-height: 1.6; }
+.fine { font-size: 13px; line-height: 1.5; color: var(--muted); margin: 14px 0 0; }
+.cta { position: fixed; left: 0; right: 0; bottom: 0; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: linear-gradient(rgba(13,15,20,0), var(--bg) 35%); }
+.cta a { display: block; max-width: 528px; margin: 0 auto; text-align: center; text-decoration: none; background: var(--neon); color: #04161a; border-radius: 14px; padding: 15px 10px; font: 400 25px var(--display); text-transform: uppercase; letter-spacing: .03em; box-shadow: 0 0 28px rgba(41,240,255,.45); }
+.cta a small { display: block; font: 700 12px var(--body); letter-spacing: .06em; opacity: .8; margin-top: 2px; }
+.cta a:focus-visible, a.back:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="./">← Back to the game</a>
+  <div class="hero"><img src="pitcrew_car.jpg" width="2000" height="1250" alt="A black number 26 race car with a tall rear wing and neon blue underglow, parked on the speedway at night in front of a full grandstand"></div>
+  <div class="k">Internet Motor Speedway</div>
+  <h1>Join the <span>Pit Crew</span></h1>
+  <p class="lead"><b>Earn your upgrades</b> instead of buying them, keep <b>3 cars</b> in your garage, and get <b>new features every week</b>.</p>
+
+  <div class="top3">
+    <div class="big"><em>Don't buy upgrades</em><b>Earn them by racing</b><span>Every 5 races is a free upgrade level for your Engine, Tires or Turbo. Everyone else pays for each one.</span></div>
+    <div class="big"><em>Your garage</em><b>3 cars, not 1</b><span>Build three cars your way, each with its own colors and its own upgrades. Switch any time.</span></div>
+    <div class="big"><em>Every week</em><b>New features every week</b><span>New tracks, new parts and new things to do in your garage, added every week. Pit Crew gets them first.</span></div>
+  </div>
+
+  <h2>Also in the Pit Crew</h2>
+  <div class="perk"><i>4</i><div><b>Repaint your car and change your number anytime</b><span>Pick new colors and a new number in your garage whenever you like. It saves by itself, no DMs.</span></div></div>
+  <div class="perk"><i>5</i><div><b>Level 4, Pit Crew only</b><span>The fastest tune in the game. Nobody else can get it.</span></div></div>
+  <div class="perk"><i>6</i><div><b>The Night Oval</b><span>Race the speedway under the lights. Only the Pit Crew can drive it.</span></div></div>
+  <div class="perk"><i>7</i><div><b>Neon underglow</b><span>Your car glows in the game, so everyone can spot it.</span></div></div>
+
+  <div class="week">
+    <b>This week</b>
+    <ul><li>New track: the Night Oval</li><li>Level 4 tune for Engine, Tires and Turbo</li><li>3 car garage</li></ul>
+  </div>
+
+  <p class="fine" id="who">After you join, open the game and tap <b style="color:#f3f4f6">Joined on Ko-fi? Claim Pit Crew</b>, then type the email you paid with. It unlocks in about a minute.</p>
+  <p class="fine">The Pit Crew never changes who wins the daily race. One car per driver runs in it, and every follower has the same shot. $5.99 a month. Leave any time.</p>
+</div>
+<div class="cta"><a id="join" href="https://ko-fi.com/internetmotorspeedway/tiers" target="_blank" rel="noopener">Join the Pit Crew<small>$5.99 A MONTH ON KO-FI</small></a></div>
+<script>
+const u = (new URLSearchParams(location.search).get("u") || "").toLowerCase().replace(/[^a-z0-9._]/g, "").slice(0, 30);
+if (u) document.getElementById("who").innerHTML = "After you join, open the game as <b style='color:#f3f4f6'>@" + u + "</b>, tap <b style='color:#f3f4f6'>Joined on Ko-fi? Claim Pit Crew</b>, and type the email you paid with. It unlocks in about a minute.";
+document.getElementById("join").href = "https://ko-fi.com/internetmotorspeedway/tiers";
+</script>
+</body>
+</html>
