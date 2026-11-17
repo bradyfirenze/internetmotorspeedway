@@ -574,7 +574,7 @@ async function signIn(raw, quiet) {
   const c = (cus.cars || []).find(x => x.ig.toLowerCase() === name), won = (mus.winners || []).some(w => w.name.toLowerCase() === name);
   const u = (gar.upgrades || {})[name] || {};
   me = { name, body: "#" + fol.f[name], roof: null, num: "", kind: "Your car", up: { e: clamp(u.e | 0, 0, 3), t: clamp(u.t | 0, 0, 3), a: clamp(u.a | 0, 0, 3) } };
-  if (c) { me.body = c.bodyHex; me.roof = c.roofHex; me.num = c.num || ""; me.kind = "Your custom car"; me.shape = c.kind || null; me.pro = c.tier === "car_pro"; }
+  if (c) { me.body = c.bodyHex; me.roof = c.roofHex; me.num = c.num || ""; me.kind = "Your custom car"; me.shape = c.kind || null; me.pro = c.tier === "car_pro"; me.look = c.look || null; me.lookHex = (c.bodyHex || "").toLowerCase(); }
   { const q = new URLSearchParams(location.search), pv = q.get("body"); if (pv && q.has("debug")) me.shape = pv; if (q.has("pro") && q.has("debug")) me.pro = true; }
   if (won) { me.body = GOLD; me.roof = "#c98200"; me.kind = "Race winner"; }
   await moneyIn({ fol, cus, gar, mus });
@@ -638,6 +638,35 @@ function glowTex() {      // soft pool of light under a Pit Crew car
   x.translate(128, 90); x.scale(1, 180 / 256); const gr = x.createRadialGradient(0, 0, 20, 0, 0, 128); gr.addColorStop(0, "rgba(255,255,255,1)"); gr.addColorStop(.45, "rgba(255,255,255,.55)"); gr.addColorStop(1, "rgba(255,255,255,0)");
   x.fillStyle = gr; x.fillRect(-128, -128, 256, 256); return _glow = new THREE.CanvasTexture(cv);
 }
+// @efii_co gift car (Brady, Nov 17; his car 3, painted the cars.json white. His car 1 stays his own black #8). cars.json "look": "efii" adds his orange mohawk, fuzzy beard, mirrored shades, nose-to-tail stripe and
+// his own logo on the doors to the normal car, only while the car wears that white (lookHex). Same parts as blender/efii_gift.py (Blender car space, nose +X), kept low poly for phones.
+function efiiLook(g, body) {
+  const S = (col, r) => new THREE.MeshStandardMaterial({ color: col, roughness: r == null ? .4 : r, metalness: .1 });
+  const box = (x, y, z, sx, sy, sz, m) => { const o = new THREE.Mesh(new THREE.BoxGeometry(sx, sz, sy), m); o.position.copy(V(x, y, z)); g.add(o); return o; };
+  const O = [S(0xff6100, .3), S(0xff8510, .5), S(0xe64500, .5)];
+  for (const [x, z, sx, sz] of [[2.315, .92, .02, .36], [1.58, 1.108, 1.44, .016], [-.3, 1.731, 2.2, .012], [-1.408, 1.4, .016, .65], [-1.85, 1.108, .9, .016], [-2.315, .92, .02, .36]]) box(x, 0, z, sx, .7, sz, O[0]);
+  const cone = new THREE.ConeGeometry(.11, 1, 6);
+  for (let i = 0; i < 11; i++) {          // mohawk: a row of swept-back spikes, tallest in the middle
+    const u = i / 10, x = .72 - u * 2.08, h = .32 + .26 * Math.sin(Math.PI * u);
+    for (const [j, sy] of [[0, .06], [1, -.06]]) { const o = new THREE.Mesh(cone, O[(i + j) % 3]); o.scale.set(1, h, 1); o.position.copy(V(x - .03 * j, sy, 1.737 + h / 2 - .03)); o.rotation.set(sy * 1.2, 0, .49, "ZXY"); g.add(o); }
+  }
+  const tuft = new THREE.IcosahedronGeometry(1, 0), B = [S(0xff5c05, .95), S(0xcc3802, .95), S(0xff8c1a, .95)];
+  let sd = 11; const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+  for (let k = 0; k < 48; k++) {          // beard under the grille, narrow at the chin
+    const z = .1 + .45 * Math.pow(rnd(), .8), half = .12 + .62 * Math.pow((z - .1) / .45, .9), y = (rnd() * 2 - 1) * half, r = .08 + .07 * rnd();
+    const o = new THREE.Mesh(tuft, B[k % 4 === 3 ? 1 + (k % 2) : 0]); o.scale.set(r, r * 1.4, r * .8); o.position.copy(V(2.36 + .14 * rnd() + .08 * (1 - (z - .1) / .45), y, z)); o.rotation.y = rnd() * 6; g.add(o);
+  }
+  for (const s of [1, -1]) for (let j = 0; j < 5; j++) box(2.4, s * (.25 + j * .14), .5 - j * .03 + .02 * j * j, .1, .16, .1, B[0]).rotation.x = -s * (.26 + j * .1);   // mustache
+  const LENS = new THREE.MeshStandardMaterial({ color: 0x6a5cff, emissive: 0x2a1a80, roughness: .15, metalness: .6 }), FR = S(0xff1480, .3);
+  for (const s of [1, -1]) {
+    box(.93, s * .5, 1.42, .06, .94, .46, LENS); box(.68, s * 1.0, 1.44, .5, .05, .4, LENS).rotation.y = s * .21;
+    box(-.3, s * .985, 1.62, 1.7, .045, .07, FR); box(.95, s * 1.0, 1.62, .12, .1, .14, FR);
+  }
+  box(.95, 0, 1.67, .1, 2.06, .08, FR); box(.95, 0, 1.36, .09, .12, .5, FR);
+  if (!efiiLook.tex) { efiiLook.tex = new THREE.TextureLoader().load("../cars/img/efii_co/logo.png"); }
+  const lm = new THREE.MeshBasicMaterial({ color: (() => { const k = new THREE.Color(body || "#ffffff"); return k.r + k.g + k.b > 1.5 ? 0x111113 : 0xf2f2ee; })(), alphaMap: efiiLook.tex, transparent: true, alphaTest: .4 });
+  for (const s of [1, -1]) { const d = new THREE.Mesh(new THREE.PlaneGeometry(1.95, 1.95 * 340 / 1480), lm); d.position.copy(V(.05, s * 1.118, .76)); d.rotation.y = s > 0 ? Math.PI : 0; g.add(d); }
+}
 function raceCar(c, ghost) {
   if (!ghost && c.shape && BODY_SCALE[c.shape]) return bodyCar(c);
   const g = new THREE.Group();
@@ -651,7 +680,7 @@ function raceCar(c, ghost) {
   if (c.num && !ghost) {
     const nm = new THREE.MeshBasicMaterial({ map: numTex(c.num, body.r + body.g + body.b > 1.5 ? "#111" : "#fff"), transparent: true });
     const hood = new THREE.Mesh(new THREE.PlaneGeometry(1.15, 1.15), nm); hood.rotation.set(-Math.PI / 2, 0, Math.PI / 2); hood.position.copy(V(1.6, 0, 1.105)); g.add(hood);
-    for (const sd of [1, -1]) { const d = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 1.1), nm); d.position.copy(V(.25, sd * 1.106, .76)); d.rotation.y = sd > 0 ? Math.PI : 0; g.add(d); }
+    if (c.look !== "efii") for (const sd of [1, -1]) { const d = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 1.1), nm); d.position.copy(V(.25, sd * 1.106, .76)); d.rotation.y = sd > 0 ? Math.PI : 0; g.add(d); }
   }
   if (!ghost) {      // DRAFT: every upgrade level bolts something you can see onto the car
     const up = c.up || {}, e = up.e | 0, t = up.t | 0, a = up.a | 0, basic = col => new THREE.MeshBasicMaterial({ color: col }), chrome = new THREE.MeshStandardMaterial({ color: 0xd8dde6, roughness: .15, metalness: .9 });
@@ -664,6 +693,7 @@ function raceCar(c, ghost) {
       box(-2.15, 0, 1.6 + .14 * a, .6, 2.36, .07, M.k); for (const sd of [1, -1]) { box(-2.15, sd * 1.18, 1.42 + .07 * a, .7, .05, .4 + .14 * a, pl); box(-2.15, sd * .6, 1.5 + .07 * a, .08, .08, .2 + .14 * a, M.k); }
       for (const sd of [.5, -.5]) box(-2.4, sd, .5, .14, .24, .24, basic(a >= 4 ? 0x4db8ff : a >= 2 ? 0xff8a1e : 0x777777)); }
     if (c.pro) proLook(g, c);
+    if (c.look === "efii" && (!c.lookHex || c.lookHex === String(c.body).toLowerCase())) efiiLook(g, c.body);
     if (c.glow || c.pro) { const neonC = c.pro ? proNeon(c) : new THREE.Color(0x29f0ff), tubeC = c.pro ? neonC.clone().lerp(new THREE.Color(0xffffff), .45) : new THREE.Color(0x8ff8ff); const u = new THREE.Mesh(new THREE.PlaneGeometry(12, 8.4), new THREE.MeshBasicMaterial({ map: glowTex(), color: neonC, transparent: true, opacity: .95, blending: THREE.AdditiveBlending, depthWrite: false })); u.rotation.x = -Math.PI / 2; u.position.copy(V(0, 0, .05)); g.add(u);
       for (const sd of [1, -1]) box(0, sd * 1.02, .14, 4.2, .06, .06, basic(tubeC)); }   // Pit Crew underglow: a pool of light and two neon tubes
   }
@@ -1124,7 +1154,7 @@ async function moneyIn(d) {      // called after sign in
   me.glow = member(); if (!me.glow) { if (night) setNight(false); if (TRK === "desert") setTrack("oval"); }
   // cars: slot 1 is the car every follower has. Slots 2 and 3 are Pit Crew only. Upgrades belong to the car, not the driver.
   const extra = c => c ? { body: c.body, roof: c.roof, num: c.num || "", kind: "", up: { e: 0, t: 0, a: 0, ...c.up } } : null;
-  ORIG = { body: me.body, roof: me.roof, num: me.num, won: me.kind === "Race winner", shape: me.shape || null, pro: !!me.pro };
+  ORIG = { body: me.body, roof: me.roof, num: me.num, won: me.kind === "Race winner", shape: me.shape || null, pro: !!me.pro, look: me.look || null, lookHex: me.lookHex || "" };
   CARS = [{ body: me.body, roof: me.roof, num: me.num, kind: me.kind, up: me.up }, extra(sv[1]), extra(sv[2])];
   if (LIVE) syncSV(); else if (sv[0] && sv[0].body && !ORIG.won && member()) { CARS[0].body = sv[0].body; CARS[0].roof = sv[0].roof; CARS[0].num = sv[0].num || ""; }
   slot = member() ? clamp(+store.get("slot:" + me.name) || 0, 0, 2) : 0; if (!CARS[slot]) slot = 0;
@@ -1133,7 +1163,7 @@ async function moneyIn(d) {      // called after sign in
 let CARS = [], slot = 0, ORIG = { body: "", roof: null, num: "", won: false };      // ORIG = the look your first car has without Pit Crew paint
 const SLOTS = 3, saveCars = () => { if (!LIVE) store.set("cars:" + me.name, JSON.stringify(CARS)); store.set("slot:" + me.name, slot); };
 const dailySlot = () => { const d = LIVE ? SV.daily : +store.get("daily:" + me.name) || 0; return member() && CARS[d] ? d : 0; };
-function applyCar() { const c = CARS[slot]; me.body = c.body; me.roof = c.roof; me.num = c.num || ""; me.up = c.up; me.shape = slot === 0 ? ORIG.shape : null; me.pro = slot === 0 && ORIG.pro;
+function applyCar() { const c = CARS[slot]; me.body = c.body; me.roof = c.roof; me.num = c.num || ""; me.up = c.up; me.shape = slot === 0 ? ORIG.shape : null; me.pro = slot === 0 && ORIG.pro; me.look = ORIG.look || null; me.lookHex = ORIG.lookHex || "";      // a cars.json look shows on whichever car wears its paint
   if (admin()) { const v = store.get("adm:" + me.name); if (v) { me.shape = BODY_SCALE[v] ? v : null; me.pro = v === "pro"; } } me.kind = slot ? "Car " + (slot + 1) + " of " + SLOTS : c.kind; saveCars(); }
 function openCars() {
   const mem = member(), have = CARS.filter(Boolean).length, lv = c => UPG.map(u => u.name + " " + c.up[u.id]).join(" · ");
@@ -1685,7 +1715,7 @@ function buildGhosts(rows) {
   for (const g of G) scene.remove(g.mesh); G.length = 0;
   rows.forEach((r, i) => {      // fastest on the front row, you start at the back, like the race against the bots
     const c = ((DATA.cus.cars || []).find(x => x.ig.toLowerCase() === r.n)) || {}, col = DATA.fol.f[r.n], gs = gridSlot(i);
-    const mesh = raceCar({ body: c.bodyHex || (col ? "#" + col : PAL[i % PAL.length]), roof: c.roofHex || null, num: c.num || "", shape: c.kind, pro: c.tier === "car_pro" });
+    const mesh = raceCar({ body: c.bodyHex || (col ? "#" + col : PAL[i % PAL.length]), roof: c.roofHex || null, num: c.num || "", shape: c.kind, pro: c.tier === "car_pro", look: c.look, lookHex: (c.bodyHex || "").toLowerCase() });
     { const tg = tagSprite(r.n); if (BODY_SCALE[c.kind]) { tg.position.y = TAG_Y[c.kind]; tg.scale.multiplyScalar(1.25 / BODY_SCALE[c.kind]); } mesh.add(tg); } mesh.visible = false; scene.add(mesh);
     G.push({ n: r.n, T: Math.round(r.t * (.992 + Math.random() * .026)), mesh, off: (i % 2 ? 1 : -1) * (1.5 + i * .7), s0: gs.s, d0: gs.d, s: gs.s, done: false });
   });

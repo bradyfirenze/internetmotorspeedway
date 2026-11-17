@@ -644,7 +644,7 @@ const LEGEND_RIDES = {
     box([-.2, 0, 1.35], [1.4, 1.75, .18], R); box([-.95, 0, 2.2], [.15, 1.7, 1.5], R); box([1.25, 0, .55], [.5, 1.2, .08], P);
   },
 };
-// @efii_co gift car (Brady, Nov 17): cars.json "look": "efii" adds his orange mohawk, fuzzy beard, mirrored shades, nose-to-tail stripe and
+// @efii_co gift car (Brady, Nov 17; it is his car 3, painted the cars.json white, his car 1 stays his own black #8): cars.json "look": "efii" adds his orange mohawk, fuzzy beard, mirrored shades, nose-to-tail stripe and
 // his own logo on the doors (dark on light paint, white on dark) to the normal car. Same parts as blender/efii_gift.py (Blender car space, nose +X), kept low poly for phones.
 function efiiLook(g, body) {
   const S = (col, r) => new THREE.MeshStandardMaterial({ color: col, roughness: r == null ? .4 : r, metalness: .1 });
@@ -688,7 +688,7 @@ function raceCar(c) {
     if (c.look !== "efii") for (const sd of [1, -1]) { const d = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 1.1), nm); d.position.copy(V(.25, sd * 1.106, .76)); d.rotation.y = sd > 0 ? Math.PI : 0; g.add(d); }
   }
   if (/car_pro/i.test(c.tier || "")) carPro(g, c);
-  if (c.look === "efii") efiiLook(g, c.bodyHex);
+  if (c.look === "efii" && (!c.lookHex || c.lookHex.toLowerCase() === String(c.bodyHex).toLowerCase())) efiiLook(g, c.bodyHex);
   g.scale.setScalar(1.25); return g;
 }
 // $5 Car PRO (Brady Nov 15, tier "car_pro"): the normal race car plus neon underglow, flame paint and neon wheels. Same rule as the game
@@ -745,7 +745,7 @@ const paintP = new Promise(res => {
 });
 function addGarages() {
   Promise.all([fetch("../cars/cars.json", { cache: "no-cache" }).then(r => r.json()), paintP]).then(([cj, paint]) => {
-    for (const c of cj.cars) { const p = c.ig && paint[c.ig.toLowerCase()]; if (p) Object.assign(c, p); }   // Pit Crew self-serve repaints
+    for (const c of cj.cars) { const p = c.ig && paint[c.ig.toLowerCase()]; if (p) { if (c.look) c.lookHex = c.bodyHex; Object.assign(c, p); } }   // Pit Crew self-serve repaints
     if (new URLSearchParams(location.search).get("tiers") === "demo")      // preview only: newest 5 cars wear the tier bodies (first one a Legend), the 6th is a Car PRO
       { ["dragon", "monster", "bus", "f1", "jet"].forEach((k, i) => { const c = cj.cars[i]; if (c) { c.kind = k; c.tier = i ? "body_swap" : "legend"; } }); if (cj.cars[5]) cj.cars[5].tier = "car_pro";
         ["prop", "mower", "shopcart", "wheelbarrow", "skateboard", "golfcart", "wheelchair"].forEach((k, i) => { const c = cj.cars[6 + i]; if (c) { c.kind = k; c.tier = "legend"; } }); }
