@@ -823,7 +823,7 @@ controls.addEventListener("start", () => { fly = null; });
 // ---- Victory Museum: gold cars for every winner on the plinths (newest in the centre, past winners left, right, left, right)
 const MUS = { x: 5, y: -50, d: 62 }, WINS = [];
 const GLASS_M = new THREE.MeshLambertMaterial({ color: 0x6f8aa3 }), LIT_M = new THREE.MeshBasicMaterial({ color: 0xffffff });
-const SLOTS = [[MUS.x - 24, MUS.y - 4], [MUS.x + 24, MUS.y - 4], [MUS.x - 38, MUS.y - 4], [MUS.x + 38, MUS.y - 4], [MUS.x + 50, MUS.y - 4], [MUS.x - 50, MUS.y - 4], [MUS.x + 62, MUS.y - 4]];   // 5th and 6th plinths (Day 7, Day 8), same as the videos
+const SLOTS = [[MUS.x - 24, MUS.y - 4], [MUS.x + 24, MUS.y - 4], [MUS.x - 38, MUS.y - 4], [MUS.x + 38, MUS.y - 4], [MUS.x + 50, MUS.y - 4], [MUS.x - 50, MUS.y - 4], [MUS.x + 62, MUS.y - 4], [MUS.x - 62, MUS.y - 4]];   // 5th to 8th plinths (Days 7 to 10 videos), same as the videos
 function goldCar(x, y, k, mat, blk) {
   const g = new THREE.Group();
   const add = (geo, m, px, py, pz) => { const o = new THREE.Mesh(geo, m); o.position.copy(V(px, py, pz)); g.add(o); };
