@@ -644,6 +644,35 @@ const LEGEND_RIDES = {
     box([-.2, 0, 1.35], [1.4, 1.75, .18], R); box([-.95, 0, 2.2], [.15, 1.7, 1.5], R); box([1.25, 0, .55], [.5, 1.2, .08], P);
   },
 };
+// @efii_co gift car (Brady, Nov 17): cars.json "look": "efii" adds his orange mohawk, fuzzy beard, mirrored shades, nose-to-tail stripe and
+// his own logo on the doors (dark on light paint, white on dark) to the normal car. Same parts as blender/efii_gift.py (Blender car space, nose +X), kept low poly for phones.
+function efiiLook(g, body) {
+  const S = (col, r) => new THREE.MeshStandardMaterial({ color: col, roughness: r == null ? .4 : r, metalness: .1 });
+  const box = (x, y, z, sx, sy, sz, m) => { const o = new THREE.Mesh(new THREE.BoxGeometry(sx, sz, sy), m); o.position.copy(V(x, y, z)); g.add(o); return o; };
+  const O = [S(0xff6100, .3), S(0xff8510, .5), S(0xe64500, .5)];
+  for (const [x, z, sx, sz] of [[2.315, .92, .02, .36], [1.58, 1.108, 1.44, .016], [-.3, 1.731, 2.2, .012], [-1.408, 1.4, .016, .65], [-1.85, 1.108, .9, .016], [-2.315, .92, .02, .36]]) box(x, 0, z, sx, .7, sz, O[0]);
+  const cone = new THREE.ConeGeometry(.11, 1, 6);
+  for (let i = 0; i < 11; i++) {          // mohawk: a row of swept-back spikes, tallest in the middle
+    const u = i / 10, x = .72 - u * 2.08, h = .32 + .26 * Math.sin(Math.PI * u);
+    for (const [j, sy] of [[0, .06], [1, -.06]]) { const o = new THREE.Mesh(cone, O[(i + j) % 3]); o.scale.set(1, h, 1); o.position.copy(V(x - .03 * j, sy, 1.737 + h / 2 - .03)); o.rotation.set(sy * 1.2, 0, .49, "ZXY"); g.add(o); }
+  }
+  const tuft = new THREE.IcosahedronGeometry(1, 0), B = [S(0xff5c05, .95), S(0xcc3802, .95), S(0xff8c1a, .95)];
+  let sd = 11; const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+  for (let k = 0; k < 48; k++) {          // beard under the grille, narrow at the chin
+    const z = .1 + .45 * Math.pow(rnd(), .8), half = .12 + .62 * Math.pow((z - .1) / .45, .9), y = (rnd() * 2 - 1) * half, r = .08 + .07 * rnd();
+    const o = new THREE.Mesh(tuft, B[k % 4 === 3 ? 1 + (k % 2) : 0]); o.scale.set(r, r * 1.4, r * .8); o.position.copy(V(2.36 + .14 * rnd() + .08 * (1 - (z - .1) / .45), y, z)); o.rotation.y = rnd() * 6; g.add(o);
+  }
+  for (const s of [1, -1]) for (let j = 0; j < 5; j++) box(2.4, s * (.25 + j * .14), .5 - j * .03 + .02 * j * j, .1, .16, .1, B[0]).rotation.x = -s * (.26 + j * .1);   // mustache
+  const LENS = new THREE.MeshStandardMaterial({ color: 0x6a5cff, emissive: 0x2a1a80, roughness: .15, metalness: .6 }), FR = S(0xff1480, .3);
+  for (const s of [1, -1]) {
+    box(.93, s * .5, 1.42, .06, .94, .46, LENS); box(.68, s * 1.0, 1.44, .5, .05, .4, LENS).rotation.y = s * .21;
+    box(-.3, s * .985, 1.62, 1.7, .045, .07, FR); box(.95, s * 1.0, 1.62, .12, .1, .14, FR);
+  }
+  box(.95, 0, 1.67, .1, 2.06, .08, FR); box(.95, 0, 1.36, .09, .12, .5, FR);
+  if (!efiiLook.tex) { efiiLook.tex = new THREE.TextureLoader().load("../cars/img/efii_co/logo.png"); }
+  const lm = new THREE.MeshBasicMaterial({ color: (() => { const k = new THREE.Color(body || "#ffffff"); return k.r + k.g + k.b > 1.5 ? 0x111113 : 0xf2f2ee; })(), alphaMap: efiiLook.tex, transparent: true, alphaTest: .4 });
+  for (const s of [1, -1]) { const d = new THREE.Mesh(new THREE.PlaneGeometry(1.95, 1.95 * 340 / 1480), lm); d.position.copy(V(.05, s * 1.118, .76)); d.rotation.y = s > 0 ? Math.PI : 0; g.add(d); }
+}
 function raceCar(c) {
   if (RIDE_KINDS.has(c.kind)) return rideModel(c);
   const g = new THREE.Group();
@@ -656,9 +685,10 @@ function raceCar(c) {
     const tex = textTex(c.num, 256, 256, null, lum > 380 ? "#111" : "#fff", "400 210px Anton, Impact, sans-serif");
     const nm = new THREE.MeshBasicMaterial({ map: tex, transparent: true });
     const hood = new THREE.Mesh(new THREE.PlaneGeometry(1.15, 1.15), nm); hood.rotation.set(-Math.PI / 2, 0, Math.PI / 2); hood.position.copy(V(1.6, 0, 1.105)); g.add(hood);
-    for (const sd of [1, -1]) { const d = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 1.1), nm); d.position.copy(V(.25, sd * 1.106, .76)); d.rotation.y = sd > 0 ? Math.PI : 0; g.add(d); }
+    if (c.look !== "efii") for (const sd of [1, -1]) { const d = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 1.1), nm); d.position.copy(V(.25, sd * 1.106, .76)); d.rotation.y = sd > 0 ? Math.PI : 0; g.add(d); }
   }
   if (/car_pro/i.test(c.tier || "")) carPro(g, c);
+  if (c.look === "efii") efiiLook(g, c.bodyHex);
   g.scale.setScalar(1.25); return g;
 }
 // $5 Car PRO (Brady Nov 15, tier "car_pro"): the normal race car plus neon underglow, flame paint and neon wheels. Same rule as the game
