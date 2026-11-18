@@ -2055,7 +2055,7 @@ const cSave = () => store.set("career:" + me.name, JSON.stringify(CAREER.c));
 function kartStats() { const c = CAREER.c || cLoad(), f = k => 1 + (c[k] - 50) / 50 * .05; return { vmax: KST.vmax * f("tm"), grip: KST.grip * f("sk"), accel: KST.accel * f("fa") }; }
 
 // the kart: a flat frame, four fat little tires and a driver. Nose is +x like the cars.
-function kartMesh(col, helm) {
+function kartMesh(col, helm, jersey, stripe, hstripe, visor) {
   const g = new THREE.Group(), m = c => new THREE.MeshLambertMaterial({ color: c }), add = (geo, mat, x, y, z) => { const o = new THREE.Mesh(geo, mat); o.position.set(x, y, z); g.add(o); return o; };
   const dark = m(0x23252b), body = m(col), tire = m(0x15161a), metal = m(0x8a8f99);
   add(new THREE.BoxGeometry(2.0, .1, .8), dark, 0, .24, 0);
@@ -2068,11 +2068,23 @@ function kartMesh(col, helm) {
   for (const sd of [-1, 1]) for (const [r, w, x, z] of [[.25, .24, .86, .7], [.29, .34, -.86, .74]]) add(new THREE.CylinderGeometry(r, r, w, 12), tire, x, r, sd * z).rotation.x = Math.PI / 2;
   add(new THREE.CylinderGeometry(.03, .03, .6, 6), metal, .34, .62, 0).rotation.z = -.9;
   { const w = add(new THREE.TorusGeometry(.17, .035, 6, 12), dark, .12, .84, 0); w.rotation.order = "YXZ"; w.rotation.y = Math.PI / 2; w.rotation.x = .5; }
-  add(new THREE.BoxGeometry(.36, .6, .48), m(0xf0f0f0), -.38, .92, 0);
-  add(new THREE.SphereGeometry(.25, 12, 10), m(helm), -.32, 1.42, 0); add(new THREE.BoxGeometry(.1, .12, .36), dark, -.1, 1.44, 0);
+  const shirt = m(jersey || 0xf0f0f0); add(new THREE.BoxGeometry(.36, .6, .48), shirt, -.38, .92, 0);
+  if (stripe) add(new THREE.BoxGeometry(.38, .13, .5), m(stripe), -.38, 1.0, 0);
+  g.userData.arms = [-1, 1].map(sd => { const p = new THREE.Group(); p.position.set(-.36, 1.14, sd * .3); const a = new THREE.Mesh(new THREE.CylinderGeometry(.075, .065, .58, 8).translate(0, -.29, 0), shirt); p.add(a); const h = new THREE.Mesh(new THREE.SphereGeometry(.08, 8, 6), dark); h.position.y = -.6; p.add(h); p.userData.sd = sd; g.add(p); return p; });
+  kartPose(g, false);
+  add(new THREE.SphereGeometry(.27, 16, 12), m(helm), -.32, 1.43, 0).scale.set(1.08, 1, 1);      // helmet: shell, wrap around visor, chin bar and a stripe over the top
+  add(new THREE.SphereGeometry(.278, 16, 8, Math.PI - 1.05, 2.1, 1.12, .62), new THREE.MeshLambertMaterial({ color: visor || 0x16171b, side: THREE.DoubleSide }), -.31, 1.43, 0).scale.set(1.08, 1, 1);
+  add(new THREE.BoxGeometry(.16, .1, .34), m(helm), -.1, 1.27, 0);
+  if (hstripe) { const t = add(new THREE.TorusGeometry(.272, .03, 6, 20, Math.PI * 1.1), m(hstripe), -.32, 1.43, 0); t.scale.set(1.08, 1, 2.2); t.rotation.z = .5; }
   g.scale.setScalar(1.5); return g;
 }
 
+// arms: down by the driver's sides in the garage, out to the wheel when driving
+function kartPose(g, drive) { for (const p of (g && g.userData.arms) || []) { p.rotation.z = drive ? 1.05 : .08; p.rotation.x = drive ? p.userData.sd * .32 : p.userData.sd * -.1; } }
+// jerseys and helmets: a plain white tee and a plain white rental helmet at the start, your team color with a helmet stripe once you are on the podium,
+// and a jersey stripe, matching helmet stripe and gold visor when the sponsor signs
+const cLevel = () => { const i = CAREER.c ? CAREER.c.i : 0; return i >= 7 ? 2 : i >= 4 ? 1 : 0; };
+function carKart() { const lv = cLevel(), light = new THREE.Color(me.body).getHSL({}).l > .7; if (myCar) scene.remove(myCar); const acc = light ? 0x16171b : 0xffcc18; myCar = kartMesh(me.body, lv ? me.body : 0xf0f0f0, lv ? me.body : 0xf0f0f0, lv > 1 ? acc : 0, lv ? (lv > 1 ? acc : light ? 0x16171b : 0xf3f3f3) : 0, lv > 1 ? 0xd9a520 : 0); myCar.userData.lv = lv; scene.add(myCar); placeCar(); }
 // the kart track look: asphalt, red and white curbs, a tire wall both sides, a start gate, bleachers, a pit shed and trees
 function kartBuild() {
   if (kG) return; kG = new THREE.Group(); scene.add(kG);
@@ -2118,7 +2130,7 @@ function cPanel(h, p, d, btn, fn, pick) {
   only("sCareer");
 }
 function carShow() {
-  const c = CAREER.c, s = CH1[c.i];
+  const c = CAREER.c, s = CH1[c.i]; if (myCar && myCar.userData.lv !== cLevel()) carKart();
   if (s.t === "pick") return cPanel(s.h, s.p, null, "", null, s);
   cPanel(s.h, s.p.replace("{T}", fmt(s.ms || 0)), null, s.go, s.t === "card" ? (s.end ? carExit : () => { c.i++; cSave(); carShow(); }) : carGo);
 }
@@ -2129,20 +2141,20 @@ $("cBack").onclick = () => carExit();
 $("cReset").onclick = () => { CAREER.c = { i: 0, sk: 50, fa: 50, tm: 50 }; cSave(); carShow(); };
 function carOpen() {
   if (!me || !myCar) return; CAREER.on = true; CAREER.c = cLoad(); CAREER.prev = { t: TRK, n: night };
-  scene.remove(myCar); myCar = kartMesh(me.body, me.roof || "#f3f3f3"); scene.add(myCar); placeCar(); carShow();
+  carKart(); carShow();
 }
 function carGo() {
   const s = CH1[CAREER.c.i]; CAREER.run = s; VF = 12; BL = 3.4; BW = 2.1;
   if (TRK !== "kart") setTrack("kart");
   if (!CAREER.kb) { CAREER.kb = []; const cols = ["#e04b4b", "#2b5fd0", "#2fae6a", "#ff7a1a", "#9b59d0"], hel = ["#f3f3f3", "#f2c230", "#16171b", "#f3f3f3", "#f2c230"];
-    for (let i = 0; i < 5; i++) { const t = i / 4, L = a => a[0] + (a[1] - a[0]) * t, b = { i, mesh: kartMesh(cols[i], hel[i]), vmax: L(KBOT.vmax), grip: L(KBOT.grip), acc: L(KBOT.acc), base: (i % 3 - 1) * 27, s: 0, d: 0, dOff: 0, v: 0, fin: null, wait: 0 }; b.mesh.visible = false; scene.add(b.mesh); CAREER.kb.push(b); } }
+    for (let i = 0; i < 5; i++) { const t = i / 4, L = a => a[0] + (a[1] - a[0]) * t, b = { i, mesh: kartMesh(cols[i], hel[i], cols[i], 0, cols[i]), vmax: L(KBOT.vmax), grip: L(KBOT.grip), acc: L(KBOT.acc), base: (i % 3 - 1) * 27, s: 0, d: 0, dOff: 0, v: 0, fin: null, wait: 0 }; b.mesh.visible = false; scene.add(b.mesh); CAREER.kb.push(b); } }
   if (!CAREER.bots0) { CAREER.bots0 = bots.splice(0); for (const b of CAREER.bots0) b.mesh.visible = false; bots.push(...CAREER.kb); }
-  startRun(s.t === "race" ? "race" : "practice"); ghost = null;
+  startRun(s.t === "race" ? "race" : "practice"); ghost = null; kartPose(myCar, true); for (const b of bots) kartPose(b.mesh, true);
   if (s.t === "race") $("posBig").lastChild.textContent = "/" + (bots.length + 1);
 }
 function carLap(ms) { const s = CAREER.run; if (s && s.t === "trial" && ms <= s.ms) finished = true; }
 function carEnd() {      // called in place of the normal result screen
-  const c = CAREER.c, s = CAREER.run || CH1[c.i], race = s.t === "race", of = " of " + (bots.length + 1); $("flash").classList.remove("on"); for (const b of bots) b.mesh.visible = false;
+  const c = CAREER.c, s = CAREER.run || CH1[c.i], race = s.t === "race", of = " of " + (bots.length + 1); $("flash").classList.remove("on"); kartPose(myCar, false); for (const b of bots) b.mesh.visible = false;
   const ok = race ? finished && place <= s.need : !!runBest && runBest <= s.ms;
   const h = race ? (finished ? (place === 1 ? "You won" : "P" + place + of) : "Race stopped") : runBest ? fmt(runBest) : "No lap set";
   if (ok) { const d = { sk: 2 }; c.sk = clamp(c.sk + 2, 0, 100); c.i++; cSave(); cPanel(h, s.win, d, "Next", carShow); }
@@ -2154,7 +2166,7 @@ function carExit() {
   const p = CAREER.prev || { t: "oval", n: false }; setTrack(p.t); if (p.n) setNight(true); rebuildCar(); kind = "practice"; resetCar(); fillGarage(); show("sGarage");
 }
 $("bCareerWrap").hidden = !careerOn(); $("bCareer").onclick = carOpen;
-if (QS.has("debug")) window.__career = { CAREER, CH1, KST, KBOT, KART, carOpen, carGo, carExit };
+if (QS.has("debug")) window.__career = { CAREER, CH1, KST, KBOT, KART, carOpen, carGo, carExit, kartPose, kart: () => myCar };
 // ---------- start: remember the last username
 const saved = store.get("user");
 if (saved) { $("uname").value = saved; signIn(saved, true); }
