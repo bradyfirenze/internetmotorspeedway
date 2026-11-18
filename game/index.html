@@ -1121,7 +1121,7 @@ const GAIN = { e: [.35, .3, .3, .2], t: [.5, .35, .25, .2], a: [.4, .35, .25, .2
 // LIVE (?live in the address, the default once this ships): credits, PIN, Pit Crew, cars and earned upgrades live on the server (game-backend/Code_DRAFT.gs).
 // Demo (the default in this draft): the same things are kept on this phone only, and nothing is real.
 const FULL = true;      // true = the real Pit Crew game: talks to the server by default (the draft only does with ?live)
-const DESERT_LIVE = false;      // the desert track shows in the DRAFT only. Flip to true (with Brady's OK) to ship it in the push build.
+const DESERT_LIVE = true;      // the desert track shows in the DRAFT only. Flip to true (with Brady's OK) to ship it in the push build.
 if (FULL && !DESERT_LIVE) MONEY.crew.track = "Night Oval";
 const DES_NAME = "Desert Track", desertOn = () => !LITE && (!FULL || DESERT_LIVE || admin());      // until it is switched on for everyone, only the admin test accounts see the desert on the live game
 const LITE = false;      // true = garage start screen and game feel only: no Pit Crew, no credits, upgrades are $1 on Ko-fi like before
@@ -1694,7 +1694,7 @@ function openTracks() {
   $("tList").innerHTML = "<button data-t='day'" + (night || TRK !== "oval" ? "" : " class='on'") + ">Speedway Oval<small>The real track. Free for every follower.</small></button>" +
     "<button data-t='night'" + (night ? " class='on'" : "") + ">Night Oval" + (member() ? "" : " 🔒") + "<small>" + (!desertOn() ? "This week's Pit Crew track." : "Pit Crew track. The oval under the lights.") + "</small></button>" +
     (!desertOn() ? "" : "<button data-t='desert'" + (TRK === "desert" ? " class='on'" : "") + ">" + DES_NAME + (member() ? "" : " 🔒") + "<small>" + (member() ? "This week's Pit Crew track. Dirt, hills and sharp turns." : "This week's Pit Crew track. Try the new track?") + "</small></button>") +
-    (!bankedOn() ? "" : "<button data-t='banked'" + (TRK === "banked" ? " class='on'" : "") + ">" + BNK_NAME + (member() ? "" : " 🔒") + "<small>TEST. Pit Crew track. Steep banked turns you can take almost flat out.</small></button>");
+    (!bankedOn() ? "" : "<button data-t='banked'" + (TRK === "banked" ? " class='on'" : "") + ">" + BNK_NAME + (member() ? "" : " 🔒") + "<small>" + (FULL && !DESERT_LIVE ? "TEST. " : "") + "Pit Crew track. Steep banked turns you can take almost flat out.</small></button>");
   only("sTracks");
 }
 $("tList").onclick = e => { const b = e.target.closest("button"); if (!b) return;
@@ -1982,7 +1982,7 @@ if (QS.has("debug") && (QS.get("trk") === "desert" || QS.get("trk") === "banked"
 const BNK = { deg: 16, mult: 2.2, ramp: 160 }, BNK_TAN = Math.tan(BNK.deg * Math.PI / 180), BNK_NAME = "Banked Oval";
 const BNK_T = [[CS[0], CS[1] + ARC], [CS[2], CS[3] + ARC]];      // each end is banked all the way round: corner, short chute, corner
 let bnkG = null;
-const bankedOn = () => !LITE && (!FULL || admin());      // test accounts only on the live game until Brady opens it
+const bankedOn = () => !LITE && (!FULL || DESERT_LIVE || admin());      // test accounts only on the live game until Brady opens it. DESERT_LIVE opens both Pit Crew tracks (python3 build.py full open)
 // 0 on the two long straights, 1 around the ends, easing up over the last BNK.ramp before an end and down after it
 function bankF(s) { s = mod(s, LEN_OVAL); let near = 1e9; for (const [a, b] of BNK_T) { if (s >= a && s <= b) return 1; near = Math.min(near, mod(a - s, LEN_OVAL), mod(s - b, LEN_OVAL)); } const t = clamp(1 - near / BNK.ramp, 0, 1); return t * t * (3 - 2 * t); }
 const bnkZ = (s, d) => bankF(s) * BNK_TAN * (clamp(d, -W / 2, W / 2 + 2) + W / 2);      // the inside edge stays on the ground, the outside edge climbs
