@@ -74,6 +74,8 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--fg); outlin
 .pres { margin: -6px 0 18px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); }
 .pres .k { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 .pres .v { font-family: var(--display); font-size: 22px; text-transform: uppercase; margin-top: 2px; line-height: 1.15; }
+.pres.efii { display: flex; align-items: center; gap: 14px; text-decoration: none; background: #000; }
+.pres.efii img { display: block; height: 30px; width: auto; }   /* Victory Museum presented by EFii (@efii_co), Brady Nov 18 */
 .pres .v a { color: var(--fg); text-decoration: none; border-bottom: 2px solid var(--yel); }
 .pres .v span { color: var(--muted); }
 .crew { margin: -6px 0 18px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); }
@@ -110,6 +112,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--fg); outlin
   <p class="a2tip" data-a2hs></p>
   <section id="v-mus" role="tabpanel" aria-labelledby="t-mus" hidden>
     <h1>Victory <span>Museum</span></h1>
+    <a class="pres efii" href="https://instagram.com/efii_co" target="_blank" rel="noopener"><div class="k">Presented by</div><img src="../cars/img/efii_co/logo.png" alt="EFii" width="185" height="43"></a>
     <p class="mintro">Every winner's car turns gold and goes in the museum forever.</p>
     <div class="wins" id="wins"></div>
   </section>
