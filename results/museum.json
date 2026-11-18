@@ -1,6 +1,22 @@
 {
  "winners": [
   {
+   "day": 12,
+   "name": "vehicular_projects",
+   "track": "The Derek Zoolander Center for Kids Who Can't Read Good and Who Wanna Learn to Do Other Stuff Good Too Motor Speedway",
+   "date": "Nov 17, 2026",
+   "cars": 24836,
+   "img": "museum/day12.jpg"
+  },
+  {
+   "day": 11,
+   "name": "stubbss__",
+   "track": "Phil McCrackin Motor Speedway",
+   "date": "Nov 16, 2026",
+   "cars": 24836,
+   "img": "museum/day11.jpg"
+  },
+  {
    "day": 10,
    "name": "batman_13p",
    "track": "Mental Health Awareness Motor Speedway",
