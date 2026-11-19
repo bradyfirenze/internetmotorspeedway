@@ -136,7 +136,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--fg); outlin
 const NEXT = { race: "", names: new Set() };
 fetch("../map/next.json", { cache: "no-cache" }).then(r => r.json()).then(d => { NEXT.race = d.race; (d.names || []).forEach(n => NEXT.names.add(n)); }).catch(() => {});
 const CUTOFF = { 9: "10:30 am PT Nov 14", 10: "1:24 pm PT Nov 15", 11: "11 pm PT Nov 15", 12: "11 pm PT Nov 15" };   // when each day's final follower list was pulled
-const DAYS = [{ id: 12, file: "day12.json" }, { id: 11, file: "day11.json" }, { id: 10, file: "day10.json" }, { id: 9, file: "day9.json" }, { id: 8, file: "day8.json" }, { id: 7, file: "day7.json" }, { id: 6, file: "day6.json" }, { id: 5, file: "day5.json" }, { id: 4, file: "day4.json" }, { id: 3, file: "day3.json" }, { id: 2, file: "day2.json" }];   // newest first; add each new race here
+const DAYS = [{ id: 13, file: "day13.json" }, { id: 12, file: "day12.json" }, { id: 11, file: "day11.json" }, { id: 10, file: "day10.json" }, { id: 9, file: "day9.json" }, { id: 8, file: "day8.json" }, { id: 7, file: "day7.json" }, { id: 6, file: "day6.json" }, { id: 5, file: "day5.json" }, { id: 4, file: "day4.json" }, { id: 3, file: "day3.json" }, { id: 2, file: "day2.json" }];   // newest first; add each new race here
 const STEP = 100;
 let data = null, shown = STEP, me = null, dnfOnly = false;   // DNF rows carry a "note": why they didn't finish (tools/results_dnf.py)
 const $ = id => document.getElementById(id);
