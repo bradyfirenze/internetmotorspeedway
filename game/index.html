@@ -252,6 +252,8 @@ button.crew { background: #062a30; color: #6ff3ff; border: 1px solid rgba(41,240
 .cmet small{display:block;margin-top:3px;font:600 10px var(--body);color:var(--muted)}
 #sCareer p{margin:3px 0 4px;font-size:14px;line-height:1.35} #sCareer #cTwo button{font-size:15px;padding:11px 6px}
 .clinks{display:flex;justify-content:space-between;margin-top:7px} .clinks .linkbtn{width:auto}
+.vrow{display:flex;gap:5px;overflow-x:auto;margin:2px 0 6px;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+.vrow button{flex:0 0 auto;width:auto;padding:6px 10px;font-size:13px;background:#0b0d11;color:var(--fg);border:1px solid var(--line)} .vrow button.on{background:var(--yel);color:#141414;border-color:var(--yel)}
 </style>
 <script type="importmap">{ "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -501,8 +503,9 @@ button.crew { background: #062a30; color: #6ff3ff; border: 1px solid rgba(41,240
   <div class="box">
     <div class="k">Pit Crew paint shop</div>
     <h2 id="ncH">Add a car</h2>
-    <div class="k" style="color:var(--muted)">Body</div><div class="sws" id="ncBody"></div>
-    <div class="k" style="color:var(--muted)">Roof</div><div class="sws" id="ncRoof"></div>
+    <div id="ncShapeRow" hidden><div class="k" style="color:var(--muted)">Vehicle</div><div class="vrow" id="ncShape"></div></div>
+    <div class="k" style="color:var(--muted)">Body color</div><div class="sws" id="ncBody"></div>
+    <div class="k" style="color:var(--muted)">Second color</div><div class="sws" id="ncRoof"></div>
     <div class="numrow" id="ncStep"><span class="k" style="color:var(--muted)">Number</span><button class="alt" data-d="-10">-10</button><button class="alt" data-d="-1">-1</button><b id="ncNum">none</b><button class="alt" data-d="1">+1</button><button class="alt" data-d="10">+10</button></div>
     <div class="msg" id="ncMsg" role="status" style="min-height:0;margin:0 0 5px"></div>
     <div class="two"><button id="ncAdd">Add this car</button><button class="alt" id="ncCancel">Cancel</button></div>
@@ -596,7 +599,7 @@ async function signIn(raw, quiet) {
   const c = (cus.cars || []).find(x => x.ig.toLowerCase() === name), won = (mus.winners || []).some(w => w.name.toLowerCase() === name);
   const u = (gar.upgrades || {})[name] || {};
   me = { name, body: "#" + fol.f[name], roof: null, num: "", kind: "Your car", up: { e: clamp(u.e | 0, 0, 3), t: clamp(u.t | 0, 0, 3), a: clamp(u.a | 0, 0, 3) } };
-  if (c) { me.body = c.bodyHex; me.roof = c.roofHex; me.num = c.num || ""; me.kind = "Your custom car"; me.shape = c.kind || null; me.pro = c.tier === "car_pro"; me.look = c.look || null; me.lookHex = (c.bodyHex || "").toLowerCase(); }
+  if (c) { me.body = c.bodyHex; me.roof = c.roofHex; me.num = c.num || ""; me.kind = "Your custom car"; me.shape = c.kind || null; me.shapes = Array.isArray(c.kinds) ? c.kinds : []; me.pro = c.tier === "car_pro"; me.look = c.look || null; me.lookHex = (c.bodyHex || "").toLowerCase(); }
   { const q = new URLSearchParams(location.search), pv = q.get("body"); if (pv && q.has("debug")) me.shape = pv; if (q.has("pro") && q.has("debug")) me.pro = true; }
   if (won) { me.body = GOLD; me.roof = "#c98200"; me.kind = "Race winner"; }
   await moneyIn({ fol, cus, gar, mus });
@@ -1145,8 +1148,8 @@ function syncSV() {              // copy the server's cars and upgrades into the
     if (!c) { if (i) CARS[i] = null; continue; }
     if (!CARS[i]) CARS[i] = { body: c.body, roof: c.roof, num: "", kind: "", up: { e: 0, t: 0, a: 0 } };
     const look = i || (c.body && !ORIG.won) ? c : ORIG;      // your first car goes back to its normal look when it has no Pit Crew paint. Race winners stay gold.
-    CARS[i].body = look.body; CARS[i].roof = look.roof || null; CARS[i].num = look.num || ""; for (const k of "eta") CARS[i].up[k] = c.up[k]; }
-  if (CARS[slot] && me.body !== undefined) { const c = CARS[slot]; me.body = c.body; me.roof = c.roof; me.num = c.num || ""; }
+    CARS[i].body = look.body; CARS[i].roof = look.roof || null; CARS[i].num = look.num || ""; CARS[i].shape = typeof c.shape === "string" ? c.shape : undefined; for (const k of "eta") CARS[i].up[k] = c.up[k]; }
+  if (CARS[slot] && me.body !== undefined) { const c = CARS[slot]; me.body = c.body; me.roof = c.roof; me.num = c.num || ""; me.shape = slotShape(slot); }
   if ((!member() && slot) || !CARS[slot]) { slot = 0; applyCar(); }
   if (me.glow !== member()) { me.glow = member(); if (!me.glow) { if (night) setNight(false); if (TRK !== "oval" && TRK !== "kart") setTrack("oval"); } if (myCar) rebuildCar(); }
 }
@@ -1177,18 +1180,23 @@ async function moneyIn(d) {      // called after sign in
   }
   me.glow = member(); if (!me.glow) { if (night) setNight(false); if (TRK !== "oval" && TRK !== "kart") setTrack("oval"); }
   // cars: slot 1 is the car every follower has. Slots 2 and 3 are Pit Crew only. Upgrades belong to the car, not the driver.
-  const extra = c => c ? { body: c.body, roof: c.roof, num: c.num || "", kind: "", up: { e: 0, t: 0, a: 0, ...c.up } } : null;
-  ORIG = { body: me.body, roof: me.roof, num: me.num, won: me.kind === "Race winner", shape: me.shape || null, pro: !!me.pro, look: me.look || null, lookHex: me.lookHex || "" };
+  const extra = c => c ? { body: c.body, roof: c.roof, num: c.num || "", kind: "", shape: typeof c.shape === "string" ? c.shape : undefined, up: { e: 0, t: 0, a: 0, ...c.up } } : null;
+  ORIG = { body: me.body, roof: me.roof, num: me.num, won: me.kind === "Race winner", shape: me.shape || null, shapes: me.shapes || [], pro: !!me.pro, look: me.look || null, lookHex: me.lookHex || "" };
   CARS = [{ body: me.body, roof: me.roof, num: me.num, kind: me.kind, up: me.up }, extra(sv[1]), extra(sv[2])];
-  if (LIVE) syncSV(); else if (sv[0] && sv[0].body && !ORIG.won && member()) { CARS[0].body = sv[0].body; CARS[0].roof = sv[0].roof; CARS[0].num = sv[0].num || ""; }
+  if (LIVE) syncSV(); else { if (sv[0] && typeof sv[0].shape === "string") CARS[0].shape = sv[0].shape; if (sv[0] && sv[0].body && !ORIG.won && member()) { CARS[0].body = sv[0].body; CARS[0].roof = sv[0].roof; CARS[0].num = sv[0].num || ""; } }
   slot = member() ? clamp(+store.get("slot:" + me.name) || 0, 0, 2) : 0; if (!CARS[slot]) slot = 0;
   applyCar(); dressGarage(); helpInit();
 }
 let CARS = [], slot = 0, ORIG = { body: "", roof: null, num: "", won: false };      // ORIG = the look your first car has without Pit Crew paint
 const SLOTS = 3, saveCars = () => { if (!LIVE) store.set("cars:" + me.name, JSON.stringify(CARS)); store.set("slot:" + me.name, slot); };
 const dailySlot = () => { const d = LIVE ? SV.daily : +store.get("daily:" + me.name) || 0; return member() && CARS[d] ? d : 0; };
-function applyCar() { const c = CARS[slot]; me.body = c.body; me.roof = c.roof; me.num = c.num || ""; me.up = c.up; me.shape = slot === 0 ? ORIG.shape : null; me.pro = slot === 0 && ORIG.pro; me.look = ORIG.look || null; me.lookHex = ORIG.lookHex || "";      // a cars.json look shows on whichever car wears its paint
-  if (admin()) { const v = store.get("adm:" + me.name); if (v) { me.shape = BODY_SCALE[v] ? v : null; me.pro = v === "pro"; } } me.kind = slot ? "Car " + (slot + 1) + " of " + SLOTS : c.kind; saveCars(); }
+// Each of your cars can be a different vehicle (Brady, Nov 18): a car slot remembers its own vehicle and its own colors.
+// You can pick from the rides you own: the one in cars.json (plus "kinds" there if you bought more), or every ride for the admin test accounts.
+// c.shape: a ride name = that ride, "" = a normal car on purpose, not set = the old rule (your bought ride sits on car 1).
+const ownedShapes = () => admin() ? Object.keys(BODY_SCALE).filter(k => k !== "balloon") : [...new Set([ORIG.shape].concat(ORIG.shapes || []).filter(k => k && BODY_SCALE[k]))];
+function slotShape(i) { const c = CARS[i], s = c && c.shape; if (s === "") return null; if (typeof s === "string" && ownedShapes().includes(s)) return s; return i ? null : ORIG.shape || null; }
+function applyCar() { const c = CARS[slot]; me.body = c.body; me.roof = c.roof; me.num = c.num || ""; me.up = c.up; me.shape = slotShape(slot); me.pro = slot === 0 && ORIG.pro; me.look = ORIG.look || null; me.lookHex = ORIG.lookHex || "";      // a cars.json look shows on whichever car wears its paint
+  if (admin() && store.get("adm:" + me.name) === "pro" && !me.shape) me.pro = true; me.kind = slot ? "Car " + (slot + 1) + " of " + SLOTS : c.kind; saveCars(); }
 function openCars() {
   const mem = member(), have = CARS.filter(Boolean).length, lv = c => UPG.map(u => u.name + " " + c.up[u.id]).join(" · ");
   $("cCount").textContent = have + " of " + (mem ? SLOTS : 1) + (mem ? " · Pit Crew" : "");
@@ -1196,7 +1204,7 @@ function openCars() {
     if (i && !mem) return "<div class='carc lock'><b>Car " + (i + 1) + " 🔒</b><div>Pit Crew gets 3 cars</div><div></div><button class='alt' data-join='1'>Pit Crew only</button></div>";
     if (!c) return "<div class='carc lock'><b>Car " + (i + 1) + "</b><div>Empty slot</div><div></div><button data-new='" + i + "'>Add a car</button></div>";
     const daily = dailySlot() === i;
-    return "<div class='carc" + (i === slot ? " on" : "") + "'><b><span class='sw' style='background:" + esc(c.body) + "'></span><span class='sw' style='background:" + esc(c.roof || c.body) + "'></span>Car " + (i + 1) + "</b><div>" + lv(c) + "</div>" +
+    return "<div class='carc" + (i === slot ? " on" : "") + "'><b><span class='sw' style='background:" + esc(c.body) + "'></span><span class='sw' style='background:" + esc(c.roof || c.body) + "'></span>Car " + (i + 1) + (slotShape(i) ? " · " + esc(BODY_NAME[slotShape(i)] || slotShape(i)) : "") + "</b><div>" + lv(c) + "</div>" +
       "<div>" + (daily ? "<span style='color:var(--yel);font-weight:700'>DAILY CAR</span>" : mem ? "<button class='linkbtn' data-daily='" + i + "'>Make daily car</button>" : "") +
         (mem && !(i === 0 && ORIG.won) ? " · <button class='linkbtn' data-paint='" + i + "' style='color:#6ff3ff'>Repaint</button>" : "") + "</div>" +
       "<button" + (i === slot ? " disabled" : "") + " data-drive='" + i + "'>" + (i === slot ? "Driving" : "Drive this") + "</button></div>"; }).join("");
@@ -1210,22 +1218,24 @@ $("cList").onclick = e => { const b = e.target.closest("button"); if (!b) return
 // a new Pit Crew car: pick the colors. Any color but gold.
 // Pit Crew paint shop: pick the body color, roof color and number for any of your cars, as often as you like. Any color but gold.
 const NEWCOL = PAL.concat(["#16171b", "#8a8f99", "#1f3a8a", "#14532d", "#ffe14d", "#0f766e", "#7c4a21", "#a3e635"]);
-let nc = { i: 1, body: NEWCOL[0], roof: "#16171b", num: 0, edit: false };
+let nc = { i: 1, body: NEWCOL[0], roof: "#16171b", num: 0, edit: false, shape: "" };
 function drawNewCar() {
   for (const [id, k] of [["ncBody", "body"], ["ncRoof", "roof"]]) { const list = NEWCOL.includes(nc[k]) ? NEWCOL : [nc[k]].concat(NEWCOL);
     $(id).innerHTML = list.map(c => "<button data-c='" + c + "' aria-label='" + c + "' style='background:" + c + "'" + (nc[k] === c ? " class='on'" : "") + "></button>").join(""); }
+  { const own = ownedShapes(); $("ncShapeRow").hidden = !own.length; $("ncShape").innerHTML = [""].concat(own).map(k => "<button data-s='" + k + "'" + (nc.shape === k ? " class='on'" : "") + ">" + esc(k ? BODY_NAME[k] || k : "Normal car") + "</button>").join(""); }
   $("ncH").textContent = (nc.edit ? "Repaint car " : "Add car ") + (nc.i + 1); $("ncAdd").textContent = nc.edit ? "Save this look" : "Add this car"; $("ncNum").textContent = nc.num ? nc.num : "none";
-  if (myCar) scene.remove(myCar); myCar = raceCar({ body: nc.body, roof: nc.roof, num: nc.num ? String(nc.num) : "", up: nc.edit ? CARS[nc.i].up : { e: 0, t: 0, a: 0 }, glow: true }); scene.add(myCar); placeCar(); dressGarage({ body: nc.body, roof: nc.roof, num: nc.num ? String(nc.num) : "" });
+  if (myCar) scene.remove(myCar); myCar = raceCar({ body: nc.body, roof: nc.roof, num: nc.num ? String(nc.num) : "", up: nc.edit ? CARS[nc.i].up : { e: 0, t: 0, a: 0 }, glow: true, shape: nc.shape || null, name: me.name }); scene.add(myCar); placeCar(); dressGarage({ body: nc.body, roof: nc.roof, num: nc.num ? String(nc.num) : "" });
 }
-function openNewCar(i) { const c = CARS[i]; nc = { i, edit: !!c, body: c ? c.body : NEWCOL[3], roof: c ? c.roof || "#16171b" : "#16171b", num: c ? +c.num || 0 : 0 }; $("ncMsg").textContent = ""; only("sNewCar"); drawNewCar(); }
+function openNewCar(i) { const c = CARS[i]; nc = { i, edit: !!c, body: c ? c.body : NEWCOL[3], roof: c ? c.roof || "#16171b" : "#16171b", num: c ? +c.num || 0 : 0, shape: c ? slotShape(i) || "" : "" }; $("ncMsg").textContent = ""; only("sNewCar"); drawNewCar(); }
 $("ncBody").onclick = e => { const c = e.target.dataset.c; if (c) { nc.body = c; drawNewCar(); } };
+$("ncShape").onclick = e => { const b = e.target.closest("button"); if (b) { nc.shape = b.dataset.s; drawNewCar(); } };
 $("ncRoof").onclick = e => { const c = e.target.dataset.c; if (c) { nc.roof = c; drawNewCar(); } };
 $("ncStep").onclick = e => { const d = +e.target.dataset.d; if (!d) return; nc.num = clamp(nc.num + d, 0, 99); drawNewCar(); };
 $("ncAdd").onclick = () => {
   const done = () => { if (!nc.edit) slot = nc.i; applyCar(); rebuildCar(); fillGarage(); openCars(); }, num = nc.num ? String(nc.num) : "";
-  if (LIVE) return needPin(async () => { let d = {}; try { d = await srv({ a: "car", pin: pinMem, slot: nc.i, body: nc.body, roof: nc.roof, num }); } catch (e) {}
+  if (LIVE) return needPin(async () => { let d = {}; try { d = await srv({ a: "car", pin: pinMem, slot: nc.i, body: nc.body, roof: nc.roof, num, ...(ownedShapes().length ? { shape: nc.shape } : {}) }); } catch (e) {}
     if (d.ok) return done(); only("sNewCar"); const m = $("ncMsg"); m.className = "msg bad"; m.textContent = d.why === "gold" ? "Gold is for race winners. Pick another color." : d.why === "crew" ? "Painting is a Pit Crew perk." : "Couldn't save it. Check your signal and try again."; });
-  CARS[nc.i] = { kind: "", up: { e: 0, t: 0, a: 0 }, ...(CARS[nc.i] || {}), body: nc.body, roof: nc.roof, num }; done(); };
+  CARS[nc.i] = { kind: "", up: { e: 0, t: 0, a: 0 }, ...(CARS[nc.i] || {}), body: nc.body, roof: nc.roof, num, ...(ownedShapes().length ? { shape: nc.shape } : {}) }; done(); };
 $("ncCancel").onclick = () => { rebuildCar(); openCars(); };
 $("bCars").onclick = openCars;
 
@@ -1321,12 +1331,16 @@ $("claimForm").addEventListener("submit", async e => { e.preventDefault(); $("cl
 
 // ---------- admin test garage (Brady's own accounts only): drive any vehicle we sell and set any upgrade level, free. Shown only when the server says admin.
 const ADMV = () => [["", "Normal car"], ["pro", "Car PRO"]].concat(Object.keys(BODY_SCALE).filter(k => k !== "balloon").map(k => [k, BODY_NAME[k] || k]));      // new bodies show up here by themselves
-function openAdmin(msg) { if (!admin()) return; const cur0 = store.get("adm:" + me.name) || "";
+function openAdmin(msg) { if (!admin()) return; const cur0 = slotShape(slot) || (store.get("adm:" + me.name) === "pro" ? "pro" : "");
   $("adV").innerHTML = ADMV().map(([k, n]) => "<button data-v='" + k + "'" + (k === cur0 ? " class='on'" : "") + ">" + n + "</button>").join("");
   $("adL").innerHTML = UPG.map(u => "<div class='adr'><b>" + u.name + "</b>" + [0, 1, 2, 3, 4].map(l => "<button data-u='" + u.id + "' data-l='" + l + "'" + (me.up[u.id] === l ? " class='on'" : "") + ">" + l + "</button>").join("") + "</div>").join("");
-  $("adMsg").textContent = msg || "Car " + (slot + 1) + ". Looks and levels here are for testing. Your laps stay off the public leaderboard."; only("sAdmin"); }
+  $("adMsg").textContent = msg || "Car " + (slot + 1) + ". A vehicle you pick here stays on this car. Repaint it from My cars. Levels are for testing. Your laps stay off the public leaderboard."; only("sAdmin"); }
 $("bAdm").onclick = () => openAdmin();
-$("adV").onclick = e => { const b = e.target.closest("button"); if (!b || !admin()) return; store.set("adm:" + me.name, b.dataset.v); applyCar(); rebuildCar(); fillGarage(); openAdmin(); };
+$("adV").onclick = e => { const b = e.target.closest("button"); if (!b || !admin()) return; const v = b.dataset.v, shp = v === "pro" ? "" : v, c = CARS[slot];
+  store.set("adm:" + me.name, v === "pro" ? "pro" : "");
+  const done = msg => { applyCar(); rebuildCar(); fillGarage(); openAdmin(msg); };
+  if (LIVE) return needPin(async () => { let d = {}; try { d = await srv({ a: "car", pin: pinMem, slot, body: c.body, roof: c.roof || c.body, num: c.num || "", shape: shp }); } catch (e) {} done(d.ok ? "" : "Couldn't save that vehicle to car " + (slot + 1) + (d.why === "gold" ? ": a gold car can't be saved here." : ". Check your signal and try again.")); });
+  c.shape = shp; done(); };
 $("adL").onclick = e => { const b = e.target.closest("button"); if (!b || !admin()) return; const up = { ...me.up, [b.dataset.u]: +b.dataset.l };
   if (LIVE) return needPin(async () => { let d = {}; try { d = await srv({ a: "setup", pin: pinMem, slot, up }); } catch (x) {} if (d.ok) { applyCar(); rebuildCar(); fillGarage(); } openAdmin(d.ok ? "" : "Couldn't save that. Check your signal and try again."); });
   me.up[b.dataset.u] = +b.dataset.l; saveCars(); rebuildCar(); fillGarage(); openAdmin(); };
