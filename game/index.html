@@ -2113,7 +2113,8 @@ function bnkBuild() {
 // ---------- CAREER, story mode (DRAFT Nov 17, Brady's idea): you start in a beat up rental kart and work your way up.
 // Chapter 1 = karts: story cards, two-answer choices that move three meters (Skill, Family, Team), a time trial and two races.
 // The meters change the kart a little: Skill = grip, Family = pull off the corners, Team = top speed. Progress is kept on this phone for now.
-const careerOn = () => !LITE && (!FULL || admin());      // test accounts only on the live game until Brady opens it
+const CAREER_LIVE = true;      // Brady opened story mode to everyone on Nov 20. false = admin test accounts only.
+const careerOn = () => !LITE && (!FULL || CAREER_LIVE || admin());
 let VF = 30, BL = 5.5, BW = 2.7, kG = null;      // VF: below this speed the steering stops getting quicker. BL / BW: how close two cars get before they bump.
 const CAREER = { on: false, run: null, prev: null, bots0: null, kb: null, c: null, fn: null };
 const KST = { vmax: 31, grip: 20, accel: 11 }, KBOT = { vmax: [28.6, 25.5], grip: [17, 13], acc: [10.2, 8.2] };
@@ -2382,7 +2383,7 @@ function carPick(w) { const c = CAREER.c, day = c.day, k = CARD[c.ev[day]], mi =
 $("cA").onclick = () => CAREER.two && CAREER.two[0][2](); $("cB").onclick = () => CAREER.two && CAREER.two[1][2]();
 $("cGo").onclick = () => { const f = CAREER.fn; if (f) f(); };
 $("cBack").onclick = () => carExit();
-$("cReset").onclick = () => { CAREER.c = C0(); cSave(); carKart(); carShow(); };
+$("cReset").onclick = e => { const b = e.currentTarget; if (!b.dataset.sure) { b.dataset.sure = 1; b.textContent = "Erase career? Tap again"; return setTimeout(() => { delete b.dataset.sure; b.textContent = "Start over"; }, 3000); } delete b.dataset.sure; b.textContent = "Start over"; CAREER.c = C0(); cSave(); carKart(); carShow(); };      // two taps, so a slip of the thumb cannot wipe a season
 // a race is in the books: points for the whole field, credits by place, the bars move, then the standings.
 // ord = the other karts in the order they finished. The cup race pays double and ends the season.
 function cRaceDone(p, tag, ord) { const c = CAREER.c, wk = c.wk, cup = c.cupwk === wk, pay = RACEPAY[p - 1] + (c.fans >= 70 ? 1 : 0), of = " of " + RACEPAY.length;
