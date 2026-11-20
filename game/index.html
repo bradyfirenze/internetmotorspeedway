@@ -346,7 +346,7 @@ button.crew { background: #062a30; color: #6ff3ff; border: 1px solid rgba(41,240
     <button class="banner" id="bWeek"></button>
     <div id="load" aria-hidden="true"><i id="lbar"></i></div>
     <button class="big" id="bRace" disabled>Loading the track</button>
-    <div class="two"><button class="alt" id="bDrivers" disabled>Race real drivers</button><button class="alt" id="bStory" hidden style="color:#3ddc84;border-color:#3ddc84">Story mode</button><button class="prize" id="bPrize" disabled>Prize race</button></div>
+    <div class="two"><button class="alt" id="bDrivers" disabled>Race real drivers</button><button class="alt" id="bStory" hidden style="color:#3ddc84;border-color:#3ddc84">My Career</button><button class="prize" id="bPrize" disabled>Prize race</button></div>
     <div class="two"><button class="alt" id="bPrac" disabled>Practice lap</button><button class="alt" id="bBoard">Leaderboard</button></div>
     <div class="two"><button class="alt" id="bCars">My cars</button><button class="alt" id="bUpg">Pit lane</button></div>
     <div class="two"><button class="crew" id="bCrew">Pit Crew</button><button class="alt" id="bWallet">Wallet</button></div>
@@ -2344,7 +2344,7 @@ function cMeters(d) { const c = CAREER.c; d = d || {};
 // o: { h, p, d (bar changes to show), go, fn, pick (a card), mi (crew member), day (which day to light up), kk (kicker word), drive }
 function cPanel(o) {
   const c = CAREER.c, wk = c.st === "week", day = o.day === undefined ? c.day : o.day;
-  $("cK").textContent = "Career · " + (c.st === "intro" || c.st === "trial" ? "Tryout" : c.st === "signed" && o.day === undefined ? "Signed" : "Week " + (o.wk || c.wk) + " · " + DAYN[day]) + (o.kk ? " · " + o.kk : "");
+  $("cK").textContent = "My Career · " + (c.st === "intro" || c.st === "trial" ? "Tryout" : c.st === "signed" && o.day === undefined ? "Signed" : "Week " + (o.wk || c.wk) + " · " + DAYN[day]) + (o.kk ? " · " + o.kk : "");
   $("cDays").hidden = CAREER.days = !(wk || o.day !== undefined); $("cDays").innerHTML = DAYS.map((n, i) => "<span class='" + (i === day ? "on" : i < day ? "past" : "") + "'>" + n + "</span>").join("");
   $("cH").textContent = o.h; $("cP").textContent = o.p; cMeters(o.d); $("cTab").hidden = !o.tab; $("cTab").innerHTML = o.tab || ""; CAREER.tab = !!o.tab; $("cP").hidden = !o.p;
   let k = o.pick, two = o.two; if (k) { const nm = c.crew[o.mi].n, M = s => s.replace(/\{M\}/g, nm); two = ["a", "b"].map(w => [M(k[w][0]), cFxText(k[w][1], nm), () => carPick(w), c.cr + (k[w][1].cr || 0) < 0]); }
