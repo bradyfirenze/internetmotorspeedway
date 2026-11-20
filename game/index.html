@@ -284,6 +284,12 @@ button.crew { background: #062a30; color: #6ff3ff; border: 1px solid rgba(41,240
 #chGo{width:auto;padding:10px 34px;position:relative;z-index:1}
 .conf{position:absolute;inset:0;pointer-events:none!important} .conf i{position:absolute;top:-14px;width:7px;height:12px;border-radius:2px;animation:cfall 4s linear infinite}
 @keyframes cfall{to{transform:translateY(110vh) rotate(700deg)}}
+/* season mode */
+#sSeason .box{padding:10px 14px} #sSeason h2{margin:0;font-size:22px} #seBody{max-height:calc(100vh - 168px);overflow-y:auto;margin:6px 0 2px} #sSeason .crow.done b{color:var(--yel)}
+.setabs{display:flex;gap:6px;margin-top:6px} .setabs button{flex:1;padding:6px 8px;font-size:13px}
+.sstand div{display:grid;grid-template-columns:24px 1fr 44px;align-items:center;gap:6px;padding:4px 6px;border-bottom:1px solid var(--line);font:600 13px var(--body)}
+.sstand i{font:400 16px var(--display);font-style:normal;color:var(--muted)} .sstand b{font:400 18px var(--display);text-align:right} .sstand em{font-style:normal;font-size:11px;margin-left:6px;color:var(--grn)}
+.sstand .me{background:rgba(255,204,24,.13);border-radius:8px} .sstand .me span,.sstand .me i{color:var(--yel)} .sstand .cut{border-bottom:2px dashed var(--yel)}
 </style>
 <script type="importmap">{ "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -332,7 +338,7 @@ button.crew { background: #062a30; color: #6ff3ff; border: 1px solid rgba(41,240
       <div class="stat"><span class="k">Rank</span><b id="gRank">--</b></div></div>
     <button class="hsw on" id="bHelp" aria-label="Steering assist on or off"></button>
     <button class="hsw two on" id="bCtl" aria-label="Steer with the slider or with buttons"></button>
-    <p class="small" style="margin:5px 0 0"><button class="linkbtn" id="bTracks" style="color:var(--yel)">Track: Speedway Oval</button> &middot; <button class="linkbtn" id="bSwitch">Switch username</button><span id="bHelpWrap" hidden> &middot; <button class="linkbtn" id="bHelpDesk">Help</button></span><span id="bCareerWrap" hidden> &middot; <button class="linkbtn" id="bCareer" style="color:#3ddc84">Career (NEW)</button></span><span id="bAdmWrap" hidden> &middot; <button class="linkbtn" id="bAdm" style="color:#ff8a1e">Admin garage</button></span><span id="bClaimWrap" hidden> &middot; <button class="linkbtn" id="bClaim" style="color:#6ff3ff">Joined on Ko-fi? Claim Pit Crew</button></span></p>
+    <p class="small" style="margin:5px 0 0"><button class="linkbtn" id="bTracks" style="color:var(--yel)">Track: Speedway Oval</button> &middot; <button class="linkbtn" id="bSwitch">Switch username</button><span id="bHelpWrap" hidden> &middot; <button class="linkbtn" id="bHelpDesk">Help</button></span><span id="bSeasonWrap" hidden> &middot; <button class="linkbtn" id="bSeason" style="color:#ffcc18">Season (NEW)</button></span><span id="bAdmWrap" hidden> &middot; <button class="linkbtn" id="bAdm" style="color:#ff8a1e">Admin garage</button></span><span id="bClaimWrap" hidden> &middot; <button class="linkbtn" id="bClaim" style="color:#6ff3ff">Joined on Ko-fi? Claim Pit Crew</button></span></p>
     <button class="fsb" id="bFs" hidden>&#128242; Address bar in the way? Save it as an app</button>
   </div>
   <div class="gside">
@@ -340,7 +346,7 @@ button.crew { background: #062a30; color: #6ff3ff; border: 1px solid rgba(41,240
     <button class="banner" id="bWeek"></button>
     <div id="load" aria-hidden="true"><i id="lbar"></i></div>
     <button class="big" id="bRace" disabled>Loading the track</button>
-    <div class="two"><button class="alt" id="bDrivers" disabled>Race real drivers</button><button class="prize" id="bPrize" disabled>Prize race</button></div>
+    <div class="two"><button class="alt" id="bDrivers" disabled>Race real drivers</button><button class="alt" id="bStory" hidden style="color:#3ddc84;border-color:#3ddc84">Story mode</button><button class="prize" id="bPrize" disabled>Prize race</button></div>
     <div class="two"><button class="alt" id="bPrac" disabled>Practice lap</button><button class="alt" id="bBoard">Leaderboard</button></div>
     <div class="two"><button class="alt" id="bCars">My cars</button><button class="alt" id="bUpg">Pit lane</button></div>
     <div class="two"><button class="crew" id="bCrew">Pit Crew</button><button class="alt" id="bWallet">Wallet</button></div>
@@ -554,6 +560,17 @@ button.crew { background: #062a30; color: #6ff3ff; border: 1px solid rgba(41,240
   </div>
 </div>
 
+<!-- season mode (DRAFT): the weekly Pit Crew cup -->
+<div class="screen mid" id="sSeason" hidden>
+  <div class="box" style="max-width:520px">
+    <div class="head"><div><div class="k">Season mode · Pit Crew cup</div><h2 id="seH">Season mode</h2></div><span class="chip" id="seChip"></span></div>
+    <div class="setabs" id="seTabs"><button id="seT1">Races</button><button id="seT2" class="alt">Standings</button></div>
+    <div id="seBody"></div>
+    <div class="msg" id="seMsg" role="status"></div>
+    <div class="two" id="seTwo" hidden><button id="seGo">Start my one attempt</button><button class="alt" id="seNo">Not yet</button></div>
+    <button class="linkbtn" id="seBack">Garage</button>
+  </div>
+</div>
 <!-- career, story mode (DRAFT) -->
 <div class="screen side" id="sCareer" hidden>
   <div class="box">
@@ -932,6 +949,7 @@ function endRun() {
   mode = "menu"; $("hud").hidden = true; $("lights").hidden = true; audioOff(); ghostCar.visible = false; for (const g of G) g.mesh.visible = false; gasOn = brkOn = 0; hitT = 0; $("hit").style.opacity = 0; $("gas").classList.remove("on"); $("brk").classList.remove("on");
   try { if (document.fullscreenElement) document.exitFullscreen(); } catch (e) {}
   if (CAREER.on) return carEnd();
+  if (SEA.run) return seaEnd();
   const b = best(), saved = +store.get("saved:" + TK() + me.name) || 0, race = kind === "race";
   $("rRun").textContent = fmt(runBest); $("rBest").textContent = fmt(b);
   $("rPosBox").hidden = !race; $("rPos").textContent = finished ? "P" + place : "--";
@@ -1283,7 +1301,7 @@ $("bCars").onclick = openCars;
 
 function paintMoney() {
   if (!me) return; refreshSV();
-  $("bAdmWrap").hidden = !admin(); $("bCareerWrap").hidden = !careerOn(); $("bHelpWrap").hidden = !window.IMSHelp;      // Help shows only once the site's help desk (site/help/help.js) is live
+  $("bAdmWrap").hidden = !admin(); $("bSeasonWrap").hidden = !seasonOn(); $("bHelpWrap").hidden = !window.IMSHelp;      // Help shows only once the site's help desk (site/help/help.js) is live
   paintBars(); const cs = crewState(), cl = $("crewLine");      // told before they cancel (Brady, Nov 16): a lapsed member's upgrades and cars lock until they rejoin
   $("bCrew").textContent = member() ? "Pit Crew ✓" : cs.lapsed ? "Rejoin Pit Crew" : "Join Pit Crew";
   cl.hidden = LITE || !(member() || cs.lapsed); cl.className = "small" + (cs.lapsed || (cs.left > 0 && cs.left <= 5) ? " warn" : "");
@@ -1293,7 +1311,7 @@ function paintMoney() {
   { const t = $("bDesert"), on = desertOn(); t.hidden = !on;      // the desert preview card: shows everyone the new track, and is the way in for members
     if (on) $("bDesertT").textContent = TRK === "desert" ? "You're on the " + DES_NAME + " ✓" : member() ? "Tap to race it" : "Pit Crew track · tap to unlock"; }
   const w = $("bWeek"); w.textContent = member() ? "Pit Crew · this week: " + MONEY.crew.track + " · race to earn upgrades" : ""; w.hidden = !member() || desertOn();      // the banner is for members only now: the Join Pit Crew button is the one ask in the garage
-  for (const [id, on] of [["bPrize", MONEY.prizeOn && !LITE], ["bWallet", MONEY.packsOn && !LITE], ["bCars", !LITE], ["bCrew", !LITE]]) { $(id).hidden = !on; if (!on) $(id).parentNode.style.gridTemplateColumns = "1fr"; }
+  for (const [id, on] of [["bPrize", MONEY.prizeOn && !LITE], ["bWallet", MONEY.packsOn && !LITE], ["bCars", !LITE], ["bCrew", !LITE]]) { $(id).hidden = !on; if (!on) $(id).parentNode.style.gridTemplateColumns = "1fr"; } storyBtn();
   if (LITE) { $("bCrew").parentNode.hidden = true; w.hidden = true; $("bTracks").hidden = true; $("bTracks").nextSibling.textContent = ""; $("pWal").hidden = true; $("pEarn").hidden = true; }
   $("bTracks").textContent = "Track: " + (TRK === "desert" ? DES_NAME : TRK === "banked" ? BNK_NAME : night ? "Night Oval" : "Speedway Oval");
 }
@@ -1358,7 +1376,7 @@ if (SHOT) { const n = "m4rvin_s"; store.set("user", n); store.set("crew:" + n, "
   store.set("cars:" + n, JSON.stringify([{ up: { e: 3, t: 2, a: 4 } }, { body: "#4187ec", roof: "#f3f3f3", num: "", kind: "", up: { e: 1, t: 1, a: 0 } }, null]));
   setInterval(() => { if (!me) return; $("gName").textContent = "@YOURNAME"; $("gKind").textContent = "Pit Crew car"; $("gBest").textContent = "36.42"; $("gRank").textContent = "P14";
     const r = $("bRace"); r.disabled = false; r.textContent = "Race"; for (const id of ["bPrac", "bDrivers", "bPrize"]) $(id).disabled = false; $("load").hidden = true;
-    for (const id of ["bPrize", "bWallet"]) { $(id).hidden = true; $(id).parentNode.style.gridTemplateColumns = "1fr"; } }, 200); }
+    for (const id of ["bPrize", "bWallet"]) { $(id).hidden = true; $(id).parentNode.style.gridTemplateColumns = "1fr"; } storyBtn(); }, 200); }
 
 // ---------- claim: a Ko-fi payment that came in without an Instagram name gets linked by the email it was paid with
 $("bClaim").onclick = () => needPin(() => { $("clName").textContent = "@" + me.name; $("clMsg").textContent = ""; $("clMsg").className = "msg"; only("sClaim"); });
@@ -2446,7 +2464,9 @@ function carExit() {
   if (CAREER.bots0) { for (const b of bots) b.mesh.visible = false; bots.splice(0); bots.push(...CAREER.bots0); CAREER.bots0 = null; }
   const p = CAREER.prev || { t: "oval", n: false }; setTrack(p.t); if (p.n) setNight(true); rebuildCar(); kind = "practice"; resetCar(); fillGarage(); show("sGarage");
 }
-$("bCareerWrap").hidden = !careerOn(); $("bCareer").onclick = carOpen;
+// the way in: a real button beside "Race real drivers" (Brady, Nov 20: the small Career link at the bottom of the garage was too easy to miss)
+function storyBtn() { const b = $("bStory"); b.hidden = !careerOn(); const n = [...b.parentNode.children].filter(x => !x.hidden).length; b.parentNode.style.gridTemplateColumns = Array(n).fill("1fr").join(" "); }
+storyBtn(); $("bStory").onclick = carOpen;
 if (QS.has("debug")) window.__career = { CAREER, DECK, CARD, C0, KST, KBOT, KART, carOpen, carGo, carExit, carShow, cRaceDone, cWeek, cPracDone, carPit, kartPose, kart: () => myCar, cSub, cChamp, cSeason, cStand,
   // filming shortcuts: __career.jump("hire" | "standings" | "cup" | "win" | "trophy")
   jump: w => { if (!CAREER.on) carOpen(); const c = CAREER.c = Object.assign(C0(), { st: "week", wk: 4, day: 6, cupwk: 4, signed: 1, pod: 1, hire: 2, cr: 24, kart: 2, trn: 1, pts: 64, riv: [68, 55, 47, 38, 30], lg: [18, 25, 15, 12, 10, 8], lp: 3, ev: [null, null, null, null, null, null], evm: [0, 0, 0, 0, 0, 0] }); carKart();
@@ -2454,6 +2474,70 @@ if (QS.has("debug")) window.__career = { CAREER, DECK, CARD, C0, KST, KBOT, KART
 // debug only: take a picture of a track from the air (used once to make the track picker photos in site/game/tracks/)
 if (QS.has("debug")) { window.__trk = { OVAL, DESERT, KART, get BNK() { return typeof BNK === "undefined" ? null : BNK; }, R: typeof R === "undefined" ? 0 : R };
   window.__snap = (t, nt, p, l, fov, w, h) => { setTrack(t); setNight(nt); garageLook(false); if (myCar) myCar.visible = false; camera.fov = fov; camera.aspect = w / h; camera.updateProjectionMatrix(); camera.position.copy(V(p[0], p[1], p[2])); camera.lookAt(V(l[0], l[1], l[2])); renderer.setPixelRatio(1); renderer.setSize(w, h, false); renderer.render(scene, camera); const u = canvas.toDataURL("image/jpeg", .82); if (myCar) myCar.visible = true; return u; }; }
+
+// ---------- Season mode (DRAFT Nov 20, Brady): one shared season a week for the Pit Crew. The server (game-backend, v13) owns the schedule,
+// the one attempt per race, the points and the standings. This file only shows them and runs the race. It needs the live server (?live).
+const SEASON_LIVE = false;      // false = admin test accounts only on the live game until Brady opens it
+const seasonOn = () => !LITE && LIVE && (!FULL || SEASON_LIVE || admin());
+const SEA = { d: null, run: null, tab: "races", ask: -1, prev: null, busy: false };
+screens.push("sSeason");
+const SDAY = ["", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat and Sun"];
+const sTrk = r => r.k === "desert" ? DES_NAME : r.k === "banked" ? BNK_NAME : r.night ? "Night Oval" : "Speedway Oval";
+const sName = (r, i) => (r.fin ? "The Final" : "Race " + (i + 1)) + " · " + sTrk(r);
+const sWeek = id => { const p = String(id || "").split("-"); return p.length === 3 ? ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][+p[1] - 1] + " " + +p[2] : ""; };
+async function seaLoad() { try { const d = await (await fetch(API + "?a=season&n=" + encodeURIComponent(me.name))).json(); if (d.ok) { SEA.d = d.season; return true; } } catch (e) {} return false; }
+function seaMsg(t, cls) { const m = $("seMsg"); m.className = "msg" + (cls ? " " + cls : ""); m.textContent = t || ""; }
+function seaDraw() {
+  const d = SEA.d, B = $("seBody"); $("seTwo").hidden = true; $("seTabs").hidden = false; SEA.ask = -1;
+  $("seT1").className = SEA.tab === "races" ? "" : "alt"; $("seT2").className = SEA.tab === "table" ? "" : "alt";
+  if (!d) { $("seH").textContent = "Season mode"; $("seChip").textContent = ""; B.innerHTML = "<p class='small'>Couldn't reach the server. Check your signal and try again.</p>"; return; }
+  $("seH").textContent = "Week of " + sWeek(d.id); $("seChip").textContent = d.me ? "P" + d.me.pos + " · " + d.me.pts + " pts" : d.crew ? "No points yet" : "Pit Crew only";
+  if (!d.on) { $("seTabs").hidden = true; B.innerHTML = "<p>Season mode opens soon. One race a day, one attempt at each, and a final for the top " + d.cut + ".</p>"; return; }
+  if (SEA.tab === "table") { const rows = d.table.map((x, i) => "<div class='" + (x.n === me.name ? "me" : "") + (i === d.cut - 1 && d.total > d.cut ? " cut" : "") + "'><i>" + (i + 1) + "</i><span>@" + esc(x.n) + (x.wins ? "<em>" + x.wins + (x.wins === 1 ? " win" : " wins") + "</em>" : "") + "</span><b>" + x.pts + "</b></div>").join("");
+    B.innerHTML = (rows ? "<div class='sstand'>" + rows + "</div>" : "<p class='small'>Nobody has raced yet this week. Be the first on the board.</p>") + "<p class='small' style='margin:6px 0 0'>Top " + d.cut + " on points race the final on Saturday and Sunday. Best finish there takes the cup." + (d.champ && d.champ.n ? " Reigning champion: <b>@" + esc(d.champ.n) + "</b>." : "") + "</p>"; return; }
+  B.innerHTML = (d.pre ? "<p class='small' style='margin:0 0 4px'>The first season starts Monday. One race opens each day.</p>" : "") + d.races.map((r, i) => {
+    const m = r.mine; let st, btn = "";
+    if (m) st = (m.ms ? fmt(m.ms) + " · P" + m.pos + " of " + r.ran : "Did not finish") + (r.fin ? "" : " · " + m.pts + (m.pts === 1 ? " pt" : " pts"));
+    else if (r.live) st = "Your run is still open on the server. It closes 15 minutes after the start.";
+    else if (r.open && r.fin && !d.qualified) st = "Open now for the top " + d.cut + " on points";
+    else if (r.open) { st = (r.fin ? "Open now · you made the final" : "Open until Friday night") + " · " + r.ran + (r.ran === 1 ? " driver so far" : " drivers so far"); btn = "<button data-r='" + i + "'>" + (d.crew ? "Race" : "Race 🔒") + "</button>"; }
+    else if (r.past) st = "Closed · you missed this one";
+    else st = "Opens " + SDAY[r.d] + (r.fin ? " · top " + d.cut + " on points" : "");
+    return "<div class='crow" + (m ? " done" : "") + "'><span><b>" + esc(sName(r, i)) + "</b><small>" + st + "</small></span>" + btn + "</div>"; }).join("") +
+    (d.leader ? "<p class='small' style='margin:6px 0 0'>Leading the final: <b>@" + esc(d.leader) + "</b></p>" : d.champ && d.champ.n ? "<p class='small' style='margin:6px 0 0'>Reigning champion: <b>@" + esc(d.champ.n) + "</b></p>" : "");
+}
+async function openSeason(keep) { only("sSeason"); if (!keep) seaMsg(""); if (!SEA.d) { $("seH").textContent = "Season mode"; $("seBody").innerHTML = "<p class='small'>Loading the season…</p>"; }
+  await seaLoad(); if (cur !== "sSeason" || SEA.ask >= 0) return; seaDraw(); seaPending(); }
+$("seT1").onclick = () => { SEA.tab = "races"; seaDraw(); }; $("seT2").onclick = () => { SEA.tab = "table"; seaDraw(); };
+$("seBack").onclick = () => { fillGarage(); show("sGarage"); };
+$("seBody").onclick = e => { const b = e.target.closest("button[data-r]"); if (!b || !SEA.d) return; const i = +b.dataset.r, r = SEA.d.races[i];
+  if (!SEA.d.crew) return crewAsk("Race for the cup?", "Season mode is the Pit Crew championship: a new race every day, one attempt at each, and a final for the top " + SEA.d.cut + ". " + MONEY.crew.price + ".", true);
+  SEA.ask = i; $("seTabs").hidden = true; $("seTwo").hidden = false; $("seGo").disabled = false; seaMsg("");
+  $("seBody").innerHTML = "<h2 style='margin:2px 0 4px'>" + esc(sName(r, i)) + "</h2><p style='margin:0'>You get <b>one attempt</b>. It counts the moment you tap Start, even if you stop early or lose your signal. " + RACE_LAPS + " laps. Your total time is ranked against every Pit Crew driver who runs this race" + (r.fin ? ", and the best finish takes the cup." : ", and your place pays the points.") + "</p>"; };
+$("seNo").onclick = () => seaDraw();
+$("seGo").onclick = () => { const i = SEA.ask; if (i < 0 || SEA.busy) return;
+  (async () => { SEA.busy = true; $("seGo").disabled = true; seaMsg("Lining you up…"); let d = null; try { d = await srv({ a: "sstart", race: i, slot }); } catch (e) {} SEA.busy = false;
+    if (d && d.ok) return seaGo(i);
+    if (d && d.season) SEA.d = d.season; seaDraw();
+    seaMsg(!d ? "Couldn't reach the server, so the race did not start. Your attempt is still yours." : d.why === "ran" ? "You already ran this race." : d.why === "closed" ? "That race is not open right now." : d.why === "cut" ? "The final is for the top " + (SEA.d ? SEA.d.cut : 16) + " on points." : d.why === "crew" ? "Season mode is for the Pit Crew." : "The race could not start. Try again.", "bad"); })(); };
+function seaGo(i) { const r = SEA.d.races[i]; SEA.prev = { t: TRK, n: night }; SEA.run = { i }; setTrack(r.k || "oval"); setNight(!!r.night); startRun("race"); }
+function seaBackTrack() { const p = SEA.prev; SEA.prev = null; if (!p) return; setTrack(p.t); setNight(p.t === "oval" && p.n); }
+// the run is over (called in place of the normal result screen): send the laps, then show where you stand
+async function seaEnd() { const i = SEA.run.i, fin = finished, laps = raceLaps.slice(0, RACE_LAPS); SEA.run = null; seaBackTrack(); kind = "practice"; resetCar(); fillGarage();
+  only("sSeason"); $("seTabs").hidden = true; $("seTwo").hidden = true; SEA.ask = -1; SEA.tab = "races";
+  if (!fin) { $("seBody").innerHTML = "<h2 style='margin:2px 0 4px'>Did not finish</h2><p style='margin:0'>That was your one attempt at this race. A run that does not finish scores 1 point.</p>"; seaMsg(""); try { await srv({ a: "sfinish", race: i, dnf: true }); } catch (e) {} return setTimeout(() => { if (cur === "sSeason") openSeason(true); }, 2200); }
+  store.set("sfin:" + me.name, JSON.stringify({ i, laps, at: Date.now() }));
+  $("seBody").innerHTML = "<h2 style='margin:2px 0 4px'>" + fmt(laps.reduce((a, l) => a + l.t, 0)) + "</h2><p style='margin:0'>Sending your race to the server…</p>"; seaMsg("");
+  await seaSend(); }
+async function seaSend() { let p = null; try { p = JSON.parse(store.get("sfin:" + me.name) || "null"); } catch (e) {} if (!p) return;
+  let d = null; for (let k = 0; k < 2 && !d; k++) { try { d = await srv({ a: "sfinish", race: p.i, laps: p.laps }); } catch (e) { await new Promise(r => setTimeout(r, 2500)); } }
+  if (!d) { if (cur === "sSeason") { seaMsg("Couldn't reach the server. Your race is saved on this phone. Stay on this screen and tap Races to send it again. It has to arrive within 15 minutes.", "bad"); $("seTabs").hidden = false; } return; }
+  store.del("sfin:" + me.name); if (d.season) SEA.d = d.season; if (cur !== "sSeason") return;
+  seaDraw(); const m = SEA.d && SEA.d.races[p.i] && SEA.d.races[p.i].mine;
+  if (d.ok && m) seaMsg(fmt(d.ms) + " · P" + m.pos + " of " + SEA.d.races[p.i].ran + " so far" + (SEA.d.races[p.i].fin ? "." : " · " + m.pts + " points if it holds."), "good");
+  else seaMsg("The server couldn't confirm that run, so it counts as a did not finish.", "bad"); }
+function seaPending() { if (store.get("sfin:" + me.name)) seaSend(); }
+$("bSeason").onclick = () => openSeason();
 // ---------- start: remember the last username
 const saved = store.get("user");
 if (saved) { $("uname").value = saved; signIn(saved, true); }
