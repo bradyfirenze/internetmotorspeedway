@@ -609,7 +609,7 @@ const IG = "https://instagram.com/internetmotorspeedway";
 const HX = 500, HY = 100, R = 250, W = 100, ARC = Math.PI * R / 2, LEN_OVAL = 4 * HX + 4 * HY + 4 * ARC; let LEN = LEN_OVAL, S0 = HX, TRK = "oval";   // finish line at x = 0
 let LIM = W / 2 - 2.2;        // how far from the centerline a car can get before the wall
 const STEP = 1 / 120;           // fixed physics step, so every phone gets the same lap for the same driving
-const RACE_LAPS = 3, NB = 19;    // race length and number of bot cars
+let RACE_LAPS = 3; const NB = 19;    // race length and number of bot cars
 const UPG = [
   { id: "e", name: "Engine", what: "Higher top speed", vals: [130, 135, 140, 145, 150] },
   { id: "t", name: "Tires", what: "More grip in the corners", vals: [22, 23, 24, 25, 26] },
@@ -2143,7 +2143,8 @@ const KST = { vmax: 31, grip: 20, accel: 11 }, KBOT = { vmax: [28.6, 25.5], grip
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Race"], DAYN = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Race day"];
 // a day with no card still has something on: a team day (small bonus) or a practice you can drive or simulate
 const DAYA = [["Team debrief", "The crew walks through last week over coffee. You leave with a clearer head.", { me: 2 }], ["Shop day", "The crew strips the kart down and cleans every part. You bring lunch.", { tm: 2 }], ["Practice"], ["Practice"], ["Sponsor day", "You shake hands and sign a few hats at the tire shop.", { fans: 2 }], ["Final practice"]];
-const PRAC_MS = 34500, PIT_LAP = 2, PIT_BOT = 4.4;
+// the kart season: 5 races and then the Kart Cup in week 6 (Brady, Nov 20: a season has to be long enough to remember). Races are 5 laps with the pit stop after lap 3.
+const PRAC_MS = 34500, PIT_LAP = 3, PIT_BOT = 4.4, KWEEKS = 6, KLAPS = 5;
 const UPC = [2, 3, 4, 6], RACEPAY = [5, 3, 2, 1, 1, 1], TRIAL_MS = 33500, SIGN_PAY = 15;
 // story points: every race pays the whole field by place (double in the cup race), and each choice you make adds a couple more
 const RPTS = [25, 18, 15, 12, 10, 8], PICK_PTS = 2, CUP_PAY = 25;
@@ -2151,14 +2152,15 @@ const RIV = ["Cole Maddox", "Jo Ramirez", "Tuck Bailey", "Nina Okafor", "Wes Cal
 // free agents: name, job, skill (1 to 5), mood, cost. A hire takes over that job. Chief = quicker pit calls, Mechanic = top speed, Tires = grip.
 const HIRE = [["Lena", "Crew chief", 4, 70, 9], ["Otis", "Crew chief", 3, 60, 5], ["Priya", "Mechanic", 4, 65, 8], ["Hank", "Mechanic", 3, 58, 4], ["Jules", "Tires", 5, 60, 10], ["Bo", "Tires", 3, 66, 4]];
 const ROLES = ["Crew chief", "Mechanic", "Tires"], ROLEW = ["Quicker pit stops", "A little more top speed", "More grip in the corners"];
-const C0 = () => ({ v: 2, st: "intro", wk: 1, day: 0, cr: 10, kart: 0, trn: 0, me: 55, fans: 20, crew: [["Ray", "Crew chief", 62], ["Dee", "Mechanic", 55], ["Marcus", "Tires", 50]].map(x => ({ n: x[0], r: x[1], m: x[2], sk: 2 })), ev: null, evm: [], seen: [], last: 0, pod: 0, signed: 0, buy: {}, pts: 0, riv: [0, 0, 0, 0, 0], lg: null, lp: 0, sn: 1, cupwk: 0, champ: 0, hire: 0 });
+const C0 = () => ({ v: 2, st: "intro", wk: 1, day: 0, cr: 10, kart: 0, trn: 0, me: 55, fans: 20, crew: [["Ray", "Crew chief", 62], ["Dee", "Mechanic", 55], ["Marcus", "Tires", 50]].map(x => ({ n: x[0], r: x[1], m: x[2], sk: 2 })), ev: null, evm: [], seen: [], last: 0, pod: 0, signed: 0, buy: {}, pts: 0, riv: [0, 0, 0, 0, 0], lg: null, lp: 0, sn: 1, cupwk: KWEEKS, champ: 0, hire: 0, off: 0, ls: null });
+// story cards ("s") sit on a set week (wk) and day (d). c = a test on the career, used for cards that only fit a rookie (season 1) or a veteran (season 2 on).
 // w: "pr" = practice days, "any" = any day, "post" = the Monday after a race, "s" = story card placed by hand. {M} = one crew member.
 // effects: cr credits, fans, me = your morale, tm = every crew member, m = the named crew member, o = the rest of the crew
 const DECK = [
-  { id: "bday", k: "Dilemma", w: "s", p: "It's your little sister's birthday. It's also the last open practice before race one.",
+  { id: "bday", k: "Dilemma", w: "s", wk: 1, d: 5, c: c => c.sn === 1, p: "It's your little sister's birthday. It's also the last open practice before race one.",
     a: ["Go to the party", { me: 10 }, "She saved you the corner piece of the cake. You walk into race day feeling good."],
     b: ["Go practice", { me: -8, tm: 6 }, "You find two tenths in the last corner and the crew notices you showed up. Your phone has four missed calls."] },
-  { id: "chain", k: "Dilemma", w: "s", p: "The chain snaps in the last practice and takes the sprocket with it. The race is tomorrow morning.",
+  { id: "chain", k: "Dilemma", w: "s", wk: 3, d: 5, c: c => c.sn === 1, p: "The chain snaps in the last practice and takes the sprocket with it. The race is tomorrow morning.",
     a: ["Ask the crew to stay late", { tm: -8, me: 5 }, "They fix it by midnight and they are not happy about it. You make it home for dinner."],
     b: ["Fix it yourself", { me: -8, tm: 6 }, "Three hours, two cut knuckles. The crew gets the night off. Your plate is in the microwave."] },
   { id: "push", k: "Dilemma", w: "pr", p: "Your kart pushed wide in every turn today and you were slowest in the session.",
@@ -2219,9 +2221,87 @@ const DECK = [
   { id: "ptire", k: "Press interview", w: "post", p: "Word got out that {M} never checked the tire pressures before Sunday's race. The reporter asks about it.",
     a: ["Criticize {M}", { m: -14 }, "{M} reads it at the shop and goes very quiet."],
     b: ["Criticize the whole crew", { m: 8, o: -7 }, "{M} is off the hook. Everyone else is on it."] },
+  // ---- added Nov 20 for the longer season: more everyday cards, a story card most weeks, and veteran cards from season 2 on
+  { id: "truck", k: "Dilemma", w: "any", p: "Dad's truck needs a new alternator. It's the truck that tows the kart.",
+    a: ["Chip in", { cr: -2, me: 6 }, "Dad doesn't say much. He fills your tank on the way home."],
+    b: ["Let him handle it", { me: -5 }, "He handles it. He always does. You feel about two feet tall."] },
+  { id: "newkid", k: "Dilemma", w: "any", p: "A new kid in a borrowed kart asks you to show him the line through the last corner.",
+    a: ["Walk the track with him", { fans: 4, me: 3, tm: -3 }, "He writes it all down on his hand. The crew waits on you for an hour."],
+    b: ["Tell him to follow you on Sunday", { tm: 3, fans: -2 }, "He laughs. Then he realizes you meant it."] },
+  { id: "calendar", k: "Dilemma", w: "pr", p: "The tire shop wants photos for next year's calendar. The shoot takes the whole practice afternoon.",
+    a: ["Do the shoot", { cr: 2, tm: -4 }, "You are now Mr. or Ms. October. The crew packed for a practice that never happened."],
+    b: ["Practice instead", { me: 3, tm: 3 }, "Good laps. The shop owner says maybe next year, and he says it slowly."] },
+  { id: "wrench", k: "Dilemma", w: "any", p: "{M}'s torque wrench is held together with tape. A new one costs 2 credits.",
+    a: ["Buy the wrench", { cr: -2, m: 14 }, "{M} holds it like a newborn."],
+    b: ["Tape works", { m: -6 }, "{M} adds another wrap of tape and looks at you while doing it."] },
+  { id: "rain", k: "Dilemma", w: "pr", p: "It rained all morning. The track is open but slick, and nobody else is going out.",
+    a: ["Run wet laps", { me: 4, tm: -5 }, "You learn where the grip hides. The crew learns what wet socks feel like."],
+    b: ["Call it off", { tm: 5, me: -2 }, "Cards in the trailer. You lose four hands in a row and think about turn two the whole time."] },
+  { id: "fair", k: "Dilemma", w: "any", p: "The county fair wants your kart on display on Saturday. They pay in corn dogs.",
+    a: ["Park it at the fair", { fans: 7, me: -3 }, "Two hundred people sit in your seat. One of them leaves gum."],
+    b: ["Keep it in the shop", { tm: 4 }, "The crew gets a quiet day with the kart. The fair books a tractor instead."] },
+  { id: "spinvid", k: "Dilemma", w: "any", p: "Your sister filmed your spin from last week. She set it to music and wants to post it.",
+    a: ["Post it", { fans: 6, me: -4 }, "It gets more views than anything you have ever done on purpose."],
+    b: ["Please don't", { me: 3, fans: -1 }, "She doesn't. She does show it to everyone at dinner."] },
+  { id: "found", k: "Dilemma", w: "any", p: "You find a rival's spark plug wrench in the paddock. It's a nice one.",
+    a: ["Walk it back", { fans: 3, me: 4 }, "He looks at you like you handed him a wallet full of cash."],
+    b: ["Finders keepers", { tm: 3, me: -5 }, "The crew loves it. You keep seeing him look for it."] },
+  { id: "sunday", k: "Dilemma", w: "any", p: "Mom offers to feed the whole crew every Sunday night.",
+    a: ["Yes please", { tm: 7, me: -2 }, "The crew is thrilled. Mom now has opinions about your braking, and an audience."],
+    b: ["Keep racing and home apart", { me: 4 }, "Sunday dinner stays Sunday dinner. Nobody mentions lap times."] },
+  { id: "spare", k: "Dilemma", w: "any", p: "Tuck Bailey's team is short a rear tire and asks to borrow your spare.",
+    a: ["Lend it", { fans: 4, tm: -4 }, "Tuck's mom hugs you. Your crew counts tires twice that night."],
+    b: ["Sorry, can't", { tm: 3, fans: -2 }, "Tuck starts on a patched tire. Word gets around the paddock."] },
+  { id: "early", k: "Dilemma", w: "any", p: "The crew wants to leave at 4 in the morning to get the good paddock spot.",
+    a: ["4 a.m. it is", { tm: 5, me: -6 }, "Best spot in the paddock. You nap in a lawn chair with your helmet on."],
+    b: ["We leave at 7", { me: 5, tm: -4 }, "You sleep great. The crew carries everything from the far lot."] },
+  { id: "plate", k: "Dilemma", w: "any", p: "A fan mailed you a hand drawn number plate. It's crooked and it's wonderful.",
+    a: ["Run it on the kart", { fans: 6, tm: -2 }, "The fan cries at the fence. The crew's clean number plate goes in a drawer."],
+    b: ["Hang it in the shop", { me: 4 }, "It goes up over the workbench where you can see it every day."] },
+  { id: "timer", k: "Dilemma", w: "any", p: "{M} wants a lap timer for the kart. It costs 3 credits and it beeps.",
+    a: ["Buy it", { cr: -3, m: 8, me: 4 }, "Now you know exactly how slow turn three was. {M} is delighted."],
+    b: ["Use the stopwatch", { m: -5 }, "{M} clicks the stopwatch a little harder than needed."] },
+  { id: "oldguy", k: "Dilemma", w: "pr", p: "An old timer at the fence says you brake too early. He says it to everybody.",
+    a: ["Try it his way", { me: 4, tm: -3 }, "He's right, which is annoying. Your crew chief is quiet for the rest of the day."],
+    b: ["Trust your crew chief", { tm: 5 }, "You stick to the plan. The old timer moves on to the next kart."] },
+  { id: "pod", k: "Press interview", w: "any", p: "A racing podcast with eleven listeners wants you for an hour.",
+    a: ["Talk about your crew", { tm: 6 }, "All eleven listeners now know who built your kart."],
+    b: ["Talk about Cole Maddox", { fans: 6, me: -3 }, "\"He's quick when nobody's near him.\" It gets clipped. Cole hears it."] },
+  // story cards, season 1
+  { id: "cole", k: "Dilemma", w: "s", wk: 2, d: 1, c: c => c.sn === 1, p: "Cole Maddox parks his trailer across two spots. One of them is yours.",
+    a: ["Ask him to move", { me: 4, fans: 2 }, "He moves it. Slowly. He revs the truck the whole time."],
+    b: ["Park at the far end", { tm: -3, me: -4, cr: 1 }, "A long walk with the toolbox. The track owner saw the whole thing and knocks a credit off your fees."] },
+  { id: "nephew", k: "Dilemma", w: "s", wk: 4, d: 3, c: c => c.sn === 1, p: "The tire shop owner stops by. He wants his nephew to turn wrenches on your kart on race day.",
+    a: ["Hand him a rag", { cr: 2, tm: -6 }, "The nephew is keen and in the way. The owner tips you two credits for the trouble."],
+    b: ["My crew is my crew", { tm: 8, fans: -2 }, "The crew hears about it within the hour. The owner leaves without a coffee."] },
+  { id: "grad", k: "Dilemma", w: "s", wk: 5, d: 4, c: c => c.sn === 1, p: "Your sister's school graduation is Friday night. So is the drivers' meeting for the Kart Cup.",
+    a: ["Graduation", { me: 10, tm: -3 }, "She waves from the stage. Your crew chief takes notes for you and they are hard to read."],
+    b: ["Drivers' meeting", { me: -8, tm: 5 }, "You know every rule for Sunday. She saved you a program."] },
+  { id: "eve", k: "Dilemma", w: "s", wk: 6, d: 5, c: c => c.sn === 1, p: "The night before the Kart Cup. The kart is ready. You are not sleepy.",
+    a: ["One more look at the kart", { tm: 6, me: -3 }, "The crew is already there. Nobody admits they couldn't sleep either."],
+    b: ["Movie night at home", { me: 8 }, "You fall asleep before the end. Somebody puts a blanket on you."] },
+  // story cards, season 2 on: you are not the new kid any more
+  { id: "raise", k: "Dilemma", w: "s", wk: 1, d: 1, c: c => c.sn >= 2, p: "{M} did the math on last season and wants a raise: 3 credits.",
+    a: ["Pay it", { cr: -3, m: 14 }, "{M} shakes your hand like it's a contract. It sort of is."],
+    b: ["Not this year", { m: -14 }, "{M} nods and goes back to work. The nod is doing a lot of talking."] },
+  { id: "napkin", k: "Dilemma", w: "s", wk: 2, d: 2, c: c => c.sn >= 2, p: "The sponsor wants a top 3 in the standings this year. He wrote it on a napkin and slid it across the table.",
+    a: ["Shake on it", { cr: 3, me: -6 }, "Three credits up front. The napkin goes on the shop wall where you can't miss it."],
+    b: ["No promises", { me: 4, fans: -2 }, "He folds the napkin and puts it in his pocket. You sleep fine."] },
+  { id: "poach", k: "Dilemma", w: "s", wk: 3, d: 5, c: c => c.sn >= 2, p: "Cole Maddox's team quietly offers {M} a job.",
+    a: ["Match the offer", { cr: -2, m: 10 }, "{M} stays. Cole's team sends the hat back."],
+    b: ["Say it's {M}'s call", { m: -8, o: 4 }, "{M} stays, but wanted to hear you fight for it. The others respect that you didn't beg."] },
+  { id: "bentaxle", k: "Dilemma", w: "s", wk: 4, d: 1, c: c => c.sn >= 2, p: "A rookie in a rental kart with a bent axle asks how you got started.",
+    a: ["Give the kid an hour", { fans: 6, me: 5, tm: -3 }, "You hear yourself say the things your first crew chief said to you. The crew starts without you."],
+    b: ["Wave and keep working", { tm: 3, me: -3 }, "The kid figures it out alone. So did you, mostly."] },
+  { id: "moveup", k: "Press interview", w: "s", wk: 5, d: 4, c: c => c.sn >= 2, p: "The paper calls you a veteran now. They ask if you're moving up to cars.",
+    a: ["I'm ready", { fans: 6, tm: -4 }, "It makes the front page. The crew wonders if they're coming with you."],
+    b: ["I'm not done here", { tm: 6 }, "\"There's a cup to win first.\" The crew cuts it out and tapes it up."] },
+  { id: "eve2", k: "Dilemma", w: "s", wk: 6, d: 5, c: c => c.sn >= 2, p: "Cup eve again. This time you know exactly how much it matters.",
+    a: ["Walk the track alone", { me: 8 }, "Six corners in the dark. You know every crack in the asphalt."],
+    b: ["Dinner with the crew", { tm: 7 }, "Nobody talks about tomorrow. Everybody is thinking about tomorrow."] },
 ];
 const CARD = {}; for (const k of DECK) CARD[k.id] = k;
-const cLoad = () => { let c = null; try { c = JSON.parse(store.get("career:" + me.name) || "null"); } catch (e) {} if (!c || c.v !== 2) return C0(); c = Object.assign(C0(), c); for (const m of c.crew) m.sk = m.sk || 2; if (c.st === "signed") { c.st = "week"; c.wk++; c.day = 0; c.ev = null; c.cupwk = c.wk; c.hire = 1; } return c; };
+const cLoad = () => { let c = null; try { c = JSON.parse(store.get("career:" + me.name) || "null"); } catch (e) {} if (!c || c.v !== 2) return C0(); c = Object.assign(C0(), c); for (const m of c.crew) m.sk = m.sk || 2; if (c.st === "signed") { c.st = "week"; c.wk++; c.day = 0; c.ev = null; c.cupwk = c.wk; c.hire = 1; } if (c.cupwk !== c.wk) c.cupwk = Math.max(c.wk, KWEEKS); return c; };      // a season saved under the old short calendar moves to the 6 week one
 const cSave = () => store.set("career:" + me.name, JSON.stringify(CAREER.c));
 const cTeam = c => Math.round(c.crew.reduce((a, m) => a + m.m, 0) / c.crew.length);
 // the bars change the kart a little: Kart = top speed and pull, Training = grip, a happy crew = a bit more speed, a happy you = a bit more grip
@@ -2240,9 +2320,9 @@ const cFxText = (d, nm) => [d.cr && cSign(d.cr) + (Math.abs(d.cr) === 1 ? " cred
 function cWeek() { const c = CAREER.c, ev = [null, null, null, null, null, null], R = n => Math.floor(Math.random() * n);
   const fits = (k, d) => k.w !== "s" && !c.seen.includes(k.id) && !ev.includes(k.id) && (!k.c || k.c(c)) && (k.w === "any" || (k.w === "pr" && (d === 2 || d === 3 || d === 5)) || (k.w === "post" && d === 0 && c.wk > 1));
   if (DECK.filter(k => k.w !== "s" && !c.seen.includes(k.id)).length < 6) c.seen = c.seen.filter(id => CARD[id] && CARD[id].w === "s");
-  if (c.wk === 1) ev[5] = "bday"; if (c.wk >= 3 && !c.seen.includes("chain")) ev[5] = "chain";
+  for (const k of DECK) if (k.w === "s" && k.wk === c.wk && (!k.c || k.c(c))) ev[k.d] = k.id;
   if (c.wk > 1 && Math.random() < .7) { const l = DECK.filter(k => k.w === "post" && fits(k, 0)); if (l.length) ev[0] = l[R(l.length)].id; }
-  const n = [2, 3, 3, 4][R(4)]; for (let t = 0; t < 40 && ev.filter(Boolean).length < n; t++) { const d = R(6); if (ev[d]) continue; const l = DECK.filter(k => k.w !== "post" && fits(k, d)); if (l.length) ev[d] = l[R(l.length)].id; }
+  const n = [3, 4, 4, 4][R(4)]; for (let t = 0; t < 40 && ev.filter(Boolean).length < n; t++) { const d = R(6); if (ev[d]) continue; const l = DECK.filter(k => k.w !== "post" && fits(k, d)); if (l.length) ev[d] = l[R(l.length)].id; }
   c.ev = ev; c.evm = ev.map(() => R(c.crew.length)); c.buy = {}; }
 
 // the kart: a flat frame, four fat little tires and a driver. Nose is +x like the cars.
@@ -2344,7 +2424,7 @@ function cMeters(d) { const c = CAREER.c; d = d || {};
 // o: { h, p, d (bar changes to show), go, fn, pick (a card), mi (crew member), day (which day to light up), kk (kicker word), drive }
 function cPanel(o) {
   const c = CAREER.c, wk = c.st === "week", day = o.day === undefined ? c.day : o.day;
-  $("cK").textContent = "My Career · " + (c.st === "intro" || c.st === "trial" ? "Tryout" : c.st === "signed" && o.day === undefined ? "Signed" : "Week " + (o.wk || c.wk) + " · " + DAYN[day]) + (o.kk ? " · " + o.kk : "");
+  $("cK").textContent = (c.st === "intro" || c.st === "trial" ? "My Career · Tryout" : "Season " + (o.sn || c.sn) + (c.champ ? " · " + c.champ + (c.champ === 1 ? " title" : " titles") : "") + " · Week " + (o.wk || c.wk) + " · " + (c.champ ? DAYS : DAYN)[day]) + (o.kk ? " · " + o.kk : "");
   $("cDays").hidden = CAREER.days = !(wk || o.day !== undefined); $("cDays").innerHTML = DAYS.map((n, i) => "<span class='" + (i === day ? "on" : i < day ? "past" : "") + "'>" + n + "</span>").join("");
   $("cH").textContent = o.h; $("cP").textContent = o.p; cMeters(o.d); $("cTab").hidden = !o.tab; $("cTab").innerHTML = o.tab || ""; CAREER.tab = !!o.tab; $("cP").hidden = !o.p;
   let k = o.pick, two = o.two; if (k) { const nm = c.crew[o.mi].n, M = s => s.replace(/\{M\}/g, nm); two = ["a", "b"].map(w => [M(k[w][0]), cFxText(k[w][1], nm), () => carPick(w), c.cr + (k[w][1].cr || 0) < 0]); }
@@ -2357,14 +2437,14 @@ function cPanel(o) {
 }
 // three pages share the card: spend credits, your crew (and hiring), and the standings
 function cSub(k) { const c = CAREER.c; CAREER.sub = k; $("cShop").hidden = !k; $("cMain").hidden = !!k; $("cSpend").textContent = k === "shop" ? "Back" : "Spend"; $("cCrewL").textContent = k === "crew" ? "Back" : "Crew"; $("cStandL").textContent = k === "stand" ? "Back" : "Standings"; { const big = k === "crew" || k === "stand"; $("cMet").hidden = $("cCrew").hidden = big || !!CAREER.tab; if (big) $("cDays").hidden = true; else if (CAREER.days !== undefined) $("cDays").hidden = CAREER.days; } if (!k) return;
-  $("cShop").innerHTML = k === "shop" ? cShopH(c) : k === "crew" ? cCrewH(c) : "<h2>Standings</h2>" + cStandH(c) + "<p class='small' style='margin:5px 0 0'>" + (c.cupwk ? (c.cupwk === c.wk ? "The cup race is this week. It pays double points." : "The cup race pays double points.") : "Most points after the cup race takes the Kart Cup.") + "</p>"; }
+  $("cShop").innerHTML = k === "shop" ? cShopH(c) : k === "crew" ? cCrewH(c) : "<h2>Season " + c.sn + " standings</h2>" + cStandH(c) + "<p class='small' style='margin:5px 0 0'>" + (c.cupwk === c.wk ? "The cup race is this week. It pays double points." : "Race " + Math.min(c.wk, KWEEKS) + " of " + KWEEKS + ". The last one is the Kart Cup and pays double points.") + (c.champ ? " Kart Cups won: " + c.champ + "." : "") + "</p>"; }
 function cShopH(c) { const up = (k, name, what) => [k, name, what + " · Lv " + c[k] + " of 4", c[k] < 4 ? UPC[c[k]] : 0, "Maxed"];
   const rows = [up("kart", "Kart", "Top speed and pull"), up("trn", "Training", "Grip in the corners"), ["din", "Team dinner", "Every crew member +6, once a week", c.buy.din ? 0 : 1, "Done this week"], ["off", "Day off", "Your morale +10, once a week", c.buy.off ? 0 : 1, "Done this week"]];
   return "<h2>Spend credits</h2>" + rows.map(([k, name, what, cost, none]) => "<div class='crow'><span><b>" + name + "</b><small>" + what + "</small></span><button data-b='" + k + "'" + (!cost || cost > c.cr ? " disabled" : "") + ">" + (cost ? cost + (cost === 1 ? " credit" : " credits") : none) + "</button></div>").join("") + "<p class='small' style='margin:5px 0 0'>You can also save credits. Tap Crew to hire.</p>"; }
 const cStars = n => "<span class='cstar'>" + "★".repeat(n) + "<i>" + "★".repeat(5 - n) + "</i></span>";
 function cCrewH(c) { const have = c.crew.map(m => m.n), pool = HIRE.filter(h => !have.includes(h[0]));
   return "<h2>Your crew</h2>" + c.crew.map(m => "<div class='crow cmem'><span><b>" + esc(m.n) + " " + cStars(m.sk || 2) + "</b><small>" + esc(m.r) + " · " + (m.m < 35 ? "Unhappy" : m.m >= 65 ? "Happy" : "Okay") + "</small></span><i class='cbar'><u style='width:" + m.m + "%" + (m.m < 35 ? ";background:var(--red)" : m.m >= 65 ? ";background:var(--grn)" : "") + "'></u></i><em>" + m.m + "</em></div>").join("") +
-    "<h2 style='margin-top:7px'>Free agents</h2>" + (c.signed ? "" : "<p class='small' style='margin:0 0 3px'>Sign a sponsor to hire. Finish top 2 in the final.</p>") + "<div class='chire'>" + pool.map(h => "<div class='crow'><span><b>" + h[0] + " " + cStars(h[2]) + "</b><small>" + h[1] + " · " + ROLEW[ROLES.indexOf(h[1])] + "</small></span><button data-h='" + h[0] + "'" + (!c.signed || h[4] > c.cr ? " disabled" : "") + ">" + h[4] + " credits</button></div>").join("") + "</div>"; }
+    "<h2 style='margin-top:7px'>Free agents</h2>" + (c.signed ? "" : "<p class='small' style='margin:0 0 3px'>Sign a sponsor to hire. Finish top 2 in any race from week 3 on.</p>") + "<div class='chire'>" + pool.map(h => "<div class='crow'><span><b>" + h[0] + " " + cStars(h[2]) + "</b><small>" + h[1] + " · " + ROLEW[ROLES.indexOf(h[1])] + "</small></span><button data-h='" + h[0] + "'" + (!c.signed || h[4] > c.cr ? " disabled" : "") + ">" + h[4] + " credits</button></div>").join("") + "</div>"; }
 function cStandH(c) { const pos = cPos(c), up = c.lp && c.lg ? c.lp - pos : 0;
   return "<div class='cstand'>" + cStand(c).map((r, i) => "<div class='" + (r.me ? "me" : "") + "'><i>" + (i + 1) + "</i><u style='background:" + r.col + "'></u><span>" + r.n + (r.me && up ? "<em class='" + (up > 0 ? "cup" : "cdn") + "'>" + (up > 0 ? "▲" : "▼") + Math.abs(up) + "</em>" : "") + "</span><small>" + (r.g ? "+" + r.g : "") + "</small><b>" + r.p + "</b></div>").join("") + "</div>"; }
 $("cShop").onclick = e => { const b = e.target.closest("button"); if (!b || b.disabled) return; const c = CAREER.c, k = b.dataset.b, h = HIRE.find(x => x[0] === b.dataset.h); let d = {};
@@ -2382,10 +2462,11 @@ function carShow() {
   const c = CAREER.c; if (myCar && myCar.userData.lv !== cLevel()) carKart();
   if (c.st === "intro") return cPanel({ h: "Welcome to your career, driver", p: "Everybody starts in the same place: a rental kart with a bent axle and a seat that smells like old fries. You have a crew of three and 10 credits. Spend them or save them. You earn more by racing well.", go: "Let's go", fn: () => { c.st = "trial"; cSave(); carShow(); } });
   if (c.st === "trial") return cPanel({ h: "Show us a lap", p: "The track owner wants to see one clean lap before the kart is yours for the season. Beat " + fmt(TRIAL_MS) + ".", go: "Start the time trial", fn: carGo, drive: 1 });
+  if (c.off) { const l = c.ls || {}; return cPanel({ kk: "Off season", h: "Season " + c.sn, p: "Season " + (c.sn - 1) + " is in the books" + (l.pos ? ": P" + l.pos + " with " + l.pts + " points" + (l.won ? ", and the Kart Cup is on your shelf" : "") : "") + ". Your kart, your crew and your credits come with you. The other five spent the winter getting quicker, and people expect more from you now.", go: "Start season " + c.sn, fn: () => { c.off = 0; cSave(); carShow(); } }); }
   if (!c.ev) { cWeek(); cSave(); }
   if (c.hire === 1 && c.day === 0) return cPanel({ kk: "Sponsor", h: "Build your crew", p: "The sponsor's check cleared. There are free agents in the paddock: a sharper crew chief, a faster mechanic, a tire wizard. Hire one great name, spread it around, or keep the people who got you here.", go: "Meet the free agents", fn: () => { c.hire = 2; cSave(); carShow(); cSub("crew"); } });
   if (c.day >= 6 && c.cupwk === c.wk) { const pos = cPos(c), top = cStand(c)[0]; return cPanel({ kk: "Cup race", h: "The Kart Cup", p: "Last race of the season, and it pays double points. You are P" + pos + " in the standings" + (pos === 1 ? ". Hold them off and the cup is yours." : ", " + (top.p - c.pts) + " behind " + top.n + ". Most points after this race takes the cup."), go: "Race for the cup", fn: carGo, drive: 1 }); }
-  if (c.day >= 6) { const fin = c.wk >= 3 && !c.signed; return cPanel({ h: fin ? (c.wk === 3 ? "The final" : "One more shot") : c.wk === 1 ? "Race one" : "Race two", p: "Six karts, three laps, one pit stop after lap 2. A happy crew gets you out quicker. Credits by finish: 5 for the win, 3 for second, 2 for third, 1 for the rest." + (fin ? " Finish in the top 2 and somebody with a checkbook will be watching." : ""), go: "Go racing", fn: carGo, drive: 1 }); }
+  if (c.day >= 6) { const fin = c.wk >= 3 && !c.signed; return cPanel({ h: "Race " + c.wk + " of " + KWEEKS, p: "Six karts, " + KLAPS + " laps, one pit stop after lap " + PIT_LAP + ". A happy crew gets you out quicker. Credits by finish: 5 for the win, 3 for second, 2 for third, 1 for the rest." + (fin ? " Finish in the top 2 and somebody with a checkbook will be watching." : ""), go: "Go racing", fn: carGo, drive: 1 }); }
   const id = c.ev[c.day], next = () => { c.day++; cSave(); carShow(); };
   if (id) { const k = CARD[id], nm = c.crew[c.evm[c.day]].n; return cPanel({ kk: k.k, h: k.k, p: k.p.replace(/\{M\}/g, nm), pick: k, mi: c.evm[c.day] }); }
   const A = DAYA[c.day], ray = cRay(c), nx = c.day === 5 ? "On to race day" : "Next day";
@@ -2409,16 +2490,16 @@ function cRaceDone(p, tag, ord) { const c = CAREER.c, wk = c.wk, cup = c.cupwk =
   c.lp = cPos(c); c.lg = [0, 0, 0, 0, 0, 0]; let got = 0; ord.forEach((who, i) => { const g = RPTS[i] * (cup ? 2 : 1); if (who < 0) got = g; else c.riv[who] += g; c.lg[who + 1] = g; });
   const d = cFx({ pts: got, cr: pay, me: p === 1 ? 6 : p <= 3 ? 3 : p >= 5 ? -4 : 0, tm: p <= 3 ? 4 : p >= 5 ? -3 : 0, fans: p === 1 ? 6 : p <= 3 ? 3 : 0 }); c.last = p; if (p <= 3) c.pod = 1;
   let txt = (p === 1 ? "A trophy the size of a coffee mug. It goes on the kitchen table anyway." : p <= 3 ? "On the podium. The crew is grinning." : "Not your day. The crew loads the trailer in silence.") + " " + got + " points and " + pay + (pay === 1 ? " credit" : " credits") + (c.fans >= 70 ? ", 1 of them from the crowd" : "") + ".";
-  const stand = (fn, tab, d2) => () => cPanel({ kk: "Standings", h: cup ? "Final standings" : "Standings after race " + wk, p: "", tab: tab || cStandH(c), d: d2, day: 6, wk, go: "Next", fn });
+  const sn0 = c.sn, stand = (fn, tab, d2) => () => cPanel({ kk: "Standings", h: cup ? "Final standings" : "Standings after race " + wk, p: "", tab: tab || cStandH(c), d: d2, day: 6, wk, sn: sn0, go: "Next", fn });
   if (cup) { const pos = cPos(c), sn = c.sn, pts = c.pts, won = pos === 1; if (won) { c.champ = (c.champ || 0) + 1; c.cr += CUP_PAY; d.cr += CUP_PAY; }
-    const fin = stand(() => won ? cChamp(sn, pts) : carShow(), cStandH(c), { ptsAt: pts }), top = cStand(c)[0].n; cSeason(); cSave(); if (myCar && myCar.userData.lv !== cLevel()) carKart();
-    return cPanel({ kk: "Cup race", h: (p === 1 ? "You won the race" : "P" + p + of) + (tag || ""), p: txt + (won ? " And that does it. The points are yours. So is the cup." : " The cup goes to " + top + " this year. You finished P" + pos + " in the season."), d: Object.assign(d, { ptsAt: pts }), day: 6, wk, go: "Final standings", fn: fin }); }
-  if (wk >= 3 && p <= 2 && !c.signed) { c.signed = 1; c.hire = 1; c.cupwk = wk + 1; c.cr += SIGN_PAY; d.cr += SIGN_PAY; txt += " A man in a tire shop jacket is waiting by your trailer. He signs you on the spot: " + SIGN_PAY + " more credits. Next week is the Kart Cup."; }
-  else if (wk >= 3 && !c.signed) txt += " The top 2 get the phone call. There's another race next week.";
+    const fin = stand(() => won ? cChamp(sn, pts) : carShow(), cStandH(c), { ptsAt: pts }), top = cStand(c)[0].n; cSeason(pos, pts, won); cSave(); if (myCar && myCar.userData.lv !== cLevel()) carKart();
+    return cPanel({ kk: "Cup race", h: (p === 1 ? "You won the race" : "P" + p + of) + (tag || ""), p: txt + (won ? " And that does it. The points are yours. So is the cup." : " The cup goes to " + top + " this year. You finished P" + pos + " in the season."), d: Object.assign(d, { ptsAt: pts }), day: 6, wk, sn, go: "Final standings", fn: fin }); }
+  if (wk >= 3 && p <= 2 && !c.signed) { c.signed = 1; c.hire = 1; c.cr += SIGN_PAY; d.cr += SIGN_PAY; txt += " A man in a tire shop jacket is waiting by your trailer. He signs you on the spot: " + SIGN_PAY + " more credits. Now you can hire."; }
+  else if (wk >= 3 && !c.signed) txt += " A top 2 finish gets you the sponsor's phone call.";
   c.wk++; c.day = 0; c.ev = null; cSave(); if (myCar && myCar.userData.lv !== cLevel()) carKart();
   cPanel({ h: (p === 1 ? "You won" : "P" + p + of) + (tag || ""), p: txt, d, day: 6, wk, go: "Standings", fn: stand(carShow) }); }
-// a new season: points back to zero, everything you built stays. From season 2 on the cup race is week 4.
-function cSeason() { const c = CAREER.c; c.sn++; c.wk = 1; c.day = 0; c.ev = null; c.pts = 0; c.riv = [0, 0, 0, 0, 0]; c.lg = null; c.lp = 0; c.cupwk = 4; }
+// a new season: points back to zero, everything you built stays. The season counter goes up and the off season card shows first.
+function cSeason(pos, pts, won) { const c = CAREER.c; c.ls = { pos, pts, won: won ? 1 : 0 }; c.off = 1; c.sn++; c.wk = 1; c.day = 0; c.ev = null; c.pts = 0; c.riv = [0, 0, 0, 0, 0]; c.lg = null; c.lp = 0; c.cupwk = KWEEKS; }
 // the win screen: your driver beside the kart with the cup, confetti, and the season line
 function cChamp(sn, pts) { kartChamp(true); $("chK").textContent = "Season " + sn + " · Kart Cup"; $("chP").textContent = pts + " points · " + CUP_PAY + " credits for the title";
   let h = ""; const cols = ["#ffcc18", "#f3f3f3", "#e04b4b", "#2b5fd0", "#2fae6a"]; for (let i = 0; i < 46; i++) h += "<i style='left:" + (i * 2.2 + Math.random() * 2).toFixed(1) + "%;background:" + cols[i % 5] + ";animation-delay:-" + (Math.random() * 4).toFixed(2) + "s;animation-duration:" + (3 + Math.random() * 2.5).toFixed(2) + "s'></i>"; $("chConf").innerHTML = h; only("sChamp"); }
@@ -2434,6 +2515,8 @@ function carGo() {
   if (TRK !== "kart") setTrack("kart");
   if (!CAREER.kb) { CAREER.kb = []; const cols = ["#e04b4b", "#2b5fd0", "#2fae6a", "#ff7a1a", "#9b59d0"], hel = ["#f3f3f3", "#f2c230", "#16171b", "#f3f3f3", "#f2c230"];
     for (let i = 0; i < 5; i++) { const t = i / 4, L = a => a[0] + (a[1] - a[0]) * t, b = { i, mesh: kartMesh(cols[i], hel[i], cols[i], 0, cols[i]), vmax: L(KBOT.vmax), grip: L(KBOT.grip), acc: L(KBOT.acc), base: (i % 3 - 1) * 27, s: 0, d: 0, dOff: 0, v: 0, fin: null, wait: 0 }; b.mesh.visible = false; scene.add(b.mesh); CAREER.kb.push(b); } }
+  { const up = 1 + Math.min(c0.sn - 1, 6) * .005; for (const b of CAREER.kb) { const t = b.i / 4, L = a => (a[0] + (a[1] - a[0]) * t) * up; b.vmax = L(KBOT.vmax); b.grip = L(KBOT.grip); b.acc = L(KBOT.acc); } }      // the other karts get half a percent quicker each season, up to 3 percent
+  RACE_LAPS = s.t === "race" ? KLAPS : 3;
   if (!CAREER.bots0) { CAREER.bots0 = bots.splice(0); for (const b of CAREER.bots0) b.mesh.visible = false; bots.push(...CAREER.kb); }
   startRun(s.t === "race" ? "race" : "practice"); ghost = null; kartPose(myCar, true); for (const b of bots) { kartPose(b.mesh, true); b.pit = 0; }
   if (s.t === "race") $("posBig").lastChild.textContent = "/" + (bots.length + 1);
@@ -2460,7 +2543,7 @@ function carEnd() {      // called in place of the normal result screen
   cPanel({ h: runBest ? fmt(runBest) : "No lap set", p: "Not quick enough yet. The owner shrugs and waves you back out.", go: "Try again", fn: carGo, drive: 1 });
 }
 function carExit() {
-  CAREER.on = false; CAREER.run = null; VF = 30; BL = 5.5; BW = 2.7;
+  CAREER.on = false; CAREER.run = null; VF = 30; BL = 5.5; BW = 2.7; RACE_LAPS = 3;
   if (CAREER.bots0) { for (const b of bots) b.mesh.visible = false; bots.splice(0); bots.push(...CAREER.bots0); CAREER.bots0 = null; }
   const p = CAREER.prev || { t: "oval", n: false }; setTrack(p.t); if (p.n) setNight(true); rebuildCar(); kind = "practice"; resetCar(); fillGarage(); show("sGarage");
 }
@@ -2469,7 +2552,7 @@ function storyBtn() { const b = $("bStory"); b.hidden = !careerOn(); const n = [
 storyBtn(); $("bStory").onclick = carOpen;
 if (QS.has("debug")) window.__career = { CAREER, DECK, CARD, C0, KST, KBOT, KART, carOpen, carGo, carExit, carShow, cRaceDone, cWeek, cPracDone, carPit, kartPose, kart: () => myCar, cSub, cChamp, cSeason, cStand,
   // filming shortcuts: __career.jump("hire" | "standings" | "cup" | "win" | "trophy")
-  jump: w => { if (!CAREER.on) carOpen(); const c = CAREER.c = Object.assign(C0(), { st: "week", wk: 4, day: 6, cupwk: 4, signed: 1, pod: 1, hire: 2, cr: 24, kart: 2, trn: 1, pts: 64, riv: [68, 55, 47, 38, 30], lg: [18, 25, 15, 12, 10, 8], lp: 3, ev: [null, null, null, null, null, null], evm: [0, 0, 0, 0, 0, 0] }); carKart();
+  jump: w => { if (!CAREER.on) carOpen(); const c = CAREER.c = Object.assign(C0(), { st: "week", wk: KWEEKS, day: 6, cupwk: KWEEKS, signed: 1, pod: 1, hire: 2, cr: 24, kart: 2, trn: 1, pts: 64, riv: [68, 55, 47, 38, 30], lg: [18, 25, 15, 12, 10, 8], lp: 3, ev: [null, null, null, null, null, null], evm: [0, 0, 0, 0, 0, 0] }); carKart();
     if (w === "hire") { c.day = 0; c.hire = 1; carShow(); } else if (w === "standings") { carShow(); cSub("stand"); } else if (w === "cup") carShow(); else if (w === "win") { c.champ = 1; c.pts = 114; cChamp(1, 114); } else if (w === "trophy") { c.champ = 1; c.day = 1; carShow(); } } };
 // debug only: take a picture of a track from the air (used once to make the track picker photos in site/game/tracks/)
 if (QS.has("debug")) { window.__trk = { OVAL, DESERT, KART, get BNK() { return typeof BNK === "undefined" ? null : BNK; }, R: typeof R === "undefined" ? 0 : R };
