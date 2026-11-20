@@ -648,7 +648,9 @@ async function signIn(raw, quiet) {
   msg.textContent = "Checking the follower list...";
   const [fol, cus, gar, mus] = await Promise.all([followersP, customP, garageP, museumP]);
   if (!fol) { msg.className = "msg bad"; msg.textContent = "Couldn't load the follower list. Check your signal and try again."; return false; }
-  if (!(name in fol.f)) {
+  let paidCar = false;
+  if (!(name in fol.f)) { try { if (LIVE) { msg.textContent = "Checking for a paid car..."; const d = await (await fetch(API + "?a=me&n=" + encodeURIComponent(name))).json(); paidCar = !!(d.ok && d.me && (d.me.carOrder || d.me.carBuilt)); } } catch (e) {} }
+  if (!(name in fol.f) && !paidCar) {
     const day = new Date(fol.date + "T12:00").toLocaleDateString("en-US", { month: "short", day: "numeric" });
     msg.className = "msg bad";
     msg.innerHTML = "<b>@" + esc(name) + "</b> isn't on the follower list yet. <a href='" + IG + "' target='_blank' rel='noopener'>Follow @internetmotorspeedway</a> to get a car. The list updates once a day (last update " + esc(day) + ").";
@@ -657,7 +659,7 @@ async function signIn(raw, quiet) {
   PRICE = gar.price || 1;
   const c = (cus.cars || []).find(x => x.ig.toLowerCase() === name), won = (mus.winners || []).some(w => w.name.toLowerCase() === name);
   const u = (gar.upgrades || {})[name] || {};
-  me = { name, body: "#" + fol.f[name], roof: null, num: "", kind: "Your car", up: { e: clamp(u.e | 0, 0, 3), t: clamp(u.t | 0, 0, 3), a: clamp(u.a | 0, 0, 3) } };
+  me = { name, body: "#" + (fol.f[name] || "8a8f99"), roof: null, num: "", kind: "Your car", up: { e: clamp(u.e | 0, 0, 3), t: clamp(u.t | 0, 0, 3), a: clamp(u.a | 0, 0, 3) } };
   if (c) { me.body = c.bodyHex; me.roof = c.roofHex; me.num = c.num || ""; me.kind = "Your custom car"; me.shape = c.kind || null; me.shapes = Array.isArray(c.kinds) ? c.kinds : []; me.pro = c.tier === "car_pro"; me.look = c.look || null; me.lookHex = (c.bodyHex || "").toLowerCase(); }
   { const q = new URLSearchParams(location.search), pv = q.get("body"); if (pv && q.has("debug")) me.shape = pv; if (q.has("pro") && q.has("debug")) me.pro = true; }
   if (won) { me.body = GOLD; me.roof = "#c98200"; me.kind = "Race winner"; }
