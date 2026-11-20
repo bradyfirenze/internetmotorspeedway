@@ -338,11 +338,12 @@ button.crew { background: #062a30; color: #6ff3ff; border: 1px solid rgba(41,240
       <div class="stat"><span class="k">Rank</span><b id="gRank">--</b></div></div>
     <button class="hsw on" id="bHelp" aria-label="Steering assist on or off"></button>
     <button class="hsw two on" id="bCtl" aria-label="Steer with the slider or with buttons"></button>
-    <p class="small" style="margin:5px 0 0"><button class="linkbtn" id="bTracks" style="color:var(--yel)">Track: Speedway Oval</button> &middot; <button class="linkbtn" id="bSwitch">Switch username</button><span id="bHelpWrap" hidden> &middot; <button class="linkbtn" id="bHelpDesk">Help</button></span><span id="bSeasonWrap" hidden> &middot; <button class="linkbtn" id="bSeason" style="color:#ffcc18">Season (NEW)</button></span><span id="bAdmWrap" hidden> &middot; <button class="linkbtn" id="bAdm" style="color:#ff8a1e">Admin garage</button></span><span id="bClaimWrap" hidden> &middot; <button class="linkbtn" id="bClaim" style="color:#6ff3ff">Joined on Ko-fi? Claim Pit Crew</button></span></p>
+    <p class="small" style="margin:5px 0 0"><button class="linkbtn" id="bTracks" style="color:var(--yel)">Track: Speedway Oval</button> &middot; <button class="linkbtn" id="bSwitch">Switch username</button><span id="bHelpWrap" hidden> &middot; <button class="linkbtn" id="bHelpDesk">Help</button></span><span id="bSeasonWrap" hidden> &middot; <button class="linkbtn" id="bSeason" style="color:#ffcc18">Season (NEW)</button></span><span id="bAdmWrap" hidden> &middot; <button class="linkbtn" id="bAdm" style="color:#ff8a1e">Admin garage</button></span><span id="bClaimWrap" hidden> &middot; <button class="linkbtn" id="bClaim" style="color:#6ff3ff">Joined on Ko-fi? Claim Pit Crew</button></span><span id="bCarClaimWrap" hidden> &middot; <button class="linkbtn" id="bCarClaim" style="color:#ffcc18">Bought a custom car? Claim it</button></span></p>
     <button class="fsb" id="bFs" hidden>&#128242; Address bar in the way? Save it as an app</button>
   </div>
   <div class="gside">
     <button class="tease" id="bDesert" hidden><img src="desert_preview.jpg" alt=""><span><i>NEW TRACK</i><b>Desert Track</b><small id="bDesertT">Tap to race it</small></span></button>
+    <button class="banner" id="bBuild" hidden style="border-color:#ffcc18;color:#ffcc18">Your custom car is paid for &middot; Build it now</button>
     <button class="banner" id="bWeek"></button>
     <div id="load" aria-hidden="true"><i id="lbar"></i></div>
     <button class="big" id="bRace" disabled>Loading the track</button>
@@ -1283,25 +1284,29 @@ function drawNewCar() {
   for (const [id, k] of [["ncBody", "body"], ["ncRoof", "roof"]]) { const list = NEWCOL.includes(nc[k]) ? NEWCOL : [nc[k]].concat(NEWCOL);
     $(id).innerHTML = list.map(c => "<button data-c='" + c + "' aria-label='" + c + "' style='background:" + c + "'" + (nc[k] === c ? " class='on'" : "") + "></button>").join(""); }
   { const own = ownedShapes(); $("ncShapeRow").hidden = !own.length; $("ncShape").innerHTML = [""].concat(own).map(k => "<button data-s='" + k + "'" + (nc.shape === k ? " class='on'" : "") + ">" + esc(k ? BODY_NAME[k] || k : "Normal car") + "</button>").join(""); }
-  $("ncH").textContent = (nc.edit ? "Repaint car " : "Add car ") + (nc.i + 1); $("ncAdd").textContent = nc.edit ? "Save this look" : "Add this car"; $("ncNum").textContent = nc.num ? nc.num : "none";
+  $("ncH").textContent = nc.build ? "Build your custom car" : (nc.edit ? "Repaint car " : "Add car ") + (nc.i + 1); $("ncAdd").textContent = nc.build ? "Lock in my car" : nc.edit ? "Save this look" : "Add this car"; $("ncNum").textContent = nc.num ? nc.num : "none"; delete $("ncAdd").dataset.sure;
+  $("ncH").previousElementSibling.textContent = nc.build ? "Custom car · one build" : "Pit Crew paint shop";
   if (myCar) scene.remove(myCar); myCar = raceCar({ body: nc.body, roof: nc.roof, num: nc.num ? String(nc.num) : "", up: nc.edit ? CARS[nc.i].up : { e: 0, t: 0, a: 0 }, glow: true, shape: nc.shape || null, name: me.name }); scene.add(myCar); placeCar(); dressGarage({ body: nc.body, roof: nc.roof, num: nc.num ? String(nc.num) : "" });
 }
 function openNewCar(i) { const c = CARS[i]; nc = { i, edit: !!c, body: c ? c.body : NEWCOL[3], roof: c ? c.roof || "#16171b" : "#16171b", num: c ? +c.num || 0 : 0, shape: c ? slotShape(i) || "" : "" }; $("ncMsg").textContent = ""; only("sNewCar"); drawNewCar(); }
 $("ncBody").onclick = e => { const c = e.target.dataset.c; if (c) { nc.body = c; drawNewCar(); } };
 $("ncShape").onclick = e => { const b = e.target.closest("button"); if (b) { nc.shape = b.dataset.s; drawNewCar(); } };
 $("ncRoof").onclick = e => { const c = e.target.dataset.c; if (c) { nc.roof = c; drawNewCar(); } };
-$("ncStep").onclick = e => { const d = +e.target.dataset.d; if (!d) return; nc.num = clamp(nc.num + d, 0, 99); drawNewCar(); };
+$("ncStep").onclick = e => { const d = +e.target.dataset.d; if (!d) return; let v = clamp(nc.num + d, 0, 99);
+  if (nc.build) { const sg = Math.sign(d); while (v > 0 && v < 99 && TAKEN.includes(v)) v += sg; if (v && TAKEN.includes(v)) v = nc.num; }      // the builder skips numbers another car already has
+  nc.num = v; drawNewCar(); };
 $("ncAdd").onclick = () => {
+  if (nc.build) return buildGo();
   const done = () => { if (!nc.edit) slot = nc.i; applyCar(); rebuildCar(); fillGarage(); openCars(); }, num = nc.num ? String(nc.num) : "";
   if (LIVE) return needPin(async () => { let d = {}; try { d = await srv({ a: "car", pin: pinMem, slot: nc.i, body: nc.body, roof: nc.roof, num, ...(ownedShapes().length ? { shape: nc.shape } : {}) }); } catch (e) {}
     if (d.ok) return done(); only("sNewCar"); const m = $("ncMsg"); m.className = "msg bad"; m.textContent = d.why === "gold" ? "Gold is for race winners. Pick another color." : d.why === "crew" ? "Painting is a Pit Crew perk." : "Couldn't save it. Check your signal and try again."; });
   CARS[nc.i] = { kind: "", up: { e: 0, t: 0, a: 0 }, ...(CARS[nc.i] || {}), body: nc.body, roof: nc.roof, num, ...(ownedShapes().length ? { shape: nc.shape } : {}) }; done(); };
-$("ncCancel").onclick = () => { rebuildCar(); openCars(); };
+$("ncCancel").onclick = () => { rebuildCar(); if (nc.build) return show("sGarage"); openCars(); };
 $("bCars").onclick = openCars;
 
 function paintMoney() {
   if (!me) return; refreshSV();
-  $("bAdmWrap").hidden = !admin(); $("bSeasonWrap").hidden = !seasonOn(); $("bHelpWrap").hidden = !window.IMSHelp;      // Help shows only once the site's help desk (site/help/help.js) is live
+  $("bAdmWrap").hidden = !admin(); $("bSeasonWrap").hidden = !seasonOn(); buildBtn(); $("bHelpWrap").hidden = !window.IMSHelp;      // Help shows only once the site's help desk (site/help/help.js) is live
   paintBars(); const cs = crewState(), cl = $("crewLine");      // told before they cancel (Brady, Nov 16): a lapsed member's upgrades and cars lock until they rejoin
   $("bCrew").textContent = member() ? "Pit Crew ✓" : cs.lapsed ? "Rejoin Pit Crew" : "Join Pit Crew";
   cl.hidden = LITE || !(member() || cs.lapsed); cl.className = "small" + (cs.lapsed || (cs.left > 0 && cs.left <= 5) ? " warn" : "");
@@ -1379,9 +1384,9 @@ if (SHOT) { const n = "m4rvin_s"; store.set("user", n); store.set("crew:" + n, "
     for (const id of ["bPrize", "bWallet"]) { $(id).hidden = true; $(id).parentNode.style.gridTemplateColumns = "1fr"; } storyBtn(); }, 200); }
 
 // ---------- claim: a Ko-fi payment that came in without an Instagram name gets linked by the email it was paid with
-$("bClaim").onclick = () => needPin(() => { $("clName").textContent = "@" + me.name; $("clMsg").textContent = ""; $("clMsg").className = "msg"; only("sClaim"); });
+$("bClaim").onclick = () => needPin(() => { claimMode(""); $("clName").textContent = "@" + me.name; $("clMsg").textContent = ""; $("clMsg").className = "msg"; only("sClaim"); });
 $("clBack").onclick = () => show("sGarage");
-$("claimForm").addEventListener("submit", async e => { e.preventDefault(); $("clEmail").blur();
+$("claimForm").addEventListener("submit", async e => { e.preventDefault(); $("clEmail").blur(); if (CLM === "car") return carClaimGo();
   const m = $("clMsg"), em = $("clEmail").value.trim(); m.className = "msg";
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) { m.className = "msg bad"; m.textContent = "That doesn't look like an email."; return; }
   m.textContent = "Checking..."; $("clGo").disabled = true; let d = {}; try { d = await srv({ a: "claim", pin: pinMem, email: em }); } catch (x) {} $("clGo").disabled = false;
@@ -1512,9 +1517,9 @@ function trailTick() {      // glow trail: a ribbon of light behind a Car PRO wh
 
 // ---------- car bodies: monster truck, school bus, F1 car, fighter jet, dragon, and the 7 Legend rides. Same shapes as the daily videos (blender/tier_models.py),
 // built from a few boxes so they are light. Looks only: every body drives exactly the same and takes up the same room on the track.
-const BODY_SCALE = { monster: 1.15, bus: 1.0, f1: 1.25, jet: .42, dragon: .78, balloon: 1.3, prop: .72, mower: 1.0, shopcart: .95, wheelbarrow: .9, skateboard: .85, golfcart: .95, wheelchair: 1.3, policebox: .8 };
-const BODY_NAME = { monster: "Monster truck", bus: "School bus", f1: "F1 car", jet: "Fighter jet", dragon: "Dragon", prop: "Stunt prop plane", mower: "Riding mower", shopcart: "Shopping cart", wheelbarrow: "Wheelbarrow", skateboard: "Skateboard", golfcart: "Golf cart", wheelchair: "Sport wheelchair", policebox: "Police box" };
-const TAG_Y = { monster: 4.6, bus: 3.9, f1: 2.6, jet: 13, balloon: 5.6, dragon: 5.4, prop: 4.0, mower: 3.7, shopcart: 4.3, wheelbarrow: 3.1, skateboard: 2.5, golfcart: 4.6, wheelchair: 4.0, policebox: 5.3 };      // balloon is kept for old entries, but it is not sold: Brady swapped it for the fighter jet (Nov 15)
+const BODY_SCALE = { monster: 1.15, bus: 1.0, f1: 1.25, jet: .42, dragon: .78, balloon: 1.3, prop: .72, mower: 1.0, shopcart: .95, wheelbarrow: .9, skateboard: .85, golfcart: .95, wheelchair: 1.3, policebox: .8, floathead: .85 };
+const BODY_NAME = { monster: "Monster truck", bus: "School bus", f1: "F1 car", jet: "Fighter jet", dragon: "Dragon", prop: "Stunt prop plane", mower: "Riding mower", shopcart: "Shopping cart", wheelbarrow: "Wheelbarrow", skateboard: "Skateboard", golfcart: "Golf cart", wheelchair: "Sport wheelchair", policebox: "Police box", floathead: "Floating head" };
+const TAG_Y = { monster: 4.6, bus: 3.9, f1: 2.6, jet: 13, balloon: 5.6, dragon: 5.4, prop: 4.0, mower: 3.7, shopcart: 4.3, wheelbarrow: 3.1, skateboard: 2.5, golfcart: 4.6, wheelchair: 4.0, policebox: 5.3, floathead: 4.6 };      // balloon is kept for old entries, but it is not sold: Brady swapped it for the fighter jet (Nov 15)
 function bodyCar(c) {
   const g = new THREE.Group(), kind = c.shape, c1 = new THREE.Color(c.body), c2 = c.roof ? new THREE.Color(c.roof) : c1.clone().multiplyScalar(.7);
   const std = (col, r = .4, m = .1) => new THREE.MeshStandardMaterial({ color: col, roughness: r, metalness: m }), lit = col => new THREE.MeshBasicMaterial({ color: col });
@@ -1563,6 +1568,17 @@ function bodyCar(c) {
     box(0, 0, 1.05, 4.2, 1.6, .14, P); for (const sx of [1, -1]) tilt(box(sx * 2.55, 0, 1.2, 1.0, 1.6, .14, P), -sx * .3); box(0, 0, 1.13, 4.0, .3, .02, G2);
     for (const x of [1.6, -1.6]) { box(x, 0, .88, .55, .55, .18, RIM); box(x, 0, .65, .3, 1.4, .25, RIM); cyl(x, 0, .45, .07, 2.2, RIM, undefined, 8); for (const sy of [1, -1]) cyl(x, sy * 1.0, .45, .45, .38, G2, undefined, 16); }
     for (const sy of [1, -1]) numAt(1.0, sy * .5, 1.14, .8, -Math.PI / 2, -Math.PI / 2);
+  } else if (kind === "floathead") {      // floating cartoon head, brown hair ($20 Legend @brandonwk23, Nov 20): blender/tier_models.py floathead(). Generic face, fixed colors.
+    const SK = std(0xedb894, .55), HR = std(0x2b170a, .8), DK = std(0x180c05, .8), EY = std(0x050506, .2), LP = std(0x8c332e, .5), GLW = lit(0x4dccff), SHD = lit(0x050506);
+    const sph = (x, y, z, sx, sy, sz, m, rot, seg = 20) => { const o = new THREE.Mesh(new THREE.SphereGeometry(1, seg, seg / 2), m); o.scale.set(sx, sz, sy); o.position.copy(V(x, y, z)); if (rot) o.rotation.set(rot[0], rot[2], -rot[1]); g.add(o); return o; };
+    const Z = 2.6;
+    sph(0, 0, Z, 1.25, 1.15, 1.45, SK); sph(.08, 0, Z - .95, .95, .9, .6, SK); cyl(0, 0, Z - 1.35, .5, .5, SK, 0, 20);          // head, jaw, neck
+    sph(-.12, 0, Z + .55, 1.22, 1.2, .95, HR); sph(.7, .25, Z + 1.0, .55, .75, .32, HR, [.3, -.35, 0]);                          // hair cap, side-swept front
+    for (const sy of [1, -1]) { sph(-.05, sy * 1.15, Z - .05, .18, .1, .3, SK, null, 12); sph(1.12, sy * .42, Z + .1, .06, .14, .16, EY, null, 12);   // ears, eyes
+      box(1.14, sy * .42, Z + .42, .08, .36, .08, DK).rotation.x = sy * -.12;                                                   // eyebrows
+      box(1.08, sy * .3, Z - .66, .08, .12, .07, LP).rotation.x = sy * .5; }                                                     // smile corners
+    sph(1.3, 0, Z - .25, .18, .14, .26, SK, null, 12); box(1.1, 0, Z - .72, .08, .55, .07, LP);                                  // nose, smile
+    cyl(0, 0, .45, .85, .06, GLW, 0, 32); cyl(0, 0, .02, 1.0, .02, SHD, 0, 32);                                                  // hover glow ring, shadow spot
   } else if (kind === "policebox") {      // tall blue call box (Legend, Nov 18): the same measurements as blender/tier_models.py. Blocky and plain: the four sign bands carry the buyer's name and number, no real signs.
     const D = std(c1.clone().multiplyScalar(.6), .55), WIN = c.roof ? lit(c2) : LIT, SIGN = lit(0x050506), tagT = String(c.tag || c.name || "").toUpperCase();
     const signTex = txt => { const cv = document.createElement("canvas"); cv.width = 512; cv.height = 76; const x = cv.getContext("2d"); let sz = 60; x.font = "400 " + sz + "px Anton, Impact, sans-serif"; while (x.measureText(txt).width > 480 && sz > 14) { sz -= 3; x.font = "400 " + sz + "px Anton, Impact, sans-serif"; }
@@ -2621,6 +2637,37 @@ async function seaSend() { let p = null; try { p = JSON.parse(store.get("sfin:" 
   else seaMsg("The server couldn't confirm that run, so it counts as a did not finish.", "bad"); }
 function seaPending() { if (store.get("sfin:" + me.name)) seaSend(); }
 $("bSeason").onclick = () => openSeason();
+
+// ---------- custom car builder (DRAFT Nov 20, Brady: "allow them to build their own custom car in the game/website by putting in their username").
+// Only for a buyer who paid and did not say what they want. The server keeps the paid list (CarOrders tab) and checks everything:
+// the order, the colors, and that nobody else has the number. One build per payment. Nothing is typed, so there is nothing to moderate.
+let TAKEN = [], CLM = "";
+function buildBtn() { const on = LIVE && !LITE && SV; $("bBuild").hidden = !(on && SV.carOrder); $("bCarClaimWrap").hidden = !(on && SV.carOn && !SV.carOrder && !SV.carBuilt); }
+$("bBuild").onclick = () => needPin(async () => {
+  try { TAKEN = (await (await fetch(API + "?a=carnums")).json()).taken || []; } catch (e) { TAKEN = []; }
+  const c = CARS[0] || {}; nc = { i: 0, edit: true, build: true, body: c.body || NEWCOL[3], roof: c.roof || "#16171b", num: 0, shape: slotShape(0) || "" };
+  const m = $("ncMsg"); m.className = "msg"; m.textContent = "Pick your colors and a number. Numbers on other cars are skipped."; only("sNewCar"); drawNewCar(); });
+async function buildGo() { const b = $("ncAdd"), m = $("ncMsg");
+  if (!b.dataset.sure) { b.dataset.sure = 1; b.textContent = "Sure? Tap again to lock it in"; m.className = "msg"; m.textContent = "You get one build. After this the car is locked."; return; }      // two taps, because it can't be undone
+  delete b.dataset.sure; b.disabled = true; m.textContent = "Building..."; let d = {};
+  try { d = await srv({ a: "carbuild", pin: pinMem, body: nc.body, roof: nc.roof, num: nc.num ? String(nc.num) : "" }); } catch (e) {} b.disabled = false;
+  if (d.ok) { nc.build = false; rebuildCar(); fillGarage(); show("sGarage"); return ask("Custom car", "Your car is built", "It is yours in the game right now. It joins the daily race, the map and the website at the next daily update.", "Let's go", () => show("sGarage")); }
+  if (d.why === "taken") { try { TAKEN = (await (await fetch(API + "?a=carnums")).json()).taken || TAKEN; } catch (e) {} }
+  drawNewCar(); m.className = "msg bad";
+  m.textContent = d.why === "taken" ? "Somebody just took that number. Pick another one." : d.why === "gold" ? "Gold is for race winners. Pick another color." : d.why === "order" ? "No paid car is waiting on this username. DM @internetmotorspeedway if that's wrong." : d.why === "pin" ? "Wrong PIN. Go back and try again." : "Couldn't save it. Check your signal and try again."; }
+// the claim screen does two jobs: Pit Crew (email) and a custom car (Ko-fi name or email)
+const CL0 = { k: $("sClaim").querySelector(".k").textContent, h: $("sClaim").querySelector("h1").textContent, p: $("sClaim").querySelector("p").innerHTML, go: $("clGo").textContent, ph: $("clEmail").placeholder };
+function claimMode(k) { CLM = k; const s = $("sClaim"), car = k === "car", e = $("clEmail");
+  s.querySelector(".k").textContent = car ? "Bought a custom car?" : CL0.k; s.querySelector("h1").textContent = car ? "Claim your car" : CL0.h;
+  s.querySelector("p").innerHTML = car ? "Type the <b>Ko-fi name</b> or the <b>email</b> you paid with. We check it against our records and open the builder for <b id='clName'></b>." : CL0.p;
+  e.type = car ? "text" : "email"; e.inputMode = car ? "text" : "email"; e.placeholder = car ? "Ko-fi name or email" : CL0.ph; e.value = ""; $("clGo").textContent = car ? "Find my car" : CL0.go; }
+$("bCarClaim").onclick = () => needPin(() => { claimMode("car"); $("clName").textContent = "@" + me.name; $("clMsg").textContent = ""; $("clMsg").className = "msg"; only("sClaim"); });
+async function carClaimGo() { const m = $("clMsg"), who = $("clEmail").value.trim(); m.className = "msg";
+  if (who.length < 2) { m.className = "msg bad"; m.textContent = "Type the Ko-fi name or the email you paid with."; return; }
+  m.textContent = "Checking our records..."; $("clGo").disabled = true; let d = {}; try { d = await srv({ a: "carclaim", pin: pinMem, who }); } catch (x) {} $("clGo").disabled = false;
+  if (d.ok && SV.carOrder) { $("clEmail").value = ""; fillGarage(); show("sGarage"); return ask("Custom car", "Found it", "Your payment is linked to @" + me.name + ". Tap the yellow Build it now button in your garage.", "Let's go", () => show("sGarage")); }
+  m.className = "msg bad";
+  m.textContent = d.why === "none" ? "No paid car found under that name or email. Check the spelling, or DM @internetmotorspeedway." : d.why === "taken" ? "That payment is already linked to another driver. DM @internetmotorspeedway and we'll sort it out." : d.why === "wait" ? "Too many tries. Wait an hour, or DM @internetmotorspeedway." : d.why === "pin" ? "Wrong PIN. Go back and try again." : "Couldn't check. Check your signal and try again."; }
 // ---------- start: remember the last username
 const saved = store.get("user");
 if (saved) { $("uname").value = saved; signIn(saved, true); }
