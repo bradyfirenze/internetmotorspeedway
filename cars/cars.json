@@ -2,6 +2,8 @@
   "frames": 36,
   "cover": 4,
   "cars": [
+    {"ig": "maltenelis.cc", "num": "", "body": "Black", "roof": "Green, green spoiler", "bodyHex": "#141416", "roofHex": "#3ce16b", "since": "2026-11-16"},
+    {"ig": "travis.sevin", "num": "88", "body": "Yellow", "roof": "Navy blue", "bodyHex": "#ffe14d", "roofHex": "#1f3a8a", "since": "2026-11-21"},
     {"ig": "efii_co", "num": "", "body": "White with an orange mohawk", "roof": "White", "bodyHex": "#ebebe6", "roofHex": "#ebebe6", "since": "2026-11-17", "look": "efii"},
     {"ig": "No_Sir", "num": "00", "body": "Dark grey and pink checker", "roof": "Pink", "bodyHex": "#2a2a2e", "roofHex": "#ff40a0", "since": "2026-11-15", "noig": true},
     {"ig": "yeahthatracingfan", "num": "47", "body": "Red", "roof": "Yellow", "bodyHex": "#e83030", "roofHex": "#ffe100", "since": "2026-11-15"},
