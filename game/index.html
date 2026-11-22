@@ -568,7 +568,19 @@ button.crew { background: #062a30; color: #6ff3ff; border: 1px solid rgba(41,240
     <div class="head"><div><div class="k">Your garage</div><h2>My cars</h2></div><span class="chip" id="cCount"></span></div>
     <div class="cars" id="cList"></div>
     <p class="small" style="margin:0 0 8px">Only your <b>daily race car</b> runs in the daily video race. One car per driver, so every follower has the same shot.</p>
+    <button class="alt" id="bLegend" style="color:var(--yel);border-color:rgba(255,204,24,.5);margin-bottom:7px">See the 12 Legend rides</button>
     <div class="two"><button class="alt" id="bPaint">Paint &middot; $1</button><button class="alt" data-close>Back</button></div>
+  </div>
+</div>
+<!-- Legend rides showroom (Brady, Nov 22): every player can look at the 12 Legend rides up close in their own colors. Only owners can race them. -->
+<div class="screen side" id="sLegend" hidden>
+  <div class="box">
+    <div class="k" id="lgK">Legend rides</div>
+    <h2 id="lgName">Monster truck</h2>
+    <p class="small" id="lgWhat" style="margin:0 0 7px"></p>
+    <div class="tnav"><button class="alt" id="lgPrev" aria-label="Previous Legend ride">&lsaquo;</button><div class="tdots" id="lgDots"></div><button class="alt" id="lgNext" aria-label="Next Legend ride">&rsaquo;</button></div>
+    <a class="btn" id="lgBuy" target="_blank" rel="noopener" href="https://ko-fi.com/internetmotorspeedway/shop" style="margin-bottom:7px">Get it: $20 Legend</a>
+    <button class="alt" id="lgBack">Back</button>
   </div>
 </div>
 <div class="screen side" id="sNewCar" hidden>
@@ -662,7 +674,7 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const mod = (a, n) => ((a % n) + n) % n;
 const lapDiff = a => mod(a + LEN / 2, LEN) - LEN / 2;          // shortest way around between two spots on the lap
 const V = (x, y, z) => new THREE.Vector3(x, z, -y);            // Blender (x, y, z) to three (x, z, -y)
-const screens = ["sGate", "sGarage", "sResult", "sBoard", "sPaint", "sFs", "sPit", "sWallet", "sPin", "sPrize", "sTracks", "sAdmin", "sAsk", "sCars", "sNewCar", "sClaim", "sFind"];
+const screens = ["sGate", "sGarage", "sResult", "sBoard", "sPaint", "sFs", "sPit", "sWallet", "sPin", "sPrize", "sTracks", "sAdmin", "sAsk", "sCars", "sLegend", "sNewCar", "sClaim", "sFind"];
 let under = "sGarage";
 function show(id) { cur = id; for (const s of screens) $(s).hidden = s !== id; if (id === "sGarage" || id === "sResult") under = id; }
 
@@ -1128,7 +1140,7 @@ function frame(now) {
     $("demo").hidden = !me || cur === "sGate" || SHOT || LIVE || LITE; if (SHOT) menuA = SHOTA;
     const wide = LW / LH > 1.5, dist = (pit ? 14 : 15.5) * (wide ? 1 : 1.5) * (SHOT ? 1.2 : 1);
     camera.fov = pit ? 31 : 34; camera.position.copy(V(GAR.x, GAR.y - dist, pit ? 4.0 : 4.3)); camera.lookAt(V(GAR.x, GAR.y, (pit ? 1.9 : 2.0) + pitH * .5));
-    camera.setViewOffset(LW, LH, LW * (pit || cur === "sNewCar" || cur === "sCareer" ? .24 : cur === "sGarage" ? .19 : 0), LH * (cur === "sGarage" ? .09 : 0), LW, LH);          // car sits left of the menu
+    camera.setViewOffset(LW, LH, LW * (pit || cur === "sNewCar" || cur === "sLegend" || cur === "sCareer" ? .24 : cur === "sGarage" ? .19 : 0), LH * (cur === "sGarage" ? .09 : 0), LW, LH);          // car sits left of the menu
   } else {
     $("demo").hidden = true; lift.visible = false; pitH = 0; garageLook(false);
     if (camera.view) camera.clearViewOffset();
@@ -1345,6 +1357,19 @@ $("ncAdd").onclick = () => {
   CARS[nc.i] = { kind: "", up: { e: 0, t: 0, a: 0 }, ...(CARS[nc.i] || {}), body: nc.body, roof: nc.roof, num, ...(ownedShapes().length ? { shape: nc.shape } : {}) }; done(); };
 $("ncCancel").onclick = () => { rebuildCar(); if (nc.build) return show("sGarage"); openCars(); };
 $("bCars").onclick = openCars;
+// ---------- Legend rides showroom (Brady, Nov 22): view only. The ride spins on the turntable in the player's own colors. Nothing here changes the player's car.
+const LEGENDS = ["monster", "bus", "f1", "jet", "dragon", "prop", "mower", "shopcart", "wheelbarrow", "skateboard", "golfcart", "wheelchair"];
+let lgI = 0;
+function lgShow() { const k = LEGENDS[lgI], own = ownedShapes().includes(k);
+  if (myCar) scene.remove(myCar); myCar = bodyCar({ body: me.body, roof: me.roof, num: me.num, shape: k }); scene.add(myCar); placeCar();
+  $("lgK").textContent = "Legend rides · " + (lgI + 1) + " of " + LEGENDS.length; $("lgName").textContent = BODY_NAME[k] + (own ? " ✓" : " 🔒");
+  $("lgWhat").textContent = own ? "This one is yours. Pick it in My cars." : "Shown in your colors. You can look, but only owners can race it. Buy it once and it is yours in the game and the daily video race.";
+  $("lgBuy").hidden = own; $("lgDots").innerHTML = LEGENDS.map((_, i) => "<i" + (i === lgI ? " class='on'" : "") + "></i>").join(""); }
+function openLegend() { only("sLegend"); lgShow(); }
+$("bLegend").onclick = openLegend;
+$("lgPrev").onclick = () => { lgI = (lgI + LEGENDS.length - 1) % LEGENDS.length; lgShow(); };
+$("lgNext").onclick = () => { lgI = (lgI + 1) % LEGENDS.length; lgShow(); };
+$("lgBack").onclick = () => { rebuildCar(); openCars(); };
 
 function paintMoney() {
   if (!me) return; refreshSV();
