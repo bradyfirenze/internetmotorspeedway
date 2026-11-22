@@ -439,7 +439,7 @@ button.crew { background: #062a30; color: #6ff3ff; border: 1px solid rgba(41,240
   <div class="box">
     <div class="k" id="bK">Fastest saved laps</div>
     <h2>Leaderboard</h2>
-    <div class="two" style="grid-template-columns:1fr 1fr 1.25fr;margin-bottom:8px"><div id="bSeg" style="display:contents"><button data-m="lap">Fastest lap</button><button class="alt" data-m="race">Whole race</button></div><button class="alt" id="bBTrk" style="color:var(--yel);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Track</button></div>
+    <div class="two" style="grid-template-columns:1fr 1fr 1.25fr;margin-bottom:8px"><div id="bSeg" style="display:contents"><button data-m="race">3 lap race</button><button class="alt" data-m="lap">Fastest lap</button></div><button class="alt" id="bBTrk" style="color:var(--yel);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Track</button></div>
     <div class="msg" id="bMsg" role="status"></div>
     <div class="list" id="bList"></div>
     <button class="alt" data-close>Back</button>
@@ -676,7 +676,7 @@ const lapDiff = a => mod(a + LEN / 2, LEN) - LEN / 2;          // shortest way a
 const V = (x, y, z) => new THREE.Vector3(x, z, -y);            // Blender (x, y, z) to three (x, z, -y)
 const screens = ["sGate", "sGarage", "sResult", "sBoard", "sPaint", "sFs", "sPit", "sWallet", "sPin", "sPrize", "sTracks", "sAdmin", "sAsk", "sCars", "sLegend", "sNewCar", "sClaim", "sFind"];
 let under = "sGarage";
-function show(id) { cur = id; for (const s of screens) $(s).hidden = s !== id; if (id === "sGarage" || id === "sResult") under = id; }
+function show(id) { if (id === "sGarage") ev("garage", null, true); cur = id; for (const s of screens) $(s).hidden = s !== id; if (id === "sGarage" || id === "sResult") under = id; }
 
 // ---------- always landscape: a phone held upright gets the whole game turned on its side
 let rot = false, LW = innerWidth, LH = innerHeight;
@@ -701,9 +701,9 @@ async function signIn(raw, quiet) {
     const day = new Date(fol.date + "T12:00").toLocaleDateString("en-US", { month: "short", day: "numeric" });
     msg.className = "msg bad";
     msg.innerHTML = "<b>@" + esc(name) + "</b> isn't on the follower list yet. <a href='" + IG + "' target='_blank' rel='noopener'>Follow @internetmotorspeedway</a> to get a car. The list updates once a day (last update " + esc(day) + ").";
-    return false;
+    ev("gate_no", { n: name }); return false;
   }
-  PRICE = gar.price || 1;
+  PRICE = gar.price || 1; ev("gate_ok", { n: name }, true);
   const c = (cus.cars || []).find(x => x.ig.toLowerCase() === name), won = (mus.winners || []).some(w => w.name.toLowerCase() === name);
   const u = (gar.upgrades || {})[name] || {};
   me = { name, body: "#" + (fol.f[name] || "8a8f99"), roof: null, num: "", kind: "Your car", up: { e: clamp(u.e | 0, 0, 3), t: clamp(u.t | 0, 0, 3), a: clamp(u.a | 0, 0, 3) } };
@@ -982,6 +982,7 @@ function botStep(dt) {
 }
 
 function startRun(k) {
+  ev("run_start", { d: (CAREER.on ? "career" : SEA.run ? "season" : k) + " " + TRK });
   kind = k; ST = stats(); runBest = 0; lastLap = 0; laps = 0; runTotal = 0; raceLaps = []; raceT = 0; acc = 0; finished = false; place = 0; gasOn = brkOn = 0; touchId = null;
   if (kind === "race") { makeBots(); resetBots(); ghost = null; }
   else { for (const b of bots) b.mesh.visible = false; try { ghost = kind === "ghosts" ? null : JSON.parse(store.get("ghost:" + TK() + me.name) || "null"); } catch (e) { ghost = null; } }
@@ -996,6 +997,7 @@ function startRun(k) {
   setTimeout(tick, 350);
 }
 function endRun() {
+  ev(finished ? "run_finish" : "run_quit", { d: (CAREER.on ? "career" : SEA.run ? "season" : kind) + " " + TRK + " laps " + laps });
   mode = "menu"; $("hud").hidden = true; $("lights").hidden = true; audioOff(); ghostCar.visible = false; for (const g of G) g.mesh.visible = false; gasOn = brkOn = 0; hitT = 0; $("hit").style.opacity = 0; $("gas").classList.remove("on"); $("brk").classList.remove("on");
   try { if (document.fullscreenElement) document.exitFullscreen(); } catch (e) {}
   if (CAREER.on) return carEnd();
@@ -1277,11 +1279,11 @@ async function countRace() {      // a finished race. Pit Crew: every few races 
   { const k = "race:" + TK() + me.name, b = +store.get(k) || 0; if (!b || tot < b) { store.set(k, tot); rt += " Your best race yet."; } }
   if (!member()) return rt; let r = raced() + 1, t = earned(); if (r >= MONEY.earnRaces) { r = 0; t++; } store.set("rc:" + me.name, r); store.set("tok:" + me.name, t);
   return rt + " " + (r === 0 ? "Pit Crew: you earned a free upgrade. Pick it up in the pit lane." : "Pit Crew: " + r + " of " + MONEY.earnRaces + " races to your next free upgrade."); }
-let bMode = "lap";      // leaderboard switch: fastest lap, or the whole race
+let bMode = "race";      // Brady, Nov 22: the leaderboard is about the fastest 3 lap race. Fastest lap is the second tab.
 $("bSeg").onclick = e => { const b = e.target.closest("button"); if (!b || b.dataset.m === bMode) return; bMode = b.dataset.m; openBoard(); };
 const crTxt = n => n.toLocaleString("en-US") + " credits";
 let cur = "sGate", pinOK = false, nudged = false, pitSel = 0, pitPrev = false, pitH = 0, night = false, gKind = "drivers", runTotal = 0, boardAt = 0, boardRows = null, DATA = null;
-const only = id => { cur = id; for (const s of screens) $(s).hidden = s !== id; };
+const only = id => { if (id === "sGarage") ev("garage", null, true); cur = id; for (const s of screens) $(s).hidden = s !== id; };
 async function moneyIn(d) {      // called after sign in
   DATA = d; pinOK = false; pinMem = "";
   let sv = [];
@@ -1357,6 +1359,17 @@ $("ncAdd").onclick = () => {
   CARS[nc.i] = { kind: "", up: { e: 0, t: 0, a: 0 }, ...(CARS[nc.i] || {}), body: nc.body, roof: nc.roof, num, ...(ownedShapes().length ? { shape: nc.shape } : {}) }; done(); };
 $("ncCancel").onclick = () => { rebuildCar(); if (nc.build) return show("sGarage"); openCars(); };
 $("bCars").onclick = openCars;
+// ---------- event log (Brady, Nov 22): counts where players drop off and whether anyone taps a buy button. Live game only.
+// Sends the event name, the Instagram username (if signed in), a random id made on this phone, and a short tag. Never an email, a PIN or a payment detail.
+const EV_ON = false;      // event log is PARKED (Brady, Nov 22: not what he asked for). The server side only exists in Code_DRAFT.gs. Leave false until he asks for it.
+function ev(e, o, once) {
+  try { if (!LIVE || !EV_ON) return; const S = ev.seen || (ev.seen = {}); if (once) { if (S[e]) return; S[e] = 1; }
+    let v = store.get("vid"); if (!v) { v = Math.random().toString(36).slice(2, 12); store.set("vid", v); }
+    const body = JSON.stringify({ a: "ev", e, n: (o && o.n) || (me ? me.name : ""), v, d: (o && o.d) || "" });
+    if (!(navigator.sendBeacon && navigator.sendBeacon(API, body))) fetch(API, { method: "POST", body, keepalive: true, headers: { "Content-Type": "text/plain;charset=utf-8" } }).catch(() => {});
+  } catch (x) {} }
+document.addEventListener("click", e => { const a = e.target.closest && e.target.closest("a[href*='ko-fi.com']"); if (a) ev("tap_kofi", { d: a.id || "link" }); }, true);
+setTimeout(() => ev("visit", null, true), 0);
 // ---------- Legend rides showroom (Brady, Nov 22): view only. The ride spins on the turntable in the player's own colors. Nothing here changes the player's car.
 const LEGENDS = ["monster", "bus", "f1", "jet", "dragon", "prop", "mower", "shopcart", "wheelbarrow", "skateboard", "golfcart", "wheelchair"];
 let lgI = 0;
@@ -1365,7 +1378,7 @@ function lgShow() { const k = LEGENDS[lgI], own = ownedShapes().includes(k);
   $("lgK").textContent = "Legend rides · " + (lgI + 1) + " of " + LEGENDS.length; $("lgName").textContent = BODY_NAME[k] + (own ? " ✓" : " 🔒");
   $("lgWhat").textContent = own ? "This one is yours. Pick it in My cars." : "Shown in your colors. You can look, but only owners can race it. Buy it once and it is yours in the game and the daily video race.";
   $("lgBuy").hidden = own; $("lgDots").innerHTML = LEGENDS.map((_, i) => "<i" + (i === lgI ? " class='on'" : "") + "></i>").join(""); }
-function openLegend() { only("sLegend"); lgShow(); }
+function openLegend() { ev("legend_view"); only("sLegend"); lgShow(); }
 $("bLegend").onclick = openLegend;
 $("lgPrev").onclick = () => { lgI = (lgI + LEGENDS.length - 1) % LEGENDS.length; lgShow(); };
 $("lgNext").onclick = () => { lgI = (lgI + 1) % LEGENDS.length; lgShow(); };
@@ -1445,7 +1458,7 @@ function setDrawer(on) { $("gSet").hidden = !on; $("bSet").setAttribute("aria-ex
 $("bSet").onclick = () => setDrawer($("gSet").hidden);
 $("sGarage").addEventListener("click", e => { if (!$("gSet").hidden && !e.target.closest("#gSet, #bSet")) setDrawer(false); });
 $("dTog").onclick = () => { const o = $("demo").classList.toggle("open"); $("dTog").setAttribute("aria-expanded", o ? "true" : "false"); };
-$("bCrew").onclick = () => { location.href = MONEY.crew.url + "?u=" + encodeURIComponent(me.name); };
+$("bCrew").onclick = () => { ev("tap_crew"); location.href = MONEY.crew.url + "?u=" + encodeURIComponent(me.name); };
 
 // ---------- ?shot: a clean garage screen for marketing pictures. No demo bar, a placeholder name, Pit Crew car, sample lap and rank.
 const SHOT = /[?&]shot/.test(location.search), SHOTA = +(new URLSearchParams(location.search).get('a') || -2.2);
@@ -1762,8 +1775,8 @@ $("aYes").onclick = () => { const f = askFn; askFn = null; if (f) f(); };
 let crewPop = false, noteT = 0;
 const racesDone = () => +store.get("nr:" + me.name) || 0;
 function note(t) { let n = $("note"); if (!n) { n = document.createElement("div"); n.id = "note"; $("sAsk").parentNode.appendChild(n); } n.textContent = t; n.className = "on"; clearTimeout(noteT); noteT = setTimeout(() => n.className = "", 2400); }
-const crewAsk = (h, p, force, img) => { if (!force && (crewPop || !racesDone())) return note("That one is for the Pit Crew. You can join any time from the garage."); crewPop = true;
-  ask("Pit Crew", h, p, "Show me", () => { location.href = MONEY.crew.url + "?u=" + encodeURIComponent(me.name); }, img); };
+const crewAsk = (h, p, force, img) => { if (!force && (crewPop || !racesDone())) return note("That one is for the Pit Crew. You can join any time from the garage."); crewPop = true; ev("ask_crew", { d: h });
+  ask("Pit Crew", h, p, "Show me", () => { ev("tap_crew"); location.href = MONEY.crew.url + "?u=" + encodeURIComponent(me.name); }, img); };
 
 // ---------- PIN: 4 digits per @, set the first time you buy or enter a paid race
 let pinBuf = "", pinFirst = null, pinMode = "set", pinThen = null, pinBack = "sGarage";
@@ -2251,7 +2264,7 @@ const CPRAC = { oval: 37500, desert: 56000, banked: 30000 };      // practice la
 const CRIV = ["Cole Maddox", "Jo Ramirez", "Dale Pruitt", "Nina Okafor", "Rex Halloran", "Marisol Vega", "Tuck Bailey", "Gus Lindqvist", "Anika Rao", "Buck Tanner", "Sienna Cho", "Hollis Grant", "Wes Calloway", "Teo Marchetti", "Ruby Kowalski", "Dex Arroyo", "Lorna Whitfield", "Mack Dupree", "Ivy Castellano"];
 const CAR_LIVE = false;      // false = only the admin test accounts get the call to move up to cars. true = every driver who finishes top 3 in karts.
 const isCar = c => !!c && c.tier === "car", cPracMs = c => isCar(c) ? CPRAC[cTrk(c.wk)[0]] : PRAC_MS, cTitles = c => (c.champ || 0) + (c.cchamp || 0);
-const goCrew = () => { location.href = MONEY.crew.url + "?u=" + encodeURIComponent(me.name); };
+const goCrew = () => { ev("tap_crew"); location.href = MONEY.crew.url + "?u=" + encodeURIComponent(me.name); };
 const UPC = [2, 3, 4, 6], RACEPAY = [5, 3, 2, 1, 1, 1], TRIAL_MS = 33500, SIGN_PAY = 15;
 // story points: every race pays the whole field by place (double in the cup race), and each choice you make adds a couple more
 const RPTS = [25, 18, 15, 12, 10, 8], PICK_PTS = 2, CUP_PAY = 25;
