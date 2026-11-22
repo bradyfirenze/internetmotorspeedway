@@ -271,7 +271,7 @@ button.crew { background: #062a30; color: #6ff3ff; border: 1px solid rgba(41,240
 .tinfo{display:flex;flex-direction:column;justify-content:center;gap:5px;padding:8px 10px 8px 0} .tinfo b{font:400 22px/1.05 var(--display);text-transform:uppercase} .tinfo small{font:600 12px/1.35 var(--body);color:var(--muted)} .tinfo button{margin-top:4px;padding:9px 6px;font-size:15px}
 .tnav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px} .tnav button{width:46px;flex:0 0 46px;padding:4px 0;font-size:22px;line-height:1} .tnav button:disabled{opacity:.3}
 .tdots{display:flex;gap:6px} .tdots i{width:8px;height:8px;border-radius:50%;background:#3a3f4b} .tdots i.on{background:var(--yel)}
-@media (orientation:portrait){.tcard{grid-template-columns:1fr}.tinfo{padding:0 10px 10px}}
+/* the game always lays out sideways (a phone held upright gets the whole app rotated), so the track card keeps its two columns. The old portrait rule hid the Race here button. */
 .cpills{display:flex;gap:5px} #cPts b{color:var(--fg)}
 .cstar{color:var(--yel);font-size:10px;letter-spacing:1px} .cstar i{font-style:normal;color:#3a3f4b}
 .cmem .cbar{flex:1 1 60px;max-width:110px;height:7px;border-radius:4px;background:#2a2e37;overflow:hidden} .cmem .cbar u{display:block;height:100%;background:var(--yel)} .cmem em{font:400 16px var(--display);font-style:normal;width:26px;text-align:right}
@@ -290,6 +290,34 @@ button.crew { background: #062a30; color: #6ff3ff; border: 1px solid rgba(41,240
 .sstand div{display:grid;grid-template-columns:24px 1fr 44px;align-items:center;gap:6px;padding:4px 6px;border-bottom:1px solid var(--line);font:600 13px var(--body)}
 .sstand i{font:400 16px var(--display);font-style:normal;color:var(--muted)} .sstand b{font:400 18px var(--display);text-align:right} .sstand em{font-style:normal;font-size:11px;margin-left:6px;color:var(--grn)}
 .sstand .me{background:rgba(255,204,24,.13);border-radius:8px} .sstand .me span,.sstand .me i{color:var(--yel)} .sstand .cut{border-bottom:2px dashed var(--yel)}
+
+/* ---- garage cleanup (Brady, Nov 22): the car is the hero. Compact chips, a closed settings drawer, a slimmer menu ---- */
+#sGarage { --gw: min(250px, 32%); }
+.gtop { display: flex; align-items: center; gap: 6px; right: calc(var(--gw) + max(12px, var(--sr)) + 10px); }
+.gwho { display: flex; align-items: center; gap: 9px; min-width: 0; background: var(--card); border: 1px solid var(--line); border-radius: 11px; padding: 4px 10px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.gwho h1 { font-size: 19px; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.gst { font: 700 9px var(--body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+.gst b { font: 400 16px var(--display); color: var(--yel); margin-left: 4px; letter-spacing: .02em; }
+#gBars { display: flex; gap: 5px; flex: none; }
+#sGarage .gbar { width: auto; padding: 6px 9px; border-radius: 11px; }
+.gbar .r { gap: 5px; align-items: center; } .gbar .r b { font-size: 0; display: flex; } .gbar .r b svg { width: 17px; height: 17px; margin: 0; } .gbar .r span { font-size: 15px; }
+.gbar .segs, .gbar small { display: none; }
+.gside { top: max(8px, var(--st)); width: var(--gw); }
+#sGarage .gside button { font-size: 13px; padding: 8px 4px; }
+#sGarage .gside button.big { font-size: 23px; padding: 11px; }
+#sGarage #bDesert, #sGarage #bWeek, #sGarage #crewLine:not(.warn) { display: none; }
+.gchips { position: absolute; left: max(12px, var(--sl)); bottom: max(8px, var(--sb)); display: flex; gap: 6px; align-items: center; pointer-events: auto; }
+#sGarage .gchip { width: auto; font: 700 11px var(--body); letter-spacing: .04em; text-transform: none; padding: 8px 12px; border-radius: 999px; background: var(--card); color: var(--fg); border: 1px solid var(--line); white-space: nowrap; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+#sGarage #bTracks { color: var(--yel); } #sGarage .gchip.on { border-color: var(--yel); }
+#sGarage .gchip.help { background: var(--yel); color: #141414; border-color: var(--yel); }
+.gme { bottom: calc(max(8px, var(--sb)) + 40px); width: min(330px, calc(100% - var(--gw) - 40px)); max-width: none; }
+.gme[hidden] { display: none; }
+#demo { top: auto; left: auto; bottom: max(8px, var(--sb)); right: calc(min(250px, 32%) + max(12px, var(--sr)) + 10px); padding: 3px; gap: 4px; }
+#demo #dMore { display: none; gap: 4px; } #demo.open #dMore { display: flex; }
+@media (max-height: 372px) { .gside { top: max(6px, var(--st)); gap: 4px; } #sGarage .gside button { padding: 6px 4px; font-size: 12.5px; } #sGarage .gside button.big { padding: 8px; font-size: 20px; } }
+@media (orientation: landscape) and (max-width: 720px), (orientation: portrait) and (max-height: 720px) { .gwho { gap: 7px; padding: 4px 8px; } .gwho h1 { font-size: 16px; } .gst:last-child { display: none; } .gst b { font-size: 14px; } #sGarage .gbar { padding: 6px 7px; } .gbar .r b svg { width: 14px; height: 14px; } .gbar .r span { font-size: 13px; } #sGarage .gchip { padding: 7px 10px; } }
+#sGarage #bTracks { display: none; }
+#sBoard .two button { font-size: 14px; padding: 8px 4px; }
 </style>
 <script type="importmap">{ "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -331,14 +359,20 @@ button.crew { background: #062a30; color: #6ff3ff; border: 1px solid rgba(41,240
 
 <!-- 2. garage: you start here, in your own pit garage, with your car on the turntable -->
 <div class="screen" id="sGarage" hidden>
-  <div class="gtop" id="gBars"></div>
-  <div class="gme">
-    <div class="who"><div><div class="k" id="gKind">Your car</div><h1 id="gName">@you</h1></div>
-      <div class="stat"><span class="k">Best lap</span><b id="gBest">--</b></div>
-      <div class="stat"><span class="k">Rank</span><b id="gRank">--</b></div></div>
+  <!-- garage cleanup (Brady, Nov 22): the car is the hero. Small chips on top, settings in a drawer that starts closed. -->
+  <div class="gtop">
+    <div class="gwho"><h1 id="gName">@you</h1><span id="gKind" hidden>Your car</span><span class="gst">Best<b id="gBest">--</b></span><span class="gst">Rank<b id="gRank">--</b></span></div>
+    <div id="gBars"></div>
+  </div>
+  <div class="gchips">
+    <button class="gchip" id="bTracks">Track: Speedway Oval</button>
+    <button class="gchip" id="bSet" aria-expanded="false" aria-controls="gSet">&#9881; Settings</button>
+    <span id="bHelpWrap" hidden><button class="gchip help" id="bHelpDesk">? Help</button></span>
+  </div>
+  <div class="gme" id="gSet" hidden>
     <button class="hsw on" id="bHelp" aria-label="Steering assist on or off"></button>
     <button class="hsw two on" id="bCtl" aria-label="Steer with the slider or with buttons"></button>
-    <p class="small" style="margin:5px 0 0"><button class="linkbtn" id="bTracks" style="color:var(--yel)">Track: Speedway Oval</button> &middot; <button class="linkbtn" id="bSwitch">Switch username</button><span id="bHelpWrap" hidden> &middot; <button class="linkbtn" id="bHelpDesk">Help</button></span><span id="bSeasonWrap" hidden> &middot; <button class="linkbtn" id="bSeason" style="color:#ffcc18">Season (NEW)</button></span><span id="bAdmWrap" hidden> &middot; <button class="linkbtn" id="bAdm" style="color:#ff8a1e">Admin garage</button></span><span id="bClaimWrap" hidden> &middot; <button class="linkbtn" id="bClaim" style="color:#6ff3ff">Joined on Ko-fi? Claim Pit Crew</button></span><span id="bCarClaimWrap" hidden> &middot; <button class="linkbtn" id="bCarClaim" style="color:#ffcc18">Bought a custom car? Claim it</button></span></p>
+    <p class="small" style="margin:6px 0 0"><button class="linkbtn" id="bSwitch">Switch username</button><span id="bSeasonWrap" hidden> &middot; <button class="linkbtn" id="bSeason" style="color:#ffcc18">Season (NEW)</button></span><span id="bAdmWrap" hidden> &middot; <button class="linkbtn" id="bAdm" style="color:#ff8a1e">Admin garage</button></span><span id="bClaimWrap" hidden> &middot; <button class="linkbtn" id="bClaim" style="color:#6ff3ff">Joined on Ko-fi? Claim Pit Crew</button></span><span id="bCarClaimWrap" hidden> &middot; <button class="linkbtn" id="bCarClaim" style="color:#ffcc18">Bought a custom car? Claim it</button></span></p>
     <button class="fsb" id="bFs" hidden>&#128242; Address bar in the way? Save it as an app</button>
   </div>
   <div class="gside">
@@ -403,8 +437,9 @@ button.crew { background: #062a30; color: #6ff3ff; border: 1px solid rgba(41,240
 <!-- 5. leaderboard -->
 <div class="screen mid" id="sBoard" hidden>
   <div class="box">
-    <div class="k">Fastest saved laps</div>
+    <div class="k" id="bK">Fastest saved laps</div>
     <h2>Leaderboard</h2>
+    <div class="two" style="grid-template-columns:1fr 1fr 1.25fr;margin-bottom:8px"><div id="bSeg" style="display:contents"><button data-m="lap">Fastest lap</button><button class="alt" data-m="race">Whole race</button></div><button class="alt" id="bBTrk" style="color:var(--yel);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Track</button></div>
     <div class="msg" id="bMsg" role="status"></div>
     <div class="list" id="bList"></div>
     <button class="alt" data-close>Back</button>
@@ -435,7 +470,7 @@ button.crew { background: #062a30; color: #6ff3ff; border: 1px solid rgba(41,240
   </div>
 </div>
 <!-- DRAFT: demo controls (not in the real game) -->
-<div id="demo" hidden>DRAFT &middot; DEMO MONEY <button id="dCr">+1,000 credits</button><button id="dCrew">Pit Crew: off</button><button id="dReset">Reset</button></div>
+<div id="demo" hidden><button id="dTog" aria-expanded="false">DEMO</button><span id="dMore"><button id="dCr">+1,000 credits</button><button id="dCrew">Pit Crew: off</button><button id="dReset">Reset</button></span></div>
 
 <!-- 8. pit lane: upgrades -->
 <div class="screen side" id="sPit" hidden>
@@ -1116,16 +1151,16 @@ async function api(body) {
 }
 function drawBoard(rows) {
   const L = $("bList");
-  if (!rows.length) { L.innerHTML = "<p style='text-align:center;margin:14px 0'>No laps saved yet. Be the first.</p>"; return; }
+  if (!rows.length) { L.innerHTML = "<p style='text-align:center;margin:14px 0'>" + (bMode === "race" ? "No races finished yet. Be the first." : "No laps saved yet. Be the first.") + "</p>"; return; }
   L.innerHTML = rows.map((r, i) => "<div class='lr" + (me && r.n === me.name ? " me" : "") + "'><span class='p'>" + (i + 1) + "</span><span class='n'>@" + esc(r.n) + (r.up ? "<small>UPGRADED</small>" : "") + "</span><span class='t'>" + fmt(r.t) + "</span></div>").join("");
   const mine = L.querySelector(".me"); if (mine) mine.scrollIntoView({ block: "center" });
 }
 async function openBoard() {
   only("sBoard");
-  const m = $("bMsg"); m.className = "msg"; $("bList").innerHTML = "";
-  if (!ENDPOINT) { m.textContent = "The shared leaderboard isn't switched on yet. These are the times saved on this phone."; const b = me && +store.get("saved:" + TK() + me.name); drawBoard(b ? [{ n: me.name, t: b, up: upTotal() }] : []); return; }
+  const m = $("bMsg"), rc = bMode === "race"; m.className = "msg"; $("bList").innerHTML = ""; $("bK").textContent = rc ? "Fastest " + RACE_LAPS + " lap races" : "Fastest saved laps"; for (const x of $("bSeg").children) x.className = x.dataset.m === bMode ? "" : "alt"; $("bBTrk").textContent = (TRK === "desert" ? DES_NAME : TRK === "banked" ? BNK_NAME : "Speedway Oval") + " ▸"; $("bBTrk").hidden = LITE;
+  if (!ENDPOINT) { m.textContent = "The shared leaderboard isn't switched on yet. These are the times saved on this phone."; const b = me && +store.get((rc ? "race:" : "saved:") + TK() + me.name); drawBoard(b ? [{ n: me.name, t: b, up: upTotal() }] : []); return; }
   m.textContent = "Loading...";
-  try { const d = await api(); m.textContent = d.total > d.rows.length ? "Top " + d.rows.length + " of " + d.total + " drivers" : d.total + (d.total === 1 ? " driver" : " drivers") + " so far"; drawBoard(d.rows); const i = me ? d.rows.findIndex(r => r.n === me.name) : -1; if (i >= 0) store.set("rank:" + TK() + me.name, i + 1); }
+  try { const d = rc ? await (await fetch(API + "?a=races" + (TRK !== "oval" ? "&k=" + TRK : ""))).json() : await api(); if (rc !== (bMode === "race")) return; m.textContent = d.total > d.rows.length ? "Top " + d.rows.length + " of " + d.total + " drivers" : d.total + (d.total === 1 ? " driver" : " drivers") + " so far"; drawBoard(d.rows); const i = me ? d.rows.findIndex(r => r.n === me.name) : -1; if (i >= 0 && !rc) store.set("rank:" + TK() + me.name, i + 1); }
   catch (e) { m.className = "msg bad"; m.textContent = "Couldn't load the leaderboard. Try again in a bit."; }
 }
 $("bBoard").onclick = openBoard; $("bBoard2").onclick = openBoard;
@@ -1219,14 +1254,19 @@ function syncSV() {              // copy the server's cars and upgrades into the
 async function refreshSV() { if (!LIVE || !me || performance.now() - svAt < 15000) return; if (await loadSV()) { syncSV(); paintMoney(); if (cur === "sCars") openCars(); if (cur === "sPit") drawPit(); } }
 document.addEventListener("visibilitychange", () => { if (!document.hidden) { svAt = 0; refreshSV(); } });     // back from Ko-fi: check for Pit Crew right away
 async function countRace() {      // a finished race. Pit Crew: every few races is an earned upgrade.
-  if (LIVE) { const t0 = SV.tok, body = { a: "race", slot, laps: raceLaps.slice(0, RACE_LAPS) }; let d = null;
+  const tot = raceLaps.slice(0, RACE_LAPS).reduce((a, l) => a + l.t, 0); let rt = "Race time " + fmt(tot) + ".";      // Brady, Nov 22: every finished race goes on the race leaderboard for its track
+  if (LIVE) { const t0 = SV.tok, body = { a: "race", slot, laps: raceLaps.slice(0, RACE_LAPS) }; if (TRK !== "oval") body.k = TRK; let d = null;
     try { d = await srv(body); } catch (e) { await new Promise(r => setTimeout(r, 2500)); try { d = await srv(body); if (!d.ok && d.why === "too soon") { await loadSV(); syncSV(); d = { ok: true }; } } catch (e2) {} }      // one more try if the server didn't answer. "Too soon" on the second try means the first one landed.
-    if (!member()) return "";
+    if (d && d.ok && d.race && d.race.rank) rt = "Race time " + fmt(d.race.t) + " · #" + d.race.rank + " of " + d.race.total + " on the race leaderboard" + (d.race.isBest ? ", your best race yet." : ". Your best is " + fmt(d.race.best) + ".");
+    if (!member()) return d && d.ok ? rt : "";
     if (!d) return "!This race didn't count: the server didn't answer. Check your signal.";
     if (!d.ok) return "!This race didn't count" + (d.why === "too soon" ? ": it came too soon after your last one." : d.why === "check" ? ": the server couldn't confirm your laps." : d.why === "follow" ? ": follow @internetmotorspeedway first." : ". Try the next one.");
-    return SV.tok > t0 ? "Pit Crew: you earned a free upgrade. Pick it up in the pit lane." : "Pit Crew: " + SV.rc + " of " + MONEY.earnRaces + " races to your next free upgrade."; }
-  if (!member()) return ""; let r = raced() + 1, t = earned(); if (r >= MONEY.earnRaces) { r = 0; t++; } store.set("rc:" + me.name, r); store.set("tok:" + me.name, t);
-  return r === 0 ? "Pit Crew: you earned a free upgrade. Pick it up in the pit lane." : "Pit Crew: " + r + " of " + MONEY.earnRaces + " races to your next free upgrade."; }
+    return rt + " " + (SV.tok > t0 ? "Pit Crew: you earned a free upgrade. Pick it up in the pit lane." : "Pit Crew: " + SV.rc + " of " + MONEY.earnRaces + " races to your next free upgrade."); }
+  { const k = "race:" + TK() + me.name, b = +store.get(k) || 0; if (!b || tot < b) { store.set(k, tot); rt += " Your best race yet."; } }
+  if (!member()) return rt; let r = raced() + 1, t = earned(); if (r >= MONEY.earnRaces) { r = 0; t++; } store.set("rc:" + me.name, r); store.set("tok:" + me.name, t);
+  return rt + " " + (r === 0 ? "Pit Crew: you earned a free upgrade. Pick it up in the pit lane." : "Pit Crew: " + r + " of " + MONEY.earnRaces + " races to your next free upgrade."); }
+let bMode = "lap";      // leaderboard switch: fastest lap, or the whole race
+$("bSeg").onclick = e => { const b = e.target.closest("button"); if (!b || b.dataset.m === bMode) return; bMode = b.dataset.m; openBoard(); };
 const crTxt = n => n.toLocaleString("en-US") + " credits";
 let cur = "sGate", pinOK = false, nudged = false, pitSel = 0, pitPrev = false, pitH = 0, night = false, gKind = "drivers", runTotal = 0, boardAt = 0, boardRows = null, DATA = null;
 const only = id => { cur = id; for (const s of screens) $(s).hidden = s !== id; };
@@ -1370,11 +1410,16 @@ const UICON = {      // simple bold icons for the upgrade bars: an engine, a tir
   a: "<svg viewBox='0 0 24 24' aria-hidden='true'><path fill='none' stroke='currentColor' stroke-width='3.4' stroke-linejoin='round' d='M10.5 5.2H22v5.6h-4.6'/><circle cx='10.5' cy='13.2' r='7.4' fill='none' stroke='currentColor' stroke-width='3.4'/><circle cx='10.5' cy='13.2' r='2.3' fill='currentColor'/><path stroke='currentColor' stroke-width='1.7' stroke-linecap='round' d='M10.5 8.6v2M15 13.2h-2M10.5 17.8v-2M6 13.2h2'/></svg>" };
 function paintBars() {
   $("gBars").innerHTML = UPG.map((u, i) => { const lv = Math.min(me.up[u.id], LITE ? 3 : 4), mem = member(), top = mem ? 4 : 3;
-    return "<button class='gbar' data-i='" + i + "'><div class='r'><b>" + (UICON[u.id] || "") + u.name + "</b><span>" + lv + "/" + top + "</span></div><div class='segs'>" +
+    return "<button class='gbar' data-i='" + i + "' aria-label='" + u.name + " level " + lv + " of " + top + ". Tap to upgrade'><div class='r'><b>" + (UICON[u.id] || "") + u.name + "</b><span>" + lv + "/" + top + "</span></div><div class='segs'>" +
       (LITE ? [0, 1, 2] : [0, 1, 2, 3]).map(k => "<i class='" + (k === 3 ? "crew " : "") + (k < lv ? "on" : "") + "'></i>").join("") + "</div><small>" +
       (lv >= top ? "Maxed out" : "<em>+" + GAIN[u.id][lv].toFixed(2) + " s a lap</em> · tap to upgrade") + "</small></button>"; }).join("");
 }
 $("gBars").onclick = e => { const b = e.target.closest("button"); if (b) openPit(+b.dataset.i); };
+// garage cleanup (Brady, Nov 22): settings live in a drawer that starts closed, so the car shows
+function setDrawer(on) { $("gSet").hidden = !on; $("bSet").setAttribute("aria-expanded", on ? "true" : "false"); $("bSet").classList.toggle("on", on); }
+$("bSet").onclick = () => setDrawer($("gSet").hidden);
+$("sGarage").addEventListener("click", e => { if (!$("gSet").hidden && !e.target.closest("#gSet, #bSet")) setDrawer(false); });
+$("dTog").onclick = () => { const o = $("demo").classList.toggle("open"); $("dTog").setAttribute("aria-expanded", o ? "true" : "false"); };
 $("bCrew").onclick = () => { location.href = MONEY.crew.url + "?u=" + encodeURIComponent(me.name); };
 
 // ---------- ?shot: a clean garage screen for marketing pictures. No demo bar, a placeholder name, Pit Crew car, sample lap and rank.
@@ -1810,8 +1855,10 @@ function trackCards() { const lock = member() ? "" : " 🔒", L = [      // Brad
   if (bankedOn()) L.push(["banked", "banked", BNK_NAME, (FULL && !DESERT_LIVE ? "TEST. " : "") + "Steep banked turns you can take almost flat out.", TRK === "banked", ""]);
   return L; }
 function trackDots() { const el = $("tList"), n = el.children.length, i = clamp(Math.round(el.scrollLeft / Math.max(1, el.clientWidth)), 0, n - 1); $("tK").textContent = "Pick a track · " + (i + 1) + " of " + n; $("tDots").innerHTML = Array.from({ length: n }, (_, j) => "<i" + (j === i ? " class='on'" : "") + "></i>").join(""); $("tPrev").disabled = i === 0; $("tNext").disabled = i === n - 1; return i; }
-function openTracks() { const L = trackCards();
-  $("tList").innerHTML = L.map(([t, img, name, what, on, lock]) => "<div class='tcard" + (on ? " on" : "") + "'><img src='tracks/" + img + ".jpg' alt='" + esc(name) + " from the air'><div class='tinfo'><b>" + esc(name) + lock + "</b><small>" + esc(what) + "</small><button data-t='" + t + "'" + (on ? " class='alt'" : "") + ">" + (on ? "Selected ✓" : lock ? "Pit Crew track" : "Race here") + "</button></div></div>").join("");
+let pickFor = null;      // Brady, Nov 22: Race, Practice and Race real drivers open the track picker, and picking a track starts the run. No track chip in the garage any more.
+const PICKLBL = { race: "Race here", practice: "Practice here", ghosts: "Race them here", board: "Show this board" };
+function openTracks(mode) { pickFor = typeof mode === "string" ? mode : null; const L = trackCards();
+  $("tList").innerHTML = L.map(([t, img, name, what, on, lock]) => "<div class='tcard" + (on ? " on" : "") + "'><img src='tracks/" + img + ".jpg' alt='" + esc(name) + " from the air'><div class='tinfo'><b>" + esc(name) + lock + "</b><small>" + esc(what) + "</small><button data-t='" + t + "'" + (on && !pickFor ? " class='alt'" : "") + ">" + (lock ? "Pit Crew track" : pickFor ? PICKLBL[pickFor] : on ? "Selected ✓" : "Race here") + "</button></div></div>").join("");
   only("sTracks"); const el = $("tList"); el.scrollLeft = Math.max(0, L.findIndex(c => c[4])) * el.clientWidth; trackDots();
 }
 $("tList").onscroll = trackDots;
@@ -1820,8 +1867,11 @@ $("tNext").onclick = () => { const el = $("tList"); el.scrollTo({ left: (trackDo
 $("tList").onclick = e => { const b = e.target.closest("button"); if (!b) return;
   if (b.dataset.t === "night" && !member()) return crewAsk("Race the Night Oval?", "The oval under the lights is a Pit Crew track. " + MONEY.crew.price + ".", true, "tracks/night.jpg");
   if (b.dataset.t === "desert" && !member()) return crewAsk("Race the " + DES_NAME + "?", "The dirt track is a Pit Crew track: hills, dips and sharp turns. " + MONEY.crew.price + ".", true, "desert_wide.jpg");
-  setTrack(b.dataset.t === "desert" || b.dataset.t === "banked" ? b.dataset.t : "oval"); setNight(b.dataset.t === "night"); openTracks(); };
-$("bTracks").onclick = openTracks;
+  setTrack(b.dataset.t === "desert" || b.dataset.t === "banked" ? b.dataset.t : "oval"); setNight(b.dataset.t === "night");
+  if (pickFor) { const m = pickFor; pickFor = null; return m === "board" ? openBoard() : m === "ghosts" ? startGhosts("drivers") : startRun(m); }
+  openTracks(); };
+$("bTracks").onclick = () => openTracks();
+if (!LITE) { $("bRace").onclick = () => openTracks("race"); $("bPrac").onclick = () => openTracks("practice"); $("bBTrk").onclick = () => openTracks("board"); }
 $("bDesert").onclick = () => { if (TRK === "desert") return openTracks();
   if (!member()) return crewAsk("Race the " + DES_NAME + "?", "The dirt track is a Pit Crew track: hills, dips and sharp turns. " + MONEY.crew.price + ".", true, "desert_wide.jpg");
   setTrack("desert"); note(DES_NAME + " picked. Hit Practice lap or Race."); };
@@ -1899,7 +1949,7 @@ async function startGhosts(k) {
   }, 240);
 }
 $("fCancel").onclick = () => { clearInterval(findT); show("sGarage"); };
-$("bDrivers").onclick = () => startGhosts("drivers");
+$("bDrivers").onclick = () => LITE ? startGhosts("drivers") : openTracks("ghosts");
 
 // ---------- prize race: win this race, win the prize. Fixed prize set by Brady, never a cut of the entry fees.
 let ageOK = false;
