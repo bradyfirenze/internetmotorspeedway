@@ -1608,7 +1608,7 @@ function trailTick() {      // glow trail: a ribbon of light behind a Car PRO wh
 
 // ---------- car bodies: monster truck, school bus, F1 car, fighter jet, dragon, and the 7 Legend rides. Same shapes as the daily videos (blender/tier_models.py),
 // built from a few boxes so they are light. Looks only: every body drives exactly the same and takes up the same room on the track.
-const BODY_SCALE = { monster: 1.15, bus: 1.0, f1: 1.25, jet: .42, dragon: .78, balloon: 1.3, prop: .72, mower: 1.0, shopcart: .95, wheelbarrow: .9, skateboard: .85, golfcart: .95, wheelchair: 1.3, policebox: .8, floathead: .85, carrier: .9 };
+const BODY_SCALE = { monster: 1.15, bus: 1.0, f1: 1.25, jet: .42, dragon: .78, balloon: 1.3, prop: .72, mower: 1.0, shopcart: .95, wheelbarrow: .9, skateboard: .85, golfcart: .95, wheelchair: 1.3, policebox: .8, floathead: .85, carrier: 1.4 };      // carrier 1.4: Brady picked the bigger ship in the Custom Cars chat, Nov 23
 const BODY_NAME = { monster: "Monster truck", bus: "School bus", f1: "F1 car", jet: "Fighter jet", dragon: "Dragon", prop: "Stunt prop plane", mower: "Riding mower", shopcart: "Shopping cart", wheelbarrow: "Wheelbarrow", skateboard: "Skateboard", golfcart: "Golf cart", wheelchair: "Sport wheelchair", policebox: "Police box", floathead: "Floating head", carrier: "Aircraft carrier" };
 const TAG_Y = { monster: 4.6, bus: 3.9, f1: 2.6, jet: 13, balloon: 5.6, dragon: 5.4, prop: 4.0, mower: 3.7, shopcart: 4.3, wheelbarrow: 3.1, skateboard: 2.5, golfcart: 4.6, wheelchair: 4.0, policebox: 5.3, floathead: 4.6, carrier: 3.9 };      // balloon is kept for old entries, but it is not sold: Brady swapped it for the fighter jet (Nov 15)
 function bodyCar(c) {
