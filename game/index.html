@@ -361,7 +361,7 @@ button.crew { background: #062a30; color: #6ff3ff; border: 1px solid rgba(41,240
 <div class="screen" id="sGarage" hidden>
   <!-- garage cleanup (Brady, Nov 22): the car is the hero. Small chips on top, settings in a drawer that starts closed. -->
   <div class="gtop">
-    <div class="gwho"><h1 id="gName">@you</h1><span id="gKind" hidden>Your car</span><span class="gst">Best<b id="gBest">--</b></span><span class="gst">Rank<b id="gRank">--</b></span></div>
+    <div class="gwho"><h1 id="gName">@you</h1><span id="gKind" hidden>Your car</span><span class="gst">Best race<b id="gBest">--</b></span><span class="gst">Rank<b id="gRank">--</b></span></div>
     <div id="gBars"></div>
   </div>
   <div class="gchips">
@@ -720,10 +720,10 @@ const upTotal = () => me.up.e + me.up.t + me.up.a;
 const best = () => +store.get("best:" + TK() + me.name) || 0;
 function fillGarage() {
   $("gName").textContent = "@" + me.name; $("gKind").textContent = me.kind;
-  $("gBest").textContent = fmt(best());
+  $("gBest").textContent = fmt(+store.get("race:" + TK() + me.name) || 0);
   paintMoney();
-  const rk = +store.get("rank:" + TK() + me.name) || 0;
-  $("gRank").textContent = rk ? "P" + rk : "--";
+  const rk = +store.get("rrank:" + TK() + me.name) || 0;
+  $("gRank").textContent = rk ? "P" + rk : "--"; raceMine();
 }
 $("gateForm").addEventListener("submit", e => { e.preventDefault(); $("uname").blur(); signIn($("uname").value); });
 $("bSwitch").onclick = () => { store.del("user"); me = null; $("uname").value = ""; $("gateMsg").textContent = ""; show("sGate"); };
@@ -1174,7 +1174,7 @@ async function openBoard() {
   const m = $("bMsg"), rc = bMode === "race"; m.className = "msg"; $("bList").innerHTML = ""; $("bK").textContent = rc ? "Fastest " + RACE_LAPS + " lap races" : "Fastest saved laps"; for (const x of $("bSeg").children) x.className = x.dataset.m === bMode ? "" : "alt"; $("bBTrk").textContent = (TRK === "desert" ? DES_NAME : TRK === "banked" ? BNK_NAME : "Speedway Oval") + " ▸"; $("bBTrk").hidden = LITE;
   if (!ENDPOINT) { m.textContent = "The shared leaderboard isn't switched on yet. These are the times saved on this phone."; const b = me && +store.get((rc ? "race:" : "saved:") + TK() + me.name); drawBoard(b ? [{ n: me.name, t: b, up: upTotal() }] : []); return; }
   m.textContent = "Loading...";
-  try { const d = rc ? await (await fetch(API + "?a=races" + (TRK !== "oval" ? "&k=" + TRK : ""))).json() : await api(); if (rc !== (bMode === "race")) return; m.textContent = d.total > d.rows.length ? "Top " + d.rows.length + " of " + d.total + " drivers" : d.total + (d.total === 1 ? " driver" : " drivers") + " so far"; drawBoard(d.rows); const i = me ? d.rows.findIndex(r => r.n === me.name) : -1; if (i >= 0 && !rc) store.set("rank:" + TK() + me.name, i + 1); }
+  try { const d = rc ? await (await fetch(API + "?a=races" + (TRK !== "oval" ? "&k=" + TRK : ""))).json() : await api(); if (rc !== (bMode === "race")) return; m.textContent = d.total > d.rows.length ? "Top " + d.rows.length + " of " + d.total + " drivers" : d.total + (d.total === 1 ? " driver" : " drivers") + " so far"; drawBoard(d.rows); const i = me ? d.rows.findIndex(r => r.n === me.name) : -1; if (i >= 0) { store.set((rc ? "rrank:" : "rank:") + TK() + me.name, i + 1); if (rc) store.set("race:" + TK() + me.name, d.rows[i].t); } }
   catch (e) { m.className = "msg bad"; m.textContent = "Couldn't load the leaderboard. Try again in a bit."; }
 }
 $("bBoard").onclick = openBoard; $("bBoard2").onclick = openBoard;
@@ -1271,6 +1271,7 @@ async function countRace() {      // a finished race. Pit Crew: every few races 
   const tot = raceLaps.slice(0, RACE_LAPS).reduce((a, l) => a + l.t, 0); let rt = "Race time " + fmt(tot) + ".";      // Brady, Nov 22: every finished race goes on the race leaderboard for its track
   if (LIVE) { const t0 = SV.tok, body = { a: "race", slot, laps: raceLaps.slice(0, RACE_LAPS) }; if (TRK !== "oval") body.k = TRK; let d = null;
     try { d = await srv(body); } catch (e) { await new Promise(r => setTimeout(r, 2500)); try { d = await srv(body); if (!d.ok && d.why === "too soon") { await loadSV(); syncSV(); d = { ok: true }; } } catch (e2) {} }      // one more try if the server didn't answer. "Too soon" on the second try means the first one landed.
+    if (d && d.ok && d.race && d.race.rank) { store.set("race:" + TK() + me.name, d.race.best); store.set("rrank:" + TK() + me.name, d.race.rank); }      // the garage chip shows your best race and race rank
     if (d && d.ok && d.race && d.race.rank) rt = "Race time " + fmt(d.race.t) + " · #" + d.race.rank + " of " + d.race.total + " on the race leaderboard" + (d.race.isBest ? ", your best race yet." : ". Your best is " + fmt(d.race.best) + ".");
     if (!member()) return d && d.ok ? rt : "";
     if (!d) return "!This race didn't count: the server didn't answer. Check your signal.";
@@ -1279,6 +1280,11 @@ async function countRace() {      // a finished race. Pit Crew: every few races 
   { const k = "race:" + TK() + me.name, b = +store.get(k) || 0; if (!b || tot < b) { store.set(k, tot); rt += " Your best race yet."; } }
   if (!member()) return rt; let r = raced() + 1, t = earned(); if (r >= MONEY.earnRaces) { r = 0; t++; } store.set("rc:" + me.name, r); store.set("tok:" + me.name, t);
   return rt + " " + (r === 0 ? "Pit Crew: you earned a free upgrade. Pick it up in the pit lane." : "Pit Crew: " + r + " of " + MONEY.earnRaces + " races to your next free upgrade."); }
+// the garage chip is about the 3 lap race too (Brady, Nov 23): fetch this driver's place on the race board once per track
+const rmDone = {};
+async function raceMine() { if (!LIVE || !me) return; const k = TK() + me.name; if (rmDone[k]) return; rmDone[k] = 1;
+  try { const d = await (await fetch(API + "?a=races" + (TRK !== "oval" ? "&k=" + TRK : ""))).json(), i = (d.rows || []).findIndex(r => r.n === me.name);
+    if (i >= 0) { store.set("race:" + k, d.rows[i].t); store.set("rrank:" + k, i + 1); if (cur === "sGarage") fillGarage(); } } catch (e) {} }
 let bMode = "race";      // Brady, Nov 22: the leaderboard is about the fastest 3 lap race. Fastest lap is the second tab.
 $("bSeg").onclick = e => { const b = e.target.closest("button"); if (!b || b.dataset.m === bMode) return; bMode = b.dataset.m; openBoard(); };
 const crTxt = n => n.toLocaleString("en-US") + " credits";
@@ -1602,9 +1608,9 @@ function trailTick() {      // glow trail: a ribbon of light behind a Car PRO wh
 
 // ---------- car bodies: monster truck, school bus, F1 car, fighter jet, dragon, and the 7 Legend rides. Same shapes as the daily videos (blender/tier_models.py),
 // built from a few boxes so they are light. Looks only: every body drives exactly the same and takes up the same room on the track.
-const BODY_SCALE = { monster: 1.15, bus: 1.0, f1: 1.25, jet: .42, dragon: .78, balloon: 1.3, prop: .72, mower: 1.0, shopcart: .95, wheelbarrow: .9, skateboard: .85, golfcart: .95, wheelchair: 1.3, policebox: .8, floathead: .85 };
-const BODY_NAME = { monster: "Monster truck", bus: "School bus", f1: "F1 car", jet: "Fighter jet", dragon: "Dragon", prop: "Stunt prop plane", mower: "Riding mower", shopcart: "Shopping cart", wheelbarrow: "Wheelbarrow", skateboard: "Skateboard", golfcart: "Golf cart", wheelchair: "Sport wheelchair", policebox: "Police box", floathead: "Floating head" };
-const TAG_Y = { monster: 4.6, bus: 3.9, f1: 2.6, jet: 13, balloon: 5.6, dragon: 5.4, prop: 4.0, mower: 3.7, shopcart: 4.3, wheelbarrow: 3.1, skateboard: 2.5, golfcart: 4.6, wheelchair: 4.0, policebox: 5.3, floathead: 4.6 };      // balloon is kept for old entries, but it is not sold: Brady swapped it for the fighter jet (Nov 15)
+const BODY_SCALE = { monster: 1.15, bus: 1.0, f1: 1.25, jet: .42, dragon: .78, balloon: 1.3, prop: .72, mower: 1.0, shopcart: .95, wheelbarrow: .9, skateboard: .85, golfcart: .95, wheelchair: 1.3, policebox: .8, floathead: .85, carrier: .9 };
+const BODY_NAME = { monster: "Monster truck", bus: "School bus", f1: "F1 car", jet: "Fighter jet", dragon: "Dragon", prop: "Stunt prop plane", mower: "Riding mower", shopcart: "Shopping cart", wheelbarrow: "Wheelbarrow", skateboard: "Skateboard", golfcart: "Golf cart", wheelchair: "Sport wheelchair", policebox: "Police box", floathead: "Floating head", carrier: "Aircraft carrier" };
+const TAG_Y = { monster: 4.6, bus: 3.9, f1: 2.6, jet: 13, balloon: 5.6, dragon: 5.4, prop: 4.0, mower: 3.7, shopcart: 4.3, wheelbarrow: 3.1, skateboard: 2.5, golfcart: 4.6, wheelchair: 4.0, policebox: 5.3, floathead: 4.6, carrier: 3.9 };      // balloon is kept for old entries, but it is not sold: Brady swapped it for the fighter jet (Nov 15)
 function bodyCar(c) {
   const g = new THREE.Group(), kind = c.shape, c1 = new THREE.Color(c.body), c2 = c.roof ? new THREE.Color(c.roof) : c1.clone().multiplyScalar(.7);
   const std = (col, r = .4, m = .1) => new THREE.MeshStandardMaterial({ color: col, roughness: r, metalness: m }), lit = col => new THREE.MeshBasicMaterial({ color: col });
@@ -1677,6 +1683,19 @@ function bodyCar(c) {
       const txt = a % 2 ? String(c.num || tagT) : tagT; if (txt) { const pl = new THREE.Mesh(new THREE.PlaneGeometry(1.86, .276), signTex(txt)); pl.position.copy(V(cs * 1.066, sn * 1.066, 3.62)); pl.rotation.y = Math.atan2(cs, -sn); g.add(pl); } }
     box(0, 0, 3.97, 2.15, 2.15, .14, P); box(0, 0, 4.1, 1.8, 1.8, .14, P); box(0, 0, 4.2, 1.3, 1.3, .1, P);
     cyl(0, 0, 4.3, .16, .12, D, 0, 12); cyl(0, 0, 4.47, .12, .24, WIN, 0, 12); cyl(0, 0, 4.62, .17, .06, D, 0, 12);
+  } else if (kind === "carrier") {      // aircraft carrier ($30 one-off, @weals_123, Nov 20): blender/tier_models.py carrier(). Generic ship, no navy marks. c1 = hull, c2 = stripes and parked jets.
+    const DK = std(0x4a4d50, .75), BOT = std(0xa03c3c, .6), LN = std(0xf6f6f2, .5), turn = (o, a) => { o.rotation.y = a; return o; };
+    box(-.2, 0, .14, 5.6, 1.1, .28, BOT); box(-.2, 0, .45, 5.8, 1.2, .35, P); box(-.1, 0, .85, 6.1, 1.45, .45, P);
+    for (const sy of [1, -1]) { for (const x of [-1.9, -.6, .7]) box(x, sy * .73, .88, .7, .02, .22, K); box(2.85, sy * .52, .85, .04, .04, .04, sy > 0 ? RED : lit(0x2aff60)); box(.1, sy * .82, 1.195, 6.4, .04, .02, Rf); }
+    for (const [x, w, z, h] of [[3.1, 1.05, .78, .55], [3.55, .7, .84, .45], [3.9, .36, .9, .36]]) box(x, 0, z, .5, w, h, P);
+    box(-3.15, 0, .72, .3, 1.15, .5, P); box(.2, 0, 1.12, 7.0, 1.75, .14, DK); turn(box(-1.0, .78, 1.12, 3.2, .9, .136, DK), .16);
+    for (let x = -2.7; x < 2.8; x += .6) box(x, -.05, 1.197, .32, .05, .02, LN); turn(box(-1.0, .62, 1.2, 3.4, .05, .02, LN), .16);
+    for (const x of [2.2, 1.35]) box(x, -.35, 1.198, .7, .06, .02, Rf);
+    box(-.3, -.66, 1.72, 1.3, .42, 1.06, P); box(-.05, -.66, 2.12, .85, .44, .22, GL); box(-.2, -.66, 2.32, .9, .4, .18, P); box(-.3, -.66, 1.42, 1.32, .44, .14, Rf);
+    box(-.45, -.66, 2.75, .09, .09, .7, RIM); box(-.45, -.66, 2.9, .05, .5, .05, RIM); cyl(-.05, -.66, 2.5, .2, .06, RIM, 0, 12); box(-.45, -.66, 3.12, .07, .07, .07, RED);
+    for (const [x, y, a] of [[.5, -.15, 0], [-1.6, .25, .16], [-2.3, .55, .16], [2.55, .35, 0]]) { const j = new THREE.Group(); j.position.copy(V(x, y, 1.22)); j.rotation.y = a; g.add(j);
+      box(0, 0, .06, .55, .1, .1, Rf, j); box(-.05, 0, .06, .22, .48, .03, Rf, j); box(-.22, 0, .14, .12, .03, .14, Rf, j); }
+    for (const sd of [1, -1]) numAt(-.45, -.66 + sd * .235, 1.82, .5, 0, sd > 0 ? Math.PI : 0); numAt(3.0, 0, 1.215, .7, -Math.PI / 2, -Math.PI / 2, new THREE.Color(0x222222));
   } else if (kind === "golfcart") {
     for (const x of [1.5, -1.4]) for (const sy of [1, -1]) wheel(x, sy * 1.05, .42, .36);
     box(0, 0, .7, 4.0, 1.9, .25, P); box(1.6, 0, 1.15, 1.0, 1.9, .8, P); box(2.05, 0, .95, .3, 1.8, .5, P); for (const sy of [1, -1]) box(2.21, sy * .6, 1.05, .04, .3, .15, LIT);
