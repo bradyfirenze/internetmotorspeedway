@@ -2,6 +2,7 @@
   "frames": 36,
   "cover": 4,
   "cars": [
+    {"ig": "weals_123", "num": "", "body": "Battleship gray", "roof": "Orange trim", "bodyHex": "#b3b8be", "roofHex": "#ff6a00", "since": "2026-11-23", "tier": "legend", "kind": "carrier"},
     {"ig": "cornflakeeee", "num": "", "body": "Dark green", "roof": "White", "bodyHex": "#1f5c2e", "roofHex": "#f2f2f2", "since": "2026-11-22"},
     {"ig": "maltenelis.cc", "num": "", "body": "Black", "roof": "Green, green spoiler", "bodyHex": "#141416", "roofHex": "#3ce16b", "since": "2026-11-16"},
     {"ig": "travis.sevin", "num": "88", "body": "Yellow", "roof": "Navy blue", "bodyHex": "#ffe14d", "roofHex": "#1f3a8a", "since": "2026-11-21"},
