@@ -318,6 +318,7 @@ button.crew { background: #062a30; color: #6ff3ff; border: 1px solid rgba(41,240
 @media (orientation: landscape) and (max-width: 720px), (orientation: portrait) and (max-height: 720px) { .gwho { gap: 7px; padding: 4px 8px; } .gwho h1 { font-size: 16px; } .gst:last-child { display: none; } .gst b { font-size: 14px; } #sGarage .gbar { padding: 6px 7px; } .gbar .r b svg { width: 14px; height: 14px; } .gbar .r span { font-size: 13px; } #sGarage .gchip { padding: 7px 10px; } }
 #sGarage #bTracks { display: none; }
 #sBoard .two button { font-size: 14px; padding: 8px 4px; }
+#sCars .carc .rides { display: flex; flex-wrap: wrap; gap: 1px 9px; font-size: 12px; line-height: 1.35; margin: 0; } #sCars .carc .rides .linkbtn { white-space: nowrap; padding: 0; min-height: 0; line-height: inherit; font-size: inherit; }
 </style>
 <script type="importmap">{ "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -1317,7 +1318,9 @@ const dailySlot = () => { const d = LIVE ? SV.daily : +store.get("daily:" + me.n
 // You can pick from the rides you own: the one in cars.json (plus "kinds" there if you bought more), or every ride for the admin test accounts.
 // c.shape: a ride name = that ride, "" = a normal car on purpose, not set = the old rule (your bought ride sits on car 1).
 const ownedShapes = () => admin() ? Object.keys(BODY_SCALE).filter(k => k !== "balloon") : [...new Set([ORIG.shape].concat(ORIG.shapes || []).filter(k => k && BODY_SCALE[k]))];
-function slotShape(i) { const c = CARS[i], s = c && c.shape; if (s === "") return null; if (typeof s === "string" && ownedShapes().includes(s)) return s; return i ? null : ORIG.shape || null; }
+const RIDE_SHORT = { monster: "Monster", bus: "Bus", f1: "F1", jet: "Jet", prop: "Prop plane", mower: "Mower", shopcart: "Cart", golfcart: "Golf cart", wheelchair: "Wheelchair" };      // short names so the ride links fit one line on a phone
+const ridePick = () => !member() && (ORIG.shapes || []).length > 0;      // bought several rides (cars.json "kinds") and not Pit Crew: pick one in My cars (Brady, Nov 24). Kept on this phone, a look only.
+function slotShape(i) { if (!i && me && ridePick()) { const r = store.get("ride:" + me.name); if (r === "normal") return null; if (r && ownedShapes().includes(r)) return r; } const c = CARS[i], s = c && c.shape; if (s === "") return null; if (typeof s === "string" && ownedShapes().includes(s)) return s; return i ? null : ORIG.shape || null; }
 function applyCar() { const c = CARS[slot]; me.body = c.body; me.roof = c.roof; me.num = c.num || ""; me.up = c.up; me.shape = slotShape(slot); me.pro = slot === 0 && ORIG.pro; me.look = ORIG.look || null; me.lookHex = ORIG.lookHex || "";      // a cars.json look shows on whichever car wears its paint
   if (admin() && store.get("adm:" + me.name) === "pro" && !me.shape) me.pro = true; me.kind = slot ? "Car " + (slot + 1) + " of " + SLOTS : c.kind; saveCars(); }
 function openCars() {
@@ -1327,14 +1330,16 @@ function openCars() {
     if (i && !mem) return "<div class='carc lock'><b>Car " + (i + 1) + " 🔒</b><div>Pit Crew gets 3 cars</div><div></div><button class='alt' data-join='1'>Pit Crew only</button></div>";
     if (!c) return "<div class='carc lock'><b>Car " + (i + 1) + "</b><div>Empty slot</div><div></div><button data-new='" + i + "'>Add a car</button></div>";
     const daily = dailySlot() === i;
-    return "<div class='carc" + (i === slot ? " on" : "") + "'><b><span class='sw' style='background:" + esc(c.body) + "'></span><span class='sw' style='background:" + esc(c.roof || c.body) + "'></span>Car " + (i + 1) + (slotShape(i) ? " · " + esc(BODY_NAME[slotShape(i)] || slotShape(i)) : "") + "</b><div>" + lv(c) + "</div>" +
+    return "<div class='carc" + (i === slot ? " on" : "") + "'><b><span class='sw' style='background:" + esc(c.body) + "'></span><span class='sw' style='background:" + esc(c.roof || c.body) + "'></span>Car " + (i + 1) + (slotShape(i) && !(!i && ridePick()) ? " · " + esc(BODY_NAME[slotShape(i)] || slotShape(i)) : "") + "</b><div>" + lv(c) + "</div>" +
       "<div>" + (daily ? "<span style='color:var(--yel);font-weight:700'>DAILY CAR</span>" : mem ? "<button class='linkbtn' data-daily='" + i + "'>Make daily car</button>" : "") +
+        (!i && ridePick() ? "<div class='rides'>" + ["normal"].concat(ownedShapes()).map(k => "<button class='linkbtn' data-ride='" + k + "' aria-label='" + (k === "normal" ? "Normal car" : esc(BODY_NAME[k] || k)) + "' style='color:" + (k === (slotShape(0) || "normal") ? "var(--yel)" : "#6ff3ff") + "'>" + (k === "normal" ? "Normal" : esc(RIDE_SHORT[k] || BODY_NAME[k] || k)) + "</button>").join("") + "</div>" : "") +
         (mem && !(i === 0 && ORIG.won) ? " · <button class='linkbtn' data-paint='" + i + "' style='color:#6ff3ff'>Repaint</button>" : "") + "</div>" +
       "<button" + (i === slot ? " disabled" : "") + " data-drive='" + i + "'>" + (i === slot ? "Driving" : "Drive this") + "</button></div>"; }).join("");
   only("sCars");
 }
 $("cList").onclick = e => { const b = e.target.closest("button"); if (!b) return; const d = b.dataset;
   if (d.join) return crewAsk("Want 3 cars?", "The Pit Crew gets 3 cars in the garage, each with its own colors and upgrades. Members also earn upgrades by racing and get new features every week. " + MONEY.crew.price + ".");
+  if (d.ride) { store.set("ride:" + me.name, d.ride); applyCar(); rebuildCar(); fillGarage(); return openCars(); }
   if (d.drive) { slot = +d.drive; applyCar(); rebuildCar(); fillGarage(); return openCars(); }
   if (d.daily) { if (LIVE) return needPin(async () => { try { await srv({ a: "daily", pin: pinMem, slot: +d.daily }); } catch (e) {} openCars(); }); store.set("daily:" + me.name, d.daily); return openCars(); }
   if (d.new) return openNewCar(+d.new); if (d.paint) return openNewCar(+d.paint); };
