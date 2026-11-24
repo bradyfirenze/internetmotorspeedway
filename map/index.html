@@ -8,12 +8,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@500;700&display=swap">
 <style>
+:root { --st: env(safe-area-inset-top, 0px); --sb: env(safe-area-inset-bottom, 0px); }
 :root { --yel: #ffcc18; --ink: #111318; --card: rgba(17,19,24,.88); --line: rgba(255,255,255,.14); --fg: #f3f4f6; --muted: #aab0bb;
   --display: "Anton", Impact, "Arial Narrow", sans-serif; --body: "Archivo", -apple-system, "Helvetica Neue", Arial, sans-serif; color-scheme: dark; }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; overflow: hidden; background: #7fb2e5; font-family: var(--body); color: var(--fg); touch-action: none; }
 #c { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
-.hud { position: fixed; z-index: 2; left: 0; right: 0; top: 0; padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) 0 max(10px, env(safe-area-inset-left)); pointer-events: none; }
+.hud { position: fixed; z-index: 2; left: 0; right: 0; top: 0; padding: max(10px, var(--st)) max(10px, env(safe-area-inset-right)) 0 max(10px, env(safe-area-inset-left)); pointer-events: none; }
 .panel { pointer-events: auto; max-width: 560px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
 .top { display: flex; align-items: center; gap: 8px; }
 .badge { font-family: var(--display); background: var(--yel); color: var(--ink); border-radius: 6px; padding: 3px 6px; font-size: 13px; }
@@ -52,10 +53,10 @@ input:focus { border-color: var(--yel); }
 .node:hover .lb, .node:focus-visible .lb { background: var(--yel); color: var(--ink); }
 @keyframes sonar { 0% { transform: scale(1); opacity: .95; } 100% { transform: scale(4.4); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .node .dot::before, .node .dot::after { animation: none; opacity: .5; transform: scale(2); } }
-#home { position: fixed; z-index: 3; left: 50%; transform: translateX(-50%); bottom: max(58px, calc(env(safe-area-inset-bottom) + 48px)); font: 400 17px var(--display); text-transform: uppercase; letter-spacing: .03em; background: var(--fg); color: var(--ink); border: 0; border-radius: 999px; padding: 10px 18px; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,.35); }
+#home { position: fixed; z-index: 3; left: 50%; transform: translateX(-50%); bottom: max(58px, calc(var(--sb) + 48px)); font: 400 17px var(--display); text-transform: uppercase; letter-spacing: .03em; background: var(--fg); color: var(--ink); border: 0; border-radius: 999px; padding: 10px 18px; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,.35); }
 .slab { position: fixed; left: 0; top: 0; z-index: 1; transform: translate(-50%, -100%); pointer-events: none; background: #ef3b2d; color: #fff; font: 400 16px var(--display); text-transform: uppercase; letter-spacing: .03em; padding: 5px 10px; border-radius: 8px; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,.35); }
 .slab::after { content: ""; position: absolute; left: 50%; bottom: -7px; margin-left: -7px; border: 7px solid transparent; border-bottom: 0; border-top-color: #ef3b2d; }
-#sponmod { position: fixed; z-index: 3; right: max(10px, env(safe-area-inset-right)); top: max(10px, env(safe-area-inset-top)); width: 290px; background: var(--card); border: 2px solid var(--yel); border-radius: 14px; padding: 14px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+#sponmod { position: fixed; z-index: 3; right: max(10px, env(safe-area-inset-right)); top: max(10px, var(--st)); width: 290px; background: var(--card); border: 2px solid var(--yel); border-radius: 14px; padding: 14px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
 #sponmod h2 { margin: 0 24px 4px 0; font: 400 24px var(--display); text-transform: uppercase; color: var(--yel); letter-spacing: .02em; }
 #sponmod .lead { margin: 0 0 10px; font: 500 13px/1.35 var(--body); color: var(--muted); }
 #sponmod ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
@@ -71,7 +72,7 @@ input:focus { border-color: var(--yel); }
 #sponmod .x { position: absolute; right: 8px; top: 6px; background: none; border: 0; color: var(--fg); font: 700 24px var(--body); cursor: pointer; }
 .spmode #spons, .spmode #sbtn, .spmode .hud, .spmode #nodes { display: none !important; }
 @media (max-width: 899px) { #sponmod .lead, #sponmod .more { display: none; } #sponmod { padding: 10px 12px; } #sponmod h2 { font-size: 20px; } #sponmod ul { gap: 4px; } #sponmod ul { grid-template-columns: 1fr 1fr; } #sponmod li { padding: 6px 9px; } #sponmod li:last-child { grid-column: 1 / -1; } #sponmod li span { display: none; } #sponmod li b i { display: inline; } #sponmod li b { font-size: 15px; flex: none; } #sponmod li span { font-size: 11px; } #sponmod .kofi { margin-top: 8px; padding: 10px; font-size: 18px; }
-  #sponmod { top: auto; left: max(10px, env(safe-area-inset-left)); right: max(10px, env(safe-area-inset-right)); bottom: max(10px, env(safe-area-inset-bottom)); width: auto; max-height: 52%; overflow: auto; } .spmode .foot { display: none; } .spmode #home { bottom: auto; top: max(12px, env(safe-area-inset-top)); } }
+  #sponmod { top: auto; left: max(10px, env(safe-area-inset-left)); right: max(10px, env(safe-area-inset-right)); bottom: max(10px, var(--sb)); width: auto; max-height: 52%; overflow: auto; } .spmode .foot { display: none; } .spmode #home { bottom: auto; top: max(12px, var(--st)); } }
 .lbl { display: block; text-align: center; margin-top: 6px; font: 700 12px var(--body); letter-spacing: .04em; color: var(--gold, #f5c542); text-decoration: none; }
 .lbl:hover { text-decoration: underline; }
 .hud { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
@@ -85,14 +86,14 @@ input:focus { border-color: var(--yel); }
 .champ:hover { text-decoration: underline; }
 .minibar { width: min(520px, 100%); padding: 6px !important; }
 .minibar .buy { margin-top: 0; }
-.finder { position: fixed; z-index: 2; left: max(10px, env(safe-area-inset-left)); bottom: max(10px, env(safe-area-inset-bottom)); width: min(420px, calc(100% - 20px)); }
+.finder { position: fixed; z-index: 2; left: max(10px, env(safe-area-inset-left)); bottom: max(10px, var(--sb)); width: min(420px, calc(100% - 20px)); }
 .finder .sub { margin: 0 0 2px; }
 .finder .fc { font: 600 12px var(--body); color: var(--muted); margin-bottom: 6px; }
 .finder .fc b { color: var(--yel); }
 .finder .hint { margin-top: 6px; }
 .foot { justify-content: flex-end !important; }
 .show .finder, .spmode .finder, .show .minibar { display: none !important; }
-@media (max-width: 899px) { .finder { bottom: max(54px, calc(env(safe-area-inset-bottom) + 44px)); padding: 8px !important; } .finder .hint, .finder .sub { display: none; } .gamebox { padding: 10px !important; } .gamebox .play { padding: 12px 10px 10px; } .play .pgo { margin-top: 6px; font-size: 15px; padding: 4px 14px; } }
+@media (max-width: 899px) { .finder { bottom: max(54px, calc(var(--sb) + 44px)); padding: 8px !important; } .finder .hint, .finder .sub { display: none; } .gamebox { padding: 10px !important; } .gamebox .play { padding: 12px 10px 10px; } .play .pgo { margin-top: 6px; font-size: 15px; padding: 4px 14px; } }
 .play.hero { position: relative; overflow: hidden; padding: 16px 14px 14px; min-height: 190px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; text-shadow: 0 2px 8px rgba(0,0,0,.6);
   background: linear-gradient(180deg, rgba(10,12,16,.15) 0%, rgba(10,12,16,.55) 45%, rgba(170,20,10,.92) 100%), url(game_shot.jpg) center 40% / cover no-repeat;
   box-shadow: 0 0 0 2px #ff6b5e inset, 0 8px 26px rgba(239,59,45,.5); }
@@ -107,15 +108,47 @@ input:focus { border-color: var(--yel); }
 .tip:empty { display: none; }
 .tip.short { display: none; }
 @media (max-width: 899px) { .tip[data-a2hs] { display: none; } .tip.short { display: block; } .play.hero { min-height: 150px; } }
+/* Phones (Brady Nov 24): game box up top and slim, find my car + Sponsors + Race results at the very bottom, the 3D track gets the middle */
+.glinks { display: contents; }
+.tip.short { text-decoration: none; }
+@media (max-width: 899px) and (orientation: portrait) {
+  .hud { padding-top: max(8px, var(--st)); gap: 6px; }
+  .gamebox { padding: 8px !important; width: 100%; max-width: 560px; }
+  .gamebox .top { margin: 0 0 6px; } h1 { font-size: 17px; } .badge { font-size: 11px; padding: 2px 5px; }
+  .gamebox .play.hero { min-height: 0; padding: 11px 10px; display: grid; grid-template-columns: 1fr auto; column-gap: 10px; align-items: center; text-align: left; }
+  .play.hero .pk { position: static; transform: none; grid-column: 1; justify-self: start; background: none; padding: 0; font-size: 10px; letter-spacing: .1em; }
+  .play.hero .pk i { display: none; }
+  .play.hero .pb { grid-column: 1; font-size: clamp(21px, 6.2vw, 30px) !important; line-height: 1.02; }
+  .play.hero .ps { grid-column: 1; font-size: 11px; line-height: 1.25; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow-wrap: anywhere; }
+  .play.hero .pgo { grid-column: 2; grid-row: 1 / span 3; margin: 0; font-size: 19px; padding: 9px 15px; white-space: nowrap; }
+  .glinks { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 8px; padding: 0 2px; }
+  .glinks .champ, .glinks .tip.short { margin: 0; font: 700 12px var(--body); white-space: nowrap; }
+  .glinks .tip.short { display: block; background: none; border: 0; padding: 0; color: var(--muted); }
+  .minibar { width: 100%; max-width: 560px; padding: 5px !important; } .buy .spon { padding: 7px 8px; font-size: 15px; } .buy a.main { padding: 7px 8px; }
+  .foot { padding-bottom: max(8px, var(--sb)); gap: 6px; } .foot #sbtn, .foot a { flex: 1; text-align: center; padding: 8px 9px; }
+  .finder { bottom: calc(max(8px, var(--sb)) + 37px); width: calc(100% - 20px); max-width: 560px; padding: 7px 8px 8px !important; }
+  .finder .fc { margin-bottom: 4px; } .finder input { padding: 8px 10px; } .finder .msg:empty { display: none; }
+  #spons { bottom: calc(max(8px, var(--sb)) + 37px); }
+  #home { bottom: calc(var(--both, 58px) + 8px); }
+  .node { gap: 4px; } .node .lb { font-size: 11px; padding: 2px 6px; } .node .dot { width: 11px; height: 11px; } .node.up { flex-direction: column-reverse; transform: translate(-50%, calc(-100% + 6px)); }
+}
+/* Phone on its side: game on the left, find my car on the right, track in between and behind */
+@media (max-height: 520px) and (orientation: landscape) {
+  .hud { right: auto; width: min(330px, 42%); padding-top: 8px; gap: 6px; } .gamebox { padding: 8px !important; } .gamebox .top { margin: 0 0 6px; } h1 { font-size: 16px; }
+  .gamebox .play.hero { min-height: 0; padding: 10px; } .play.hero .pk, .play.hero .ps, .tip, .tip.short, .tip[data-a2hs] { display: none; } .play.hero .pb { font-size: 22px !important; } .play.hero .pgo { font-size: 16px; padding: 6px 16px; margin-top: 6px; }
+  .champ { margin-top: 6px; font-size: 12px; } .minibar { padding: 5px !important; } .buy .spon { padding: 7px; font-size: 14px; } .buy a.main { padding: 7px; font-size: 12px; }
+  .finder { left: auto; right: max(10px, env(safe-area-inset-right)); bottom: calc(max(8px, var(--sb)) + 37px); width: min(300px, 38%); padding: 8px !important; } .finder .sub, .finder .hint { display: none; }
+  .foot { padding-bottom: max(8px, var(--sb)); }
+}
 @keyframes pp { 50% { box-shadow: 0 0 0 2px #ff6b5e inset, 0 6px 26px rgba(239,59,45,.8); } }
 @media (prefers-reduced-motion: reduce) { .play { animation: none; } }
 #spons.flash { animation: fl 1.2s ease-out 1; }
 @keyframes fl { 0%, 40% { box-shadow: 0 0 0 3px var(--yel); } 100% { box-shadow: none; } }
-.foot { position: fixed; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-between; gap: 8px; padding: 0 max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left)); pointer-events: none; }
+.foot { position: fixed; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-between; gap: 8px; padding: 0 max(10px, env(safe-area-inset-right)) max(10px, var(--sb)) max(10px, env(safe-area-inset-left)); pointer-events: none; }
 .foot div, .foot a { pointer-events: auto; background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 7px 9px; font: 700 11px var(--body); letter-spacing: .06em; text-transform: uppercase; color: var(--fg); text-decoration: none; }
 .foot b { color: var(--yel); }
 /* Sponsors list (Brady Nov 12): everyone who has ever sponsored. Right side on wide screens, a pull-up sheet on phones. */
-#spons { position: fixed; z-index: 2; right: max(10px, env(safe-area-inset-right)); top: max(10px, env(safe-area-inset-top)); width: 230px; max-height: calc(100% - 80px); overflow: auto;
+#spons { position: fixed; z-index: 2; right: max(10px, env(safe-area-inset-right)); top: max(10px, var(--st)); width: 230px; max-height: calc(100% - 80px); overflow: auto;
   background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
 #spons h2 { margin: 0 0 8px; font: 400 20px var(--display); letter-spacing: .03em; text-transform: uppercase; color: var(--yel); }
 #spons ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
@@ -131,7 +164,7 @@ input:focus { border-color: var(--yel); }
 #sbtn { display: none; }
 .show #spons, .show #sbtn { display: none !important; }
 @media (max-width: 899px) {
-  #spons { display: none; top: auto; bottom: max(54px, calc(env(safe-area-inset-bottom) + 44px)); left: max(10px, env(safe-area-inset-left)); width: auto; max-height: 55%; }
+  #spons { display: none; top: auto; bottom: max(54px, calc(var(--sb) + 44px)); left: max(10px, env(safe-area-inset-left)); width: auto; max-height: 55%; }
   #spons.open { display: block; }
   #spons .x { display: block; position: absolute; right: 8px; top: 6px; background: none; border: 0; color: var(--fg); font: 700 22px var(--body); cursor: pointer; }
   #sbtn { display: block; pointer-events: auto; background: var(--yel); color: var(--ink); border: 0; border-radius: 8px; padding: 7px 10px; font: 700 11px var(--body); letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
@@ -159,7 +192,7 @@ input:focus { border-color: var(--yel); }
 .show .foot { display: none; }
 .show .nav .res { display: none; }
 .nav a.on { background: var(--fg); color: var(--ink); border-color: var(--fg); }
-.card { position: fixed; left: 50%; bottom: max(14px, env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(560px, calc(100% - 20px)); z-index: 3;
+.card { position: fixed; left: 50%; bottom: max(14px, var(--sb)); transform: translateX(-50%); width: min(560px, calc(100% - 20px)); z-index: 3;
   background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px 14px 12px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); touch-action: pan-y; }
 .card .row { display: flex; align-items: center; gap: 10px; }
 .card .txt { flex: 1; min-width: 0; transition: opacity .25s, transform .25s; }
@@ -188,20 +221,35 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
   "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
 </head>
 <body>
+<script>
+// Notch padding: in-app browsers start the page under their own bar but still report the notch, so it was counted twice. Keep it only when the page is that tall.
+(function () {
+  var p = document.createElement("div"); p.style.cssText = "position:fixed;visibility:hidden;pointer-events:none;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)"; document.body.appendChild(p);
+  function fit() {
+    var c = getComputedStyle(p), t = parseFloat(c.paddingTop) || 0, b = parseFloat(c.paddingBottom) || 0, tall = innerHeight > innerWidth,
+      full = tall ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height), r = document.documentElement.style;
+    var clear = t + b > 0 && full - innerHeight >= t + b - 4;
+    r.setProperty("--st", clear ? "0px" : "env(safe-area-inset-top, 0px)"); r.setProperty("--sb", clear ? "0px" : "env(safe-area-inset-bottom, 0px)");
+  }
+  fit(); addEventListener("resize", fit); addEventListener("orientationchange", function () { setTimeout(fit, 300); });
+})();
+</script>
 <canvas id="c" aria-label="3D map of the speedway. Drag to move, pinch or scroll to zoom."></canvas>
 <div id="load"><div><div class="t">Loading the speedway</div><div class="bar"><i id="lbar"></i></div><div class="p" id="lp">0%</div></div></div>
 <div class="hud">
   <div class="panel gamebox">
     <div class="top"><span class="badge">IMS</span><h1 id="title">Internet Motor Speedway</h1></div>
     <a class="play hero" href="../game/" data-play>
-      <span class="pk">&#127937; Free racing game &middot; your car &middot; this track</span>
+      <span class="pk">&#127937; Free racing game<i style="font-style:normal"> &middot; your car &middot; this track</i></span>
       <span class="pb" id="beatH">Drive your own car</span>
       <span class="ps" id="beatS">Race the real Internet Motor Speedway. Fastest laps go on the leaderboard.</span>
       <span class="pgo">Race now &rarr;</span>
     </a>
+    <div class="glinks">
     <a class="champ" id="champ" href="../leaderboard/">&#127942; <span id="champt">See the top 10 fastest laps</span> &rarr;</a>
+    <a class="tip short" href="../game/" data-play>&#128242; Play it like an app</a>
+    </div>
     <div class="tip" data-a2hs></div>
-    <div class="tip short">&#128242; <b>Play it like an app:</b> tap Race now, we show you how to save it to your home screen.</div>
     <nav class="nav" aria-label="Pages"><a class="back" href="#" id="back" hidden>&larr; Whole track</a></nav>
     <div class="chips" role="group" aria-label="Views" hidden><button class="chip" data-v="track" aria-pressed="true">Whole track</button></div>
   </div>
@@ -257,14 +305,14 @@ renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x86b9ea);
-scene.fog = new THREE.Fog(0x86b9ea, 1800, 4200);
+scene.fog = innerWidth < 900 && innerHeight > innerWidth ? new THREE.Fog(0x86b9ea, 3300, 6800) : new THREE.Fog(0x86b9ea, 1800, 4200);   // phones start pulled back, so the haze starts farther out
 const camera = new THREE.PerspectiveCamera(45, 1, 1, 8000);
 scene.add(new THREE.HemisphereLight(0xffffff, 0x5a7a4a, 1.6));
 const sun = new THREE.DirectionalLight(0xffffff, 1.9); sun.position.set(-600, 900, 400); scene.add(sun);
 
 const controls = new MapControls(camera, renderer.domElement);
 controls.enableDamping = true; controls.dampingFactor = 0.08; controls.screenSpacePanning = false;
-controls.minDistance = 8; controls.maxDistance = 2600; controls.maxPolarAngle = Math.PI * 0.47;
+controls.minDistance = 8; controls.maxDistance = innerWidth < 900 ? 3800 : 2600; controls.maxPolarAngle = Math.PI * 0.47;
 controls.zoomToCursor = true;
 
 // Blender (x, y, z) to three (x, z, -y)
@@ -286,8 +334,19 @@ function flyTo(pos, target, ms = 1400) {
 }
 function ease(u) { return u < .5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2; }
 
+// whole-track camera. Tall phones look down the length of the oval so all of it fits; everything else keeps the wide view
+const trackCam = () => innerWidth < 900 && camera.aspect < .8 ? [new THREE.Vector3(-TC.x, TC.y, TC.z), new THREE.Vector3(TC.t, 0, 0)] : [new THREE.Vector3(-170, 1150, 1300), new THREE.Vector3(0, 0, 60)];
+const TC = { x: 2560, y: 2100, z: 0, t: -170 };
+// the open band on a phone (under the top boxes, over the bottom ones): the scene is slid into its middle
+let OFFY = 0, offGoal = 0;
+function band() {
+  const tall = innerWidth < 900 && innerHeight > innerWidth, fd = document.querySelector(".finder"), hd = document.querySelector(".minibar");
+  if (tall && fd && hd && fd.offsetHeight && hd.offsetHeight) { const a = hd.getBoundingClientRect().bottom, b = fd.getBoundingClientRect().top;
+    document.documentElement.style.setProperty("--both", Math.round(innerHeight - b) + "px"); offGoal = (a + b) / 2 - innerHeight / 2; } else offGoal = 0;
+}
+new ResizeObserver(band).observe(document.querySelector(".hud")); new ResizeObserver(band).observe(document.querySelector(".finder")); addEventListener("resize", band);
 const VIEWS = {
-  track: () => flyTo(new THREE.Vector3(-170, 1150, 1300), new THREE.Vector3(0, 0, 60)),   // wide Day 7 track (290 m): pulled back so the outside edge fits
+  track: () => { const [p, t] = trackCam(); flyTo(p, t); },   // wide Day 7 track (290 m): pulled back so the outside edge fits
   grid: () => { const f = DATA.front; flyTo(V(f.x + 70, f.y - 120, 60), V(f.x - 150, f.y + 20, 0)); },
   ads: (() => { let k = 0; return () => { const e = k++ % 2, x = (e ? -1 : 1) * DATA.rect_x; const z = Math.max(1, .95 / camera.aspect), sx = e ? -1 : 1; flyTo(V(x + sx * 300 * z, 0, 260 * z), V(x - sx * 10, 0, 0)); }; })(),
   boards: (() => { let k = 0; return () => { const b = DATA.boards[k++ % DATA.boards.length];
@@ -469,7 +528,7 @@ Promise.all([carsP, glbP]).then(([d, gltf]) => {
   const beam = new THREE.Mesh(new THREE.CylinderGeometry(.35, .35, 40, 12), new THREE.MeshBasicMaterial({ color: 0xffcc18, transparent: true, opacity: .55 }));
   beam.position.y = 22; hl.add(beam); hl.visible = false; scene.add(hl);
   addGarages(); addMuseum(gltf.scene); addInfield();
-  camera.position.set(-170, 1150, 1300); controls.target.set(0, 0, 60); controls.update();
+  { band(); OFFY = offGoal; const [p, t] = trackCam(); camera.position.copy(p); controls.target.copy(t); controls.update(); }
   document.getElementById("load").hidden = true;
   const u = new URLSearchParams(location.search).get("u");
   if (u) { document.getElementById("q").value = u; document.getElementById("f").requestSubmit(); }
@@ -840,6 +899,8 @@ renderer.setAnimationLoop(t => {
     if (u >= 1) fly = null;
   }
   controls.update();
+  if (Math.abs(offGoal - OFFY) > .3) OFFY += (offGoal - OFFY) * .12; else OFFY = offGoal;
+  if (OFFY) camera.setViewOffset(innerWidth, innerHeight, 0, -OFFY, innerWidth, innerHeight); else if (camera.view && camera.view.enabled) camera.clearViewOffset();
   if (tagAt) {
     tmp.copy(tagAt).project(camera);
     const vis = tmp.z < 1 && Math.abs(tmp.x) < 1.1 && Math.abs(tmp.y) < 1.1;
@@ -851,7 +912,9 @@ renderer.setAnimationLoop(t => {
     tmp.copy(n.at); const dist = tmp.distanceTo(camera.position); tmp.project(camera);
     const vis = !SHOW && sponMod.hidden && dist > 380 && tmp.z < 1 && Math.abs(tmp.x) < .97 && Math.abs(tmp.y) < .97;
     n.el.hidden = !vis;
-    if (vis) { n.el.style.left = (tmp.x * .5 + .5) * innerWidth + "px"; n.el.style.top = (-tmp.y * .5 + .5) * innerHeight + "px"; }
+    if (vis) { const x = (tmp.x * .5 + .5) * innerWidth, hw = n.el.offsetWidth / 2 + 6, lb = n.el.querySelector(".lb"); n.el.style.left = x + "px"; n.el.style.top = (-tmp.y * .5 + .5) * innerHeight + "px";
+      if (lb && !n.up) { n.up = 1; n.el.classList.toggle("up", /^(custom car garages|starting grid|sponsor spots)$/i.test(lb.textContent.trim())); }
+      if (lb) lb.style.transform = "translateX(" + (Math.max(0, hw - x) - Math.max(0, x + hw - innerWidth)) + "px)"; }
   }
   for (const n of SLABS) {
     tmp.copy(n.at).project(camera); const vis = tmp.z < 1 && Math.abs(tmp.x) < 1 && Math.abs(tmp.y) < 1; n.el.hidden = !vis;
