@@ -1432,6 +1432,8 @@ async function countRace() {      // a finished race. Pit Crew: every few races 
   if (LIVE) { const t0 = SV.tok, body = { a: "race", slot, laps: raceLaps.slice(0, RACE_LAPS) }; if (TRK !== "oval") body.k = TRK; let d = null;
     try { d = await srv(body); } catch (e) { await new Promise(r => setTimeout(r, 2500)); try { d = await srv(body); if (!d.ok && d.why === "too soon") { await loadSV(); syncSV(); d = { ok: true }; } } catch (e2) {} }      // one more try if the server didn't answer. "Too soon" on the second try means the first one landed.
     if (d && d.ok && d.race && d.race.rank) { store.set("race:" + TK() + me.name, d.race.best); store.set("rrank:" + TK() + me.name, d.race.rank); }      // the garage chip shows your best race and race rank
+    else if (d && d.ok) { const k = "race:" + TK() + me.name, b = +store.get(k) || 0; if (!b || tot < b) store.set(k, tot); delete rmDone[TK() + me.name];      // Brady, Nov 25: when the server sends no rank, the garage said "None yet" forever. Keep the best on this phone, and look the board up again next time in the garage.
+      if (d.race) rt = "Race time " + fmt(tot) + (!b || tot < b ? ". Your best race yet." : ". Your best is " + fmt(b) + "."); }
     if (d && d.ok && d.race && d.race.rank) rt = "Race time " + fmt(d.race.t) + " · #" + d.race.rank + " of " + d.race.total + " on the race leaderboard" + (d.race.isBest ? ", your best race yet." : ". Your best is " + fmt(d.race.best) + ".");
     if (!member()) return d && d.ok ? rt : "";
     if (!d) return "!This race didn't count: the server didn't answer. Check your signal.";
