@@ -275,7 +275,7 @@ button.crew { background: #062a30; color: #6ff3ff; border: 1px solid rgba(41,240
 .cpills{display:flex;gap:5px} #cPts b{color:var(--fg)}
 .cstar{color:var(--yel);font-size:10px;letter-spacing:1px} .cstar i{font-style:normal;color:#3a3f4b}
 .cmem .cbar{flex:1 1 60px;max-width:110px;height:7px;border-radius:4px;background:#2a2e37;overflow:hidden} .cmem .cbar u{display:block;height:100%;background:var(--yel)} .cmem em{font:400 16px var(--display);font-style:normal;width:26px;text-align:right}
-#cShop{max-height:calc(100vh - 96px);overflow-y:auto;-webkit-overflow-scrolling:touch}
+#cShop{max-height:calc(var(--lh, 100vh) - 96px);overflow-y:auto;-webkit-overflow-scrolling:touch}
 .cstand div{display:grid;grid-template-columns:20px 10px 1fr 34px 36px;align-items:center;gap:6px;padding:4px 6px;border-bottom:1px solid var(--line);font:600 13px var(--body)}
 .cstand i{font:400 16px var(--display);font-style:normal;color:var(--muted)} .cstand u{width:10px;height:10px;border-radius:50%} .cstand small{color:var(--grn);font:700 11px var(--body);text-align:right} .cstand b{font:400 18px var(--display);text-align:right}
 .cstand .me{background:rgba(255,204,24,.13);border-radius:8px;border-bottom-color:transparent} .cstand .me span,.cstand .me i{color:var(--yel)} .cstand em{font-style:normal;font-size:11px;margin-left:6px} .cstand .cup{color:var(--grn)} .cstand .cdn{color:var(--red)}
@@ -285,7 +285,7 @@ button.crew { background: #062a30; color: #6ff3ff; border: 1px solid rgba(41,240
 .conf{position:absolute;inset:0;pointer-events:none!important} .conf i{position:absolute;top:-14px;width:7px;height:12px;border-radius:2px;animation:cfall 4s linear infinite}
 @keyframes cfall{to{transform:translateY(110vh) rotate(700deg)}}
 /* season mode */
-#sSeason .box{padding:10px 14px} #sSeason h2{margin:0;font-size:22px} #seBody{max-height:calc(100vh - 168px);overflow-y:auto;margin:6px 0 2px} #sSeason .crow.done b{color:var(--yel)}
+#sSeason .box{padding:10px 14px} #sSeason h2{margin:0;font-size:22px} #seBody{max-height:calc(var(--lh, 100vh) - 168px);overflow-y:auto;margin:6px 0 2px} #sSeason .crow.done b{color:var(--yel)}
 .setabs{display:flex;gap:6px;margin-top:6px} .setabs button{flex:1;padding:6px 8px;font-size:13px}
 .sstand div{display:grid;grid-template-columns:24px 1fr 44px;align-items:center;gap:6px;padding:4px 6px;border-bottom:1px solid var(--line);font:600 13px var(--body)}
 .sstand i{font:400 16px var(--display);font-style:normal;color:var(--muted)} .sstand b{font:400 18px var(--display);text-align:right} .sstand em{font-style:normal;font-size:11px;margin-left:6px;color:var(--grn)}
@@ -427,6 +427,9 @@ button.crew { background: #062a30; color: #6ff3ff; border: 1px solid rgba(41,240
 .lcard > b { font: 400 19px var(--display); text-transform: uppercase; letter-spacing: .03em; } .lcard small { color: var(--muted); font: 600 10.5px var(--body); } .lcard button { margin-top: 4px; padding: 8px; font-size: 13px; }
 
 .oparts b { font-size: 12px; } .oparts b em { font-size: 12px; }
+
+/* phone browser bar fix (Brady, Nov 24): screens fill the app box, which is sized to the visible part of the page, so nothing hides under the browser bar */
+#app .screen { position: absolute; }
 </style>
 <script type="importmap">{ "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -892,12 +895,16 @@ const camera = new THREE.PerspectiveCamera(55, 1, .5, 3400);
 const hemi = new THREE.HemisphereLight(0xffffff, 0x5a7a4a, 1.6); scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xffffff, 1.9); sun.position.set(-600, 900, 400); scene.add(sun);
 function resize() {
-  rot = innerHeight > innerWidth; LW = rot ? innerHeight : innerWidth; LH = rot ? innerWidth : innerHeight;
+  const vv = window.visualViewport, ae = document.activeElement, sized = !!$("app").style.height;
+  if (sized && ((vv && Math.abs(vv.scale - 1) > .01) || (ae && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName)))) return;
+  const zv = vv && Math.abs(vv.scale - 1) <= .01, VW = zv ? Math.round(vv.width) : innerWidth, VH = zv ? Math.round(vv.height) : innerHeight, r2 = VH > VW, w2 = r2 ? VH : VW, h2 = r2 ? VW : VH;
+  if (sized && r2 === rot && w2 === LW && h2 === LH) return;
+  rot = r2; LW = w2; LH = h2; document.documentElement.style.setProperty("--lh", LH + "px");
   document.documentElement.classList.toggle("rot", rot);
   const a = $("app"); a.style.width = LW + "px"; a.style.height = LH + "px";
   renderer.setSize(LW, LH, false); camera.aspect = LW / LH; camera.updateProjectionMatrix();
 }
-addEventListener("resize", resize); addEventListener("orientationchange", () => setTimeout(resize, 250)); resize();
+addEventListener("resize", resize); if (window.visualViewport) visualViewport.addEventListener("resize", resize); addEventListener("focusout", () => setTimeout(resize, 300)); addEventListener("orientationchange", () => setTimeout(resize, 250)); resize();
 
 const draco = new DRACOLoader(); draco.setDecoderPath("https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/libs/draco/gltf/");
 const loader = new GLTFLoader(); loader.setDRACOLoader(draco);
