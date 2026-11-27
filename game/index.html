@@ -471,6 +471,7 @@ button.crew { background: #062a30; color: #6ff3ff; border: 1px solid rgba(41,240
 <script type="importmap">{ "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
   "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
+<script src="../help/help.js" data-launcher="none" defer></script>
 </head>
 <body>
 
@@ -1600,7 +1601,7 @@ $("lgBack").onclick = () => { rebuildCar(); openCars(); };
 
 function paintMoney() {
   if (!me) return; refreshSV();
-  $("bAdmWrap").hidden = !admin(); $("bSeasonWrap").hidden = !seasonOn(); buildBtn(); $("bHelpWrap").hidden = !window.IMSHelp;      // Help shows only once the site's help desk (site/help/help.js) is live
+  $("bAdmWrap").hidden = !admin(); $("bSeasonWrap").hidden = !seasonOn(); buildBtn(); $("bHelpWrap").hidden = !window.IMSHelp || !(member() || admin() || comp());      // Help shows only once the site's help desk (site/help/help.js) is live
   paintBars(); const cs = crewState(), cl = $("crewLine");      // told before they cancel (Brady, Nov 16): a lapsed member's upgrades and cars lock until they rejoin
   crewCta(cs); promoDraw(); storyLine();
   cl.hidden = LITE || !(member() || cs.lapsed); cl.className = "small" + (cs.lapsed || (cs.left > 0 && cs.left <= 5) ? " warn" : "");

@@ -1,0 +1,441 @@
+{
+ "_note": "DRAFT 2026-11-16. The ONLY source the help bubble and the AI may answer from. Facts from ~/Brain-2.0/Projects/Speedway/START.md and the live site. Edit here, then push. Never add a fact you can't point to.",
+ "updated": "2026-11-26",
+ "contact": "DM @internetmotorspeedway on Instagram",
+ "items": [
+  {
+   "id": "what",
+   "topic": "Races",
+   "q": "What is the Internet Motor Speedway?",
+   "keys": [
+    "what is",
+    "how does it work",
+    "explain",
+    "about",
+    "what is this"
+   ],
+   "a": "An Instagram page where every follower gets a voxel race car. There's a new race video every day, and one follower wins it.",
+   "link": [
+    "Follow on Instagram",
+    "https://www.instagram.com/internetmotorspeedway/"
+   ]
+  },
+  {
+   "id": "get-car",
+   "topic": "Races",
+   "q": "How do I get a car in the race?",
+   "keys": [
+    "get a car",
+    "join",
+    "enter",
+    "sign up",
+    "how do i get in",
+    "free car"
+   ],
+   "a": "Follow @internetmotorspeedway on Instagram. Every follower gets a free car in every race. If you followed after that day's cutoff, you're in the next race."
+  },
+  {
+   "id": "winner",
+   "topic": "Races",
+   "q": "How is the winner picked?",
+   "keys": [
+    "winner",
+    "who wins",
+    "how to win",
+    "picked",
+    "rigged",
+    "random",
+    "chance",
+    "odds"
+   ],
+   "a": "The winner is a random pick from real followers who have commented at least once on a post. People who comment more have a better shot, but it's still random. Money never changes who wins: custom cars and sponsors are looks and brand spots only."
+  },
+  {
+   "id": "win-again",
+   "topic": "Races",
+   "q": "Can I win more than once? What happens when I win?",
+   "keys": [
+    "win twice",
+    "win again",
+    "gold",
+    "museum",
+    "trophy",
+    "what do i get"
+   ],
+   "a": "One win per person. The winner's car turns gold and goes in the Victory Museum forever. No car is gold until it wins.",
+   "link": [
+    "Victory Museum",
+    "results/#museum"
+   ]
+  },
+  {
+   "id": "standings",
+   "topic": "Races",
+   "q": "How are the places after 1st decided?",
+   "keys": [
+    "my place",
+    "finish",
+    "standings",
+    "position",
+    "2nd",
+    "3rd",
+    "top 10",
+    "why did i finish",
+    "climb"
+   ],
+   "a": "The winner is random. For the rest, people who comment often climb closer to the front each day, nobody repeats the top 3 within a few races, and the top 10 gets spread to new people. Search your @ on the Results page to see your place."
+  },
+  {
+   "id": "find-car",
+   "topic": "Your car",
+   "q": "I can't find my car.",
+   "keys": [
+    "find my car",
+    "where is my car",
+    "my car",
+    "search",
+    "can't find",
+    "cant find",
+    "not in the list",
+    "missing",
+    "can't find my car",
+    "cant find my car",
+    "where's my car",
+    "wheres my car",
+    "lost my car",
+    "no car"
+   ],
+   "a": "Open the track map and tap FIND MY CAR, then type your Instagram @. On the Results page you can search your @ for each race. Not in the list? You followed after that day's cutoff, so you're in the next race. Paid for a custom car and can't find it? It only shows after it's built: open the game and tap the yellow \"Build it now\" button in your garage (or \"Bought a custom car? Claim it\" if there's no yellow button).",
+   "link": [
+    "Find my car",
+    "map/"
+   ]
+  },
+  {
+   "id": "track-name",
+   "topic": "Races",
+   "q": "How does the track get its name?",
+   "keys": [
+    "track name",
+    "name the track",
+    "speedway name",
+    "top comment"
+   ],
+   "a": "The top comment on the day's post names the next race's track as \"[NAME] Motor Speedway\". Offensive comments and real-person comments can be skipped. The website itself always says Internet Motor Speedway."
+  },
+  {
+   "id": "custom-tiers",
+   "topic": "Custom cars",
+   "q": "What custom cars can I buy?",
+   "keys": [
+    "custom car",
+    "custom",
+    "tiers",
+    "buy a car",
+    "paint",
+    "colors",
+    "body swap",
+    "car pro",
+    "legend",
+    "monster truck",
+    "bus",
+    "f1",
+    "dragon",
+    "jet",
+    "price",
+    "cost",
+    "how much"
+   ],
+   "a": "On the Ko-fi shop: $1 Custom Car (your colors and number). $5 Car PRO (your car plus neon underglow, flame paint and neon wheels). $10 Body Swap (monster truck, school bus or F1). $20 Legend (9 rides: dragon, fighter jet, stunt plane, riding mower, shopping cart, golf cart, skateboard, wheelbarrow or sport wheelchair, or your own idea). No gold: gold is only for winners. Custom cars never change who wins.",
+   "link": [
+    "Ko-fi shop",
+    "https://ko-fi.com/internetmotorspeedway/shop"
+   ]
+  },
+  {
+   "id": "custom-after",
+   "topic": "Custom cars",
+   "q": "I paid for a custom car. Where is it?",
+   "keys": [
+    "i paid",
+    "i bought",
+    "paid for a custom",
+    "bought a custom",
+    "paid $1",
+    "paid 1",
+    "after i pay",
+    "when will my car",
+    "where is my custom",
+    "where is my car i paid",
+    "build it now",
+    "build my car",
+    "build it",
+    "yellow button",
+    "claim my car",
+    "claim it",
+    "ko-fi name",
+    "order",
+    "not showing",
+    "custom car missing"
+   ],
+   "a": "Open the game and type your Instagram @ and PIN. In your garage, tap the yellow \"Your custom car is paid for · Build it now\" button, pick your colors and a number, then tap twice to lock it in (you get one build). Your car is in the game right away and joins the daily race, the map and the website at the next daily update. No yellow button? Tap \"Bought a custom car? Claim it\" in the garage and type the Ko-fi name or the email you paid with, then tap Build it now. Put your colors in the Ko-fi message instead? Then we build it for you. A new Legend idea takes 2 to 3 days. Still missing? Send a report below or DM @internetmotorspeedway with your Ko-fi name.",
+   "link": [
+    "Open the game",
+    "game/"
+   ]
+  },
+  {
+   "id": "pitcrew",
+   "topic": "Pit Crew",
+   "q": "What is the Pit Crew?",
+   "keys": [
+    "pit crew",
+    "membership",
+    "subscribe",
+    "subscription",
+    "monthly",
+    "member",
+    "perks",
+    "5.99"
+   ],
+   "a": "Pit Crew is $5.99 a month on Ko-fi. You get: a free upgrade level every 5 counted races (others pay for upgrades), 3 cars in your garage, repaint your car and change your number anytime, the Level 4 tune, the Night Oval track, neon underglow, and new features every week. It never changes who wins the daily race. Leave any time.",
+   "link": [
+    "Pit Crew",
+    "game/pitcrew.html"
+   ]
+  },
+  {
+   "id": "pitcrew-claim",
+   "topic": "Pit Crew",
+   "q": "I joined Pit Crew but it isn't unlocked.",
+   "keys": [
+    "claim",
+    "unlock",
+    "not unlocked",
+    "joined",
+    "paid for pit crew",
+    "pit crew not working",
+    "ko-fi email",
+    "pit crew locked",
+    "still locked",
+    "still says locked",
+    "didn't unlock",
+    "didnt unlock",
+    "isn't unlocked",
+    "not working",
+    "paid but"
+   ],
+   "a": "Open the game, tap \"Joined on Ko-fi? Claim Pit Crew\", type your PIN and the email you paid with on Ko-fi. It can take about a minute after you pay. If it says the payment is linked to another driver, or you hit too many tries, DM @internetmotorspeedway.",
+   "link": [
+    "Open the game",
+    "game/"
+   ]
+  },
+  {
+   "id": "pin",
+   "topic": "Game",
+   "q": "What is the PIN? I forgot my PIN.",
+   "keys": [
+    "pin",
+    "forgot pin",
+    "reset pin",
+    "wrong pin",
+    "change pin",
+    "pin locked"
+   ],
+   "a": "The 4 digit PIN locks your account in the game so nobody else can change your car. You pick it once. To change or reset it, DM @internetmotorspeedway from your Instagram account."
+  },
+  {
+   "id": "game-start",
+   "topic": "Game",
+   "q": "How do I play the game?",
+   "keys": [
+    "play",
+    "game",
+    "how to play",
+    "start",
+    "race now",
+    "racing game"
+   ],
+   "a": "Tap PLAY or Race now on the track map. Followers only: type your Instagram @ to get your car. Then race the real track and set a lap time.",
+   "link": [
+    "Play",
+    "game/"
+   ]
+  },
+  {
+   "id": "game-controls",
+   "topic": "Game",
+   "q": "What are the game controls?",
+   "keys": [
+    "controls",
+    "steer",
+    "steering",
+    "brake",
+    "gas",
+    "how to turn",
+    "too hard",
+    "corners",
+    "keyboard"
+   ],
+   "a": "Left thumb: slide to steer. Right thumb: gas and brake. Brake into the corners: braking makes the car turn sharper. Corner help is on by default (the car slows for corners and helps you turn); you can switch it off on the start screen."
+  },
+  {
+   "id": "not-follower",
+   "topic": "Game",
+   "q": "The game says I'm not on the follower list.",
+   "keys": [
+    "not on the follower list",
+    "not a follower",
+    "can't get my car",
+    "cant get my car",
+    "username not found",
+    "followers only"
+   ],
+   "a": "The game's follower list updates a few times a day. If you just followed, try again in a few hours. Check the spelling of your @. Still stuck after a day? Send a report below."
+  },
+  {
+   "id": "app",
+   "topic": "Game",
+   "q": "How do I save the game as an app?",
+   "keys": [
+    "app",
+    "home screen",
+    "full screen",
+    "address bar",
+    "instagram browser",
+    "download"
+   ],
+   "a": "In Instagram, tap the three dots at the top right and pick Open in browser. iPhone: Share, then Add to Home Screen. Android Chrome: the menu, then Add to Home screen. Then open Speedway from your home screen."
+  },
+  {
+   "id": "upgrades",
+   "topic": "Game",
+   "q": "How do upgrades work?",
+   "keys": [
+    "upgrade",
+    "upgrades",
+    "engine",
+    "tires",
+    "turbo",
+    "credits",
+    "level",
+    "faster"
+   ],
+   "a": "Your car has Engine, Tires and Turbo levels. Pit Crew members earn 1 free level for every 5 counted races and can reach Level 4. Only \"Race\" and \"Race real drivers\" count, and all 3 laps must be finished. Practice never counts. Buying credits isn't open yet."
+  },
+  {
+   "id": "race-count",
+   "topic": "Pit Crew",
+   "q": "Why didn't my race count toward my free upgrade?",
+   "keys": [
+    "didn't count",
+    "didnt count",
+    "not counted",
+    "doesn't count",
+    "doesnt count",
+    "race count",
+    "races count",
+    "which races count",
+    "count toward",
+    "practice count",
+    "free upgrade",
+    "this race didn't count",
+    "prize",
+    "cash",
+    "win money",
+    "prize race"
+   ],
+   "a": "Only \"Race\" and \"Race real drivers\" count, and you have to finish all 3 laps. Practice never counts. 5 counted races earn 1 free upgrade. If a race didn't count, Pit Crew members see a red \"This race didn't count\" line on the result screen. Every missed race is saved with its reason, so tap Send a report below and we can check it. Prize races and cash prizes are off for now."
+  },
+  {
+   "id": "leaderboard",
+   "topic": "Leaderboard",
+   "q": "How does the leaderboard work?",
+   "keys": [
+    "leaderboard",
+    "top 10",
+    "fastest lap",
+    "lap time",
+    "my time",
+    "board",
+    "ranking"
+   ],
+   "a": "Your fastest saved lap in the game goes on the leaderboard. The page shows the top 10 and refreshes every minute. There's an Open board (all cars) and a Stock board (no upgrades). The game leaderboard doesn't change who wins the daily race.",
+   "link": [
+    "Leaderboard",
+    "leaderboard/"
+   ]
+  },
+  {
+   "id": "sponsor",
+   "topic": "Sponsors",
+   "q": "How do I sponsor the speedway?",
+   "keys": [
+    "sponsor",
+    "advertise",
+    "ad",
+    "billboard",
+    "infield",
+    "wall ad",
+    "brand",
+    "logo",
+    "blimp",
+    "presented by"
+   ],
+   "a": "Infield ad: $30 a race, or $200 for a full week. Wall ad: $10 a race. Billboard: $15 a race (8 spots on the stands). Blimp and \"Trophy presented by\": DM for price. Pay on Ko-fi and DM your logo to @internetmotorspeedway. Weekly or monthly deals: DM. Sponsors never change who wins.",
+   "link": [
+    "Sponsors",
+    "sponsors/"
+   ]
+  },
+  {
+   "id": "career",
+   "topic": "Game",
+   "q": "What is My Career (story mode)?",
+   "keys": [
+    "career",
+    "my career",
+    "story",
+    "story mode",
+    "kart",
+    "stock car",
+    "league",
+    "crew morale",
+    "decision"
+   ],
+   "a": "My Career is the story mode in the game. You start in a rental kart. Each week you run a practice, answer one decision about you, your crew or your fans, then race. Finish a kart season and you can move up to the Stock Car League, which is a Pit Crew league. It's separate from the daily race video and never changes who wins it."
+  },
+  {
+   "id": "refund",
+   "topic": "Help",
+   "q": "I want a refund or my payment went wrong.",
+   "keys": [
+    "refund",
+    "charged",
+    "money back",
+    "double charged",
+    "payment problem",
+    "cancel"
+   ],
+   "a": "Pit Crew: you can leave any time on Ko-fi. For a refund or a payment problem, DM @internetmotorspeedway with your Ko-fi name. Brady handles every payment question himself.",
+   "human": true
+  },
+  {
+   "id": "contact",
+   "topic": "Help",
+   "q": "How do I talk to a person?",
+   "keys": [
+    "human",
+    "person",
+    "contact",
+    "talk to",
+    "dm",
+    "email",
+    "support"
+   ],
+   "a": "DM @internetmotorspeedway on Instagram, or tap Send a report below and we'll look at it.",
+   "human": true
+  }
+ ]
+}
