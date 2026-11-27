@@ -2523,7 +2523,7 @@ const cTrkName = t => t[0] === "desert" ? DES_NAME : t[0] === "banked" ? BNK_NAM
 const CPRAC = { oval: 37500, desert: 56000, banked: 30000 };      // practice lap to beat, by track: about the pace of the quickest other car. Not tuned by a person yet.
 // the other 19 drivers, quickest first. The five kart rivals moved up too.
 const CRIV = ["Cole Maddox", "Jo Ramirez", "Dale Pruitt", "Nina Okafor", "Rex Halloran", "Marisol Vega", "Tuck Bailey", "Gus Lindqvist", "Anika Rao", "Buck Tanner", "Sienna Cho", "Hollis Grant", "Wes Calloway", "Teo Marchetti", "Ruby Kowalski", "Dex Arroyo", "Lorna Whitfield", "Mack Dupree", "Ivy Castellano"];
-const CAR_LIVE = false;      // false = only the admin test accounts get the call to move up to cars. true = every driver who finishes top 3 in karts.
+const CAR_LIVE = true;      // Brady opened the Stock Car League to everyone on Nov 26. false = only the admin test accounts get the call to move up to cars. true = every driver who finishes top 3 in karts.
 const isCar = c => !!c && c.tier === "car", cPracMs = c => isCar(c) ? CPRAC[cTrk(c.wk)[0]] : PRAC_MS, cTitles = c => (c.champ || 0) + (c.cchamp || 0);
 const goCrew = () => { ev("tap_crew"); location.href = MONEY.crew.url + "?u=" + encodeURIComponent(me.name); };
 const UPC = [2, 3, 4, 6], RACEPAY = [5, 4, 3, 1, 1, 1], TRIAL_MS = 33500, SIGN_PAY = 15;
