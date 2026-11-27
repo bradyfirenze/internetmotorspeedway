@@ -1518,9 +1518,12 @@ const dailySlot = () => { const d = LIVE ? SV.daily : +store.get("daily:" + me.n
 // Each of your cars can be a different vehicle (Brady, Nov 18): a car slot remembers its own vehicle and its own colors.
 // You can pick from the rides you own: the one in cars.json (plus "kinds" there if you bought more), or every ride for the admin test accounts.
 // c.shape: a ride name = that ride, "" = a normal car on purpose, not set = the old rule (your bought ride sits on car 1).
-const ownedShapes = () => admin() ? Object.keys(BODY_SCALE).filter(k => k !== "balloon") : [...new Set([ORIG.shape].concat(ORIG.shapes || []).filter(k => k && BODY_SCALE[k]))];
+const LEGENDS = ["monster", "bus", "f1", "jet", "dragon", "prop", "mower", "shopcart", "wheelbarrow", "skateboard", "golfcart", "wheelchair"];
+const COMP = { danggkazz: 1 };      // Brady, Nov 26: these drivers get every Legend ride free. A look only: Pit Crew itself comes from the server.
+const comp = () => !!me && COMP[me.name] === 1;
+const ownedShapes = () => admin() ? Object.keys(BODY_SCALE).filter(k => k !== "balloon") : [...new Set([ORIG.shape].concat(ORIG.shapes || [], comp() ? LEGENDS : []).filter(k => k && BODY_SCALE[k]))];
 const RIDE_SHORT = { monster: "Monster", bus: "Bus", f1: "F1", jet: "Jet", prop: "Prop plane", mower: "Mower", shopcart: "Cart", golfcart: "Golf cart", wheelchair: "Wheelchair" };      // short names so the ride links fit one line on a phone
-const ridePick = () => !member() && (ORIG.shapes || []).length > 0;      // bought several rides (cars.json "kinds") and not Pit Crew: pick one in My cars (Brady, Nov 24). Kept on this phone, a look only.
+const ridePick = () => !member() && ((ORIG.shapes || []).length > 0 || comp());      // bought several rides (cars.json "kinds") and not Pit Crew: pick one in My cars (Brady, Nov 24). Kept on this phone, a look only.
 function slotShape(i) { if (!i && me && ridePick()) { const r = store.get("ride:" + me.name); if (r === "normal") return null; if (r && ownedShapes().includes(r)) return r; } const c = CARS[i], s = c && c.shape; if (s === "") return null; if (typeof s === "string" && ownedShapes().includes(s)) return s; return i ? null : ORIG.shape || null; }
 function applyCar() { const c = CARS[slot]; me.body = c.body; me.roof = c.roof; me.num = c.num || ""; me.up = c.up; me.shape = slotShape(slot); me.pro = slot === 0 && ORIG.pro; me.look = ORIG.look || null; me.lookHex = ORIG.lookHex || "";      // a cars.json look shows on whichever car wears its paint
   if (admin() && store.get("adm:" + me.name) === "pro" && !me.shape) me.pro = true; me.kind = slot ? "Car " + (slot + 1) + " of " + SLOTS : c.kind; saveCars(); }
@@ -1583,7 +1586,6 @@ function ev(e, o, once) {
 document.addEventListener("click", e => { const a = e.target.closest && e.target.closest("a[href*='ko-fi.com']"); if (a) ev("tap_kofi", { d: a.id || "link" }); }, true);
 setTimeout(() => ev("visit", null, true), 0);
 // ---------- Legend rides showroom (Brady, Nov 22): view only. The ride spins on the turntable in the player's own colors. Nothing here changes the player's car.
-const LEGENDS = ["monster", "bus", "f1", "jet", "dragon", "prop", "mower", "shopcart", "wheelbarrow", "skateboard", "golfcart", "wheelchair"];
 let lgI = 0;
 function lgShow() { const k = LEGENDS[lgI], own = ownedShapes().includes(k);
   if (myCar) scene.remove(myCar); myCar = bodyCar({ body: me.body, roof: me.roof, num: me.num, shape: k }); scene.add(myCar); placeCar();
@@ -3184,7 +3186,7 @@ if (QS.has("debug")) { window.__trk = { OVAL, DESERT, KART, get BNK() { return t
 // ---------- Season mode (DRAFT Nov 20, Brady): one shared season a week for the Pit Crew. The server (game-backend, v13) owns the schedule,
 // the one attempt per race, the points and the standings. This file only shows them and runs the race. It needs the live server (?live).
 const SEASON_LIVE = false;      // false = admin test accounts only on the live game until Brady opens it
-const seasonOn = () => !LITE && LIVE && (!FULL || SEASON_LIVE || admin());
+const seasonOn = () => !LITE && LIVE && (!FULL || SEASON_LIVE || admin() || comp());      // comp() = the free access list in js.txt (Brady, Nov 26)
 const SEA = { d: null, run: null, tab: "races", ask: -1, prev: null, busy: false };
 screens.push("sSeason");
 const SDAY = ["", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat and Sun"];
