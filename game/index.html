@@ -1464,7 +1464,7 @@ function syncSV() {              // copy the server's cars and upgrades into the
     CARS[i].body = look.body; CARS[i].roof = look.roof || null; CARS[i].num = look.num || ""; CARS[i].shape = typeof c.shape === "string" ? c.shape : undefined; for (const k of "eta") CARS[i].up[k] = c.up[k]; }
   if (CARS[slot] && me.body !== undefined) { const c = CARS[slot]; me.body = c.body; me.roof = c.roof; me.num = c.num || ""; me.shape = slotShape(slot); }
   if ((!member() && slot) || !CARS[slot]) { slot = 0; applyCar(); }
-  if (me.glow !== member()) { me.glow = member(); if (!me.glow) { if (night) setNight(false); if (TRK === "desert") setTrack("oval"); } if (myCar) rebuildCar(); }      // Brady, Nov 21: the Banked Oval is open to every follower. The Desert Track and the Night Oval stay Pit Crew.
+  if (me.glow !== member()) { me.glow = member(); if (!me.glow) { if (TRK === "desert") setTrack("oval"); } if (myCar) rebuildCar(); }      // Brady, Nov 21: the Banked Oval is open to every follower. The Desert Track and the Night Oval stay Pit Crew.
 }
 async function refreshSV() { if (!LIVE || !me || performance.now() - svAt < 15000) return; if (await loadSV()) { syncSV(); paintMoney(); if (cur === "sCars") openCars(); if (cur === "sPit") drawPit(); } }
 document.addEventListener("visibilitychange", () => { if (!document.hidden) { svAt = 0; refreshSV(); } });     // back from Ko-fi: check for Pit Crew right away
@@ -1504,7 +1504,7 @@ async function moneyIn(d) {      // called after sign in
     try { sv = JSON.parse(store.get("cars:" + me.name) || "[]"); } catch (e) {}
     if (sv[0] && sv[0].up) for (const k of "eta") me.up[k] = clamp(Math.max(me.up[k], sv[0].up[k] | 0), 0, 4);
   }
-  me.glow = member(); if (!me.glow) { if (night) setNight(false); if (TRK === "desert") setTrack("oval"); }
+  me.glow = member(); if (!me.glow) { if (TRK === "desert") setTrack("oval"); }
   // cars: slot 1 is the car every follower has. Slots 2 and 3 are Pit Crew only. Upgrades belong to the car, not the driver.
   const extra = c => c ? { body: c.body, roof: c.roof, num: c.num || "", kind: "", shape: typeof c.shape === "string" ? c.shape : undefined, up: { e: 0, t: 0, a: 0, ...c.up } } : null;
   ORIG = { body: me.body, roof: me.roof, num: me.num, won: me.kind === "Race winner", shape: me.shape || null, shapes: me.shapes || [], pro: !!me.pro, look: me.look || null, lookHex: me.lookHex || "" };
@@ -1695,8 +1695,8 @@ function storyLine() { let c = null; try { c = JSON.parse(store.get("career:" + 
 // One banner in the garage, rotating. A tap goes straight to that page. If the page is a Pit Crew thing and you are not a member, the Pit Crew ask opens on top of it.
 let promoI = 0, promoL = [];
 function promoList() { const m = member(), L = [];
-  if (desertOn()) L.push({ k: "New tracks", h: "Race new tracks", s: m ? "Desert Track and Night Oval" : "Desert Track · Night Oval", c: "#ffb347", go: () => { openTracks("race"); const el = $("tList"), i = trackCards().findIndex(x => x[0] === "desert"); if (i >= 0) { el.scrollLeft = i * el.clientWidth; trackDots(); }
-    if (!m) crewAsk("Race the " + DES_NAME + "?", "The dirt track and the Night Oval are the Pit Crew tracks: hills, dips, sharp turns, and the oval under the lights. " + MONEY.crew.price + ".", true, "desert_wide.jpg");
+  if (desertOn()) L.push({ k: "New tracks", h: "Race new tracks", s: "Desert Track and Night Oval", c: "#ffb347", go: () => { openTracks("race"); const el = $("tList"), i = trackCards().findIndex(x => x[0] === "desert"); if (i >= 0) { el.scrollLeft = i * el.clientWidth; trackDots(); }
+    if (!m) crewAsk("Race the " + DES_NAME + "?", "The dirt track is the Pit Crew track: hills, dips and sharp turns. " + MONEY.crew.price + ".", true, "desert_wide.jpg");
     if (!m) { const no = $("aNo").onclick; $("aNo").onclick = () => { no(); if (i >= 0) el.scrollLeft = i * el.clientWidth; trackDots(); }; } } });
   if (careerOn()) L.push({ k: "Story mode", h: $("bStory").querySelector("b").textContent, s: "From a rental kart to a car seat", c: "#3ddc84", go: () => carOpen() });
   L.push({ k: "Your look", h: "Customize your car", s: m ? "Colors, number and 3 cars" : "Colors · number · 3 cars", c: "#6ff3ff", go: () => { openCars();
@@ -2148,7 +2148,7 @@ function setNight(on) { night = !!on; const k = SKY[TRK !== "oval" ? TRK : night
 // track picker (Brady, Nov 18): one track at a time with a real picture of it. Swipe or tap the arrows to see the next one.
 function trackCards() { const lock = member() ? "" : " 🔒", L = [      // Brady, Nov 21: the Speedway Oval and Banked Oval are free for every follower. The Desert Track and Night Oval are the Pit Crew tracks
     ["day", "oval", "Speedway Oval", "The real track. Free for every follower.", !night && TRK === "oval", ""],
-    ["night", "night", "Night Oval", "Pit Crew track. The oval under the lights.", night, lock]];
+    ["night", "night", "Night Oval", "The oval under the lights. Free for every follower.", night, ""]];      // Brady, Nov 26: the Night Oval is open to everyone
   if (desertOn()) L.push(["desert", "desert", DES_NAME, "Pit Crew track. Dirt, hills and sharp turns.", TRK === "desert", lock]);
   if (bankedOn()) L.push(["banked", "banked", BNK_NAME, (FULL && !DESERT_LIVE ? "TEST. " : "") + "Steep banked turns you can take almost flat out.", TRK === "banked", ""]);
   return L; }
@@ -2163,7 +2163,6 @@ $("tList").onscroll = trackDots;
 $("tPrev").onclick = () => { const el = $("tList"); el.scrollTo({ left: (trackDots() - 1) * el.clientWidth, behavior: "smooth" }); };
 $("tNext").onclick = () => { const el = $("tList"); el.scrollTo({ left: (trackDots() + 1) * el.clientWidth, behavior: "smooth" }); };
 $("tList").onclick = e => { const b = e.target.closest("button"); if (!b) return;
-  if (b.dataset.t === "night" && !member()) return crewAsk("Race the Night Oval?", "The oval under the lights is a Pit Crew track. " + MONEY.crew.price + ".", true, "tracks/night.jpg");
   if (b.dataset.t === "desert" && !member()) return crewAsk("Race the " + DES_NAME + "?", "The dirt track is a Pit Crew track: hills, dips and sharp turns. " + MONEY.crew.price + ".", true, "desert_wide.jpg");
   setTrack(b.dataset.t === "desert" || b.dataset.t === "banked" ? b.dataset.t : "oval"); setNight(b.dataset.t === "night");
   if (pickFor === "ghosts" && TRK !== "oval") return note("Racing real drivers comes to this track once it has some lap times. Pick the Speedway Oval or the Night Oval.");
@@ -2175,7 +2174,7 @@ $("bRace").onclick = () => only("sMode"); $("bRaceGo").onclick = () => LITE ? st
 $("bDesert").onclick = () => { if (TRK === "desert") return openTracks();
   if (!member()) return crewAsk("Race the " + DES_NAME + "?", "The dirt track is a Pit Crew track: hills, dips and sharp turns. " + MONEY.crew.price + ".", true, "desert_wide.jpg");
   setTrack("desert"); note(DES_NAME + " picked. Hit Practice lap or Race."); };
-$("bWeek").onclick = () => member() ? openTracks() : crewAsk("Join the Pit Crew?", "Earn your upgrades by racing, keep 3 cars in your garage, race the " + DES_NAME + " and the Night Oval, and get new features every week. " + MONEY.crew.price + ".");
+$("bWeek").onclick = () => member() ? openTracks() : crewAsk("Join the Pit Crew?", "Earn your upgrades by racing, keep 3 cars in your garage, race the " + DES_NAME + ", and get new features every week. " + MONEY.crew.price + ".");
 
 // ---------- racing real drivers: 10 best laps from the leaderboard drive as cars with their @ over the roof
 // DRAFT: the server only stores lap times today, so each car drives a clean racing line at that driver's real best lap time.
